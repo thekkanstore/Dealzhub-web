@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primaryButtonBackgroundColor: #528E6B;
+  --color-secondaryButtonBackgroundColor: #E6E6E6;
+  --color-tertiaryButtonBackgroundColor: #E5EEE9;
+  --color-neutralButtonBackgroundColor: #FFFFFF;
+  --color-primaryBackgroundColor: #FFFFFF;
+  --color-secondaryBackgroundColor: #E5EEE9;
+  --color-primaryTextColor: #121212;
+  --color-secondaryTextColor: #ffffff;
+  --color-tertiaryTextColor: #C9DCD1;
+  --color-quaternaryTextColor: #4D4D4D;
+  --color-greyTextColor: #666666;
+  --color-placeHolderTextColor: #999999;
+  --color-disabledTextColor: #CCCCCC;
+  --color-neutralButtonTextColor: #254030;
+  --color-noFoundTextColor: #315540;
+  --color-inputBorder: #666666;
+  --color-inputBackground: #FAFAFA;
+  --color-inputBackgroundSecondary: #fff;
+  --color-inputDisabledBackground: #F0F0F0;
+  --color-backgroundContainerLight: #F8F8F8;
+  --color-errorBorder: #BD343B66;
+  --color-errorTextColor: #BD343B;
+  --color-errorToastBackgroundColor: #BD343B;
+  --color-successButtonBackgroundColor: #50ae77ff;
+  --color-successText: #119A2F;
+  --color-pendingText: #C98905;
+  --color-rejectedText: #BD343B66;
+  --color-transparent: transparent;
+  --color-tabBarBackgroundColor: #E5EEE9;
+  --color-cardItemBackground: #F2F2F2;
+  --color-switchBorder: #C5C5C5;
+  --color-headerBorder: #D9D9D9;
+  --color-darkTextColor: #000000;
+  --color-radioButtonBackgroundColor: #427256;
+  --color-radioButtonSelectedBackgroundColor: #427256;
+  --color-radioButtonDisabledBackgroundColor: #fff;
+  --color-radioButtonDisabledBorderColor: #fff;
+  --color-favoriteUnselectedColor: #FAFAFABD;
+  --color-favoritesSelectedColor: #FF5858;
+  --color-iconShadeColor: #8B8A8A;
+}
