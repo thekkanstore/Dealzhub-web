@@ -17,7 +17,7 @@ const FavoritesPage = () => {
         <h1 className="text-3xl font-bold mb-6">My Favorites ({favoriteProducts.length})</h1>
         {favoriteProducts.length === 0 ? (
           <div className="bg-white rounded-lg p-12 text-center">
-            <img src={noDataFound} alt="No Favorites" className="w-48 h-48 mx-auto mb-6" />
+            <img src={noDataFound} alt="No Favorites" className="w-48 h-48 mx-auto mb-6" loading="lazy" />
             <h2 className="text-2xl font-medium mb-2">No favorites yet</h2>
             <p className="text-gray-600 mb-6">Add items you love to see them here</p>
             <div className='w-full flex items-center justify-center'>

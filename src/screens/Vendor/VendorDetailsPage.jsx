@@ -1,13 +1,23 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import appLogo from "../../assets/images/appLogo@2x.png";
+import appLogo from '../../assets/images/appLogo@2x.png';
 import VendorDetailsForm from '../../components/vendor/VendorDetailsForm';
 import { useAppContext } from '../../context/AppContext';
 import { createNewStore, updateUserRole } from '../../services/firestore';
 
 const VendorDetailsPage = () => {
-  const { user } = useAppContext();
+  const { user, appConfigs } = useAppContext();
   const navigate = useNavigate();
+  console.log("App Config in VendorDetailsPage:", appConfigs);
+  const handelMessage = (storeName) => {
+    const message = `Vendor request for ${storeName} has been submitted. Kindly review the store details and proceed with the approval.`;
+  
+    const phone = appConfigs[0]?.adminNo?.replace(/[^0-9]/g, ""); // ensure clean number
+    console.log("Admin Phone Number:", phone);
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  
+    window.open(url, "_blank");
+  };  
 
   const handleSubmit = async (formData) => {
     if (user) {
@@ -24,14 +34,17 @@ const VendorDetailsPage = () => {
         isActive: true,
         vendorStatus: 'pending',
       };
-      
+
       try {
         // Create the store
         await createNewStore(storeData);
-        
+
         // Update user role to include 'vendor'
         await updateUserRole(user.providerData[0].uid, 'vendor');
-        
+        if (formData.storeName) {
+          handelMessage(formData.storeName);
+        }
+
         navigate('/home');
       } catch (error) {
         console.error('Error creating store or updating user role:', error);
@@ -52,6 +65,7 @@ const VendorDetailsPage = () => {
               src={appLogo}
               alt="App Logo"
               className="w-40 h-40 object-cover"
+              loading="lazy"
             />
           </div>
           <VendorDetailsForm

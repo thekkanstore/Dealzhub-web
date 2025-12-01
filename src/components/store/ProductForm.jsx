@@ -329,6 +329,7 @@ const ProductForm = ({
                     src={imageUrl} 
                     alt={`Existing ${index + 1}`} 
                     className="w-full h-24 object-cover rounded-lg border border-gray-300"
+                    loading="lazy"
                   />
                   <button
                     type="button"
@@ -350,6 +351,7 @@ const ProductForm = ({
                     src={preview} 
                     alt={`New ${index + 1}`} 
                     className="w-full h-24 object-cover rounded-lg border border-green-300"
+                    loading="lazy"
                   />
                   <button
                     type="button"

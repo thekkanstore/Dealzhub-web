@@ -14,17 +14,17 @@ const slides = [
     {
         image: welcome1,
         title: "New Products Everyday",
-        subtitle: "Shopee adds new designs every day. Explore and find the best furniture for your home and offices.",
+        subtitle: "⁠Find your favourite products with new deals everyday!",
     },
     {
         image: welcome2,
         title: "Minimal Look Better Quality",
-        subtitle: "Shopee adds new designs every day. Explore and find the best furniture for your home and offices.",
+        subtitle: "Dealzhub lets you shop and sell without the interference of any third-party",
     },
     {
         image: welcome3,
         title: "Fastest Home Delivery",
-        subtitle: "Shopee adds new designs every day. Explore and find the best furniture for your home and offices.",
+        subtitle: "Buy straight from the owner; sell straight to your buyer, zero interference!",
     },
 ];
 
@@ -88,6 +88,7 @@ const LoginPage = () => {
                             src={slide.image}
                             alt={slide.title}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                         />
                         <div className="absolute bottom-16 flex justify-center flex-col w-full p-12">
                             <h2 className="text-3xl font-bold text-tertiaryTextColor">{slide.title}</h2>
@@ -113,6 +114,7 @@ const LoginPage = () => {
                             src={appLogo}
                             alt="App Logo"
                             className="w-40 h-40 object-cover"
+                            loading="lazy"
                         />
                     </div>
                     <div className="w-full justify-center flex mt-4">
@@ -121,6 +123,7 @@ const LoginPage = () => {
                                 src={googleLogo}
                                 alt="Google Logo"
                                 className="w-6 h-6 object-cover"
+                                loading="lazy"
                             />
                             Sign In with Google
                         </button>

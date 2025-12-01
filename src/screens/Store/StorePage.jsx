@@ -266,7 +266,7 @@ const StorePage = () => {
               </button>
               <button
                 onClick={() => navigate('/add-product')}
-                className="p-2 bg-primaryButtonBackgroundColor gap-2 rounded-full w-5/12 flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                className="p-2 bg-primaryButtonBackgroundColor gap-2 rounded-full w-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
               >
                 Add Product
               </button>
@@ -281,7 +281,7 @@ const StorePage = () => {
               {/* LEFT: QR CODE */}
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 {qrCodeUrl ? (
-                  <img src={qrCodeUrl} alt="Store QR Code" className="w-48 h-48" />
+                  <img src={qrCodeUrl} alt="Store QR Code" className="w-48 h-48" loading="lazy" />
                 ) : (
                   <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg"></div>
                 )}
@@ -326,7 +326,7 @@ const StorePage = () => {
               />
             ) : (
               <div className="bg-white rounded-lg p-12 text-center">
-                <img src={noDataFound} alt="No Products Found" className="w-48 h-48 mx-auto mb-6" />
+                <img src={noDataFound} alt="No Products Found" className="w-48 h-48 mx-auto mb-6" loading="lazy" />
                 <h2 className="text-2xl font-medium mb-2">
                   {selectedCategory ? "This category doesn't have any products" : "No products available"}
                 </h2>

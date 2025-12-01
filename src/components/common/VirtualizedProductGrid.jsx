@@ -5,7 +5,7 @@ import ProductCard from '../home/ProductCard';
 import { useAppContext } from '../../context/AppContext';
 import LoadingSpinner from './LoadingSpinner';
 
-const VirtualizedProductGrid = ({
+const VirtualizedProductGrid = React.memo(({
   products,
   isLoading,
 }) => {
@@ -35,6 +35,6 @@ const VirtualizedProductGrid = ({
       {isLoading && <LoadingSpinner />}
     </div>
   );
-};
+});
 
 export default VirtualizedProductGrid;

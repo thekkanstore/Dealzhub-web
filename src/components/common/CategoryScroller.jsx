@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import CategorySkeleton from '../home/skeletons/CategorySkeleton';
 import allCategoriesImage from '../../assets/images/chooseUserTypeBg-1@3x.png';
 
-const CategoryScroller = ({
+const CategoryScroller = React.memo(({
   categories,
   selectedCategory,
   onCategoryClick,
@@ -44,6 +44,6 @@ const CategoryScroller = ({
       </div>
     </div>
   );
-};
+});
 
 export default CategoryScroller;

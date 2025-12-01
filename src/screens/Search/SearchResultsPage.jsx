@@ -43,7 +43,7 @@ const SearchResultsPage = () => {
             />
           ) : (
             <div className="text-center py-12">
-              <img src={noDataFound} alt="No Products Found" className="w-48 h-48 mx-auto mb-6" />
+              <img src={noDataFound} alt="No Products Found" className="w-48 h-48 mx-auto mb-6" loading="lazy" />
               <h2 className="text-2xl font-medium mb-2">No products found</h2>
               <p className="text-gray-600">Try a different search term.</p>
             </div>

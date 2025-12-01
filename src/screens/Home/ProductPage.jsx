@@ -76,6 +76,7 @@ const ProductPage = () => {
                 src={images[currentImageIndex]} 
                 alt={`${selectedProduct.name} - Image ${currentImageIndex + 1}`} 
                 className={`w-full h-96 object-contain rounded-lg transition-opacity duration-300 ${isUnavailable ? 'opacity-50' : ''}`} 
+                loading="lazy"
               />
               
               {/* Unavailable Overlay */}
@@ -130,6 +131,7 @@ const ProductPage = () => {
                       src={img} 
                       alt={`Thumbnail ${index + 1}`} 
                       className="w-full h-full object-cover"
+                      loading='lazy'
                     />
                   </button>
                 ))}
@@ -199,7 +201,7 @@ const ProductPage = () => {
                         const storePhoneNumber = selectedProduct.store?.phoneNumber;
                         if (storePhoneNumber) {
                           const cleanedPhoneNumber = storePhoneNumber.replace(/\D/g, '');
-                          const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description}\nImage: ${selectedProduct.image}`;
+                          const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description}\nImage: ${selectedProduct.image}.Can you tell me more?`;
                           const encodedMessage = encodeURIComponent(message);
                           const whatsappUrl = `https://wa.me/${cleanedPhoneNumber}?text=${encodedMessage}`;
                           window.open(whatsappUrl, '_blank');

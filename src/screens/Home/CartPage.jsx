@@ -13,7 +13,7 @@ const CartPage = () => {
         <h1 className="text-3xl font-bold mb-6">Shopping Cart ({cart.length})</h1>
         {cart.length === 0 ? (
           <div className="bg-white rounded-lg p-12 text-center">
-            <img src={noDataFound} alt="No Favorites" className="w-48 h-48 mx-auto mb-6" />
+            <img src={noDataFound} alt="No Favorites" className="w-48 h-48 mx-auto mb-6" loading="lazy" />
             <h2 className="text-2xl font-medium mb-2">Your cart is empty</h2>
             <p className="text-gray-600 mb-6">Add items to get started</p>
             <div className='w-full flex items-center justify-center'>

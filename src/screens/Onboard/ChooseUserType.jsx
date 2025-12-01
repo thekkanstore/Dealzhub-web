@@ -59,6 +59,7 @@ const ChooseUserType = () => {
                             src={slide.image}
                             alt={slide.title}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                         />
                         <div className="absolute bottom-16 flex justify-center flex-col w-full p-12">
                             <h2 className="text-3xl font-bold text-tertiaryTextColor">{slide.title}</h2>
@@ -84,6 +85,7 @@ const ChooseUserType = () => {
                             src={appLogo}
                             alt="App Logo"
                             className="w-40 h-40 object-cover"
+                            loading="lazy"
                         />
                     </div>
                     <div className="w-full justify-center flex flex-col mt-4">
