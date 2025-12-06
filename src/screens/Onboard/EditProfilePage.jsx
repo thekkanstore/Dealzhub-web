@@ -3,6 +3,7 @@ import PersonalDetailsForm from './PersonalDetailsForm';
 import { useAppContext } from '../../context/AppContext';
 import { getUserData, updateUserProfile } from '../../services/firestore';
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from 'lucide-react';
 
 const EditProfilePage = () => {
   const { user } = useAppContext();
@@ -87,9 +88,9 @@ const EditProfilePage = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <button
           onClick={() => navigate('/home')}
-          className="flex items-center gap-2 text-gray-600 mb-6 hover:underline"
+          className="px-4 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit"
         >
-          ← Back
+          
         </button>
         <div className="max-w-sm w-full mx-auto">
           <h2 className="text-2xl font-bold text-center mt-4">Edit Profile</h2>

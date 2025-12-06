@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Star, Heart, ChevronLeft, ChevronRight, Edit } from 'lucide-react';
+import { Star, Heart, ChevronLeft, ChevronRight, Edit, ArrowLeft } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { getProductById } from '../../services/productService';
@@ -64,9 +64,9 @@ const ProductPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <button
           onClick={() => navigate('/home')}
-          className="flex items-center gap-2 text-gray-600 mb-6 hover:underline"
+          className="px-4 py-1.5 mb-4 text-sm cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit"
         >
-          ← Back
+          <ArrowLeft/>
         </button>
         <div className="bg-white rounded-lg p-8 grid md:grid-cols-2 gap-8">
           <div>

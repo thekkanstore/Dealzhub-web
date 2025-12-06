@@ -8,7 +8,7 @@ import noDataFound from '../../assets/images/noDataFound@3x.png';
 import VirtualizedProductGrid from '../../components/common/VirtualizedProductGrid';
 import { fetchAllProducts } from '../../services/productService';
 import QRCode from 'qrcode';
-import { Download } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import appLogo from '../../assets/images/appLogo@2x.png';
 import { getCategoryById } from '../../services/firestore';
 
@@ -246,66 +246,73 @@ const StorePage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-8 flex justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2 flex gap-5 items-center">{store.storeName}
-            <span
-              className={`text-sm px-3 py-1 rounded-full border ${getStatusColor(store.vendorStatus)}`}
-            >
-              {store.vendorStatus}
-            </span>
-          </h1>
-          <p className="text-gray-600 mb-6">{store.address}</p>
+      <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col">
+        <button
+          onClick={() => navigate('/home')}
+          className="px-4 py-1.5 mb-4 text-sm cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit"
+        >
+          <ArrowLeft />
+        </button>
+        <div className='flex flex-wrap justify-between'>
+          <div className='mb-6'>
+            <h1 className="text-3xl font-bold mb-2 flex gap-5 items-center">{store.storeName}
+              <span
+                className={`text-sm px-3 py-1 rounded-full border ${getStatusColor(store.vendorStatus)}`}
+              >
+                {store.vendorStatus}
+              </span>
+            </h1>
+            <p className="text-gray-600 mb-6">{store.address}</p>
+            {store?.vendorStatus === "approved" && isStoreOwner && (
+              <div className='flex items-center gap-4'>
+                <button
+                  onClick={() => navigate('/editstore')}
+                  className="p-2 bg-red-500/10 gap-2 rounded-full w-5/12 flex items-center justify-center text-red-700 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => navigate('/add-product')}
+                  className="p-2 bg-primaryButtonBackgroundColor gap-2 rounded-full w-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Add Product
+                </button>
+              </div>)}
+          </div>
+          
+          {/* QR Code Section - Only show to store owner */}
           {store?.vendorStatus === "approved" && isStoreOwner && (
-            <div className='flex items-center gap-4'>
-              <button
-                onClick={() => navigate('/editstore')}
-                className="p-2 bg-red-500/10 gap-2 rounded-full w-5/12 flex items-center justify-center text-red-700 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => navigate('/add-product')}
-                className="p-2 bg-primaryButtonBackgroundColor gap-2 rounded-full w-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Add Product
-              </button>
-            </div>)}
-        </div>
+            <div className="flex flex-col bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <div className="flex flex-wrap items-start md:justify-start justify-center w-fit gap-6">
 
-        {/* QR Code Section - Only show to store owner */}
-        {store?.vendorStatus === "approved" && isStoreOwner && (
-          <div className="flex flex-col bg-gray-50 p-6 rounded-xl border border-gray-200">
-            <div className="flex items-start gap-6">
-
-              {/* LEFT: QR CODE */}
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                {qrCodeUrl ? (
-                  <img src={qrCodeUrl} alt="Store QR Code" className="w-48 h-48" loading="lazy" />
-                ) : (
-                  <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg"></div>
-                )}
-              </div>
-
-              <div className="flex flex-col h-full py-2">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Store QR Code</h3>
-                  <p className="text-sm text-gray-600 mt-1">Scan to visit store</p>
+                {/* LEFT: QR CODE */}
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  {qrCodeUrl ? (
+                    <img src={qrCodeUrl} alt="Store QR Code" className="w-48 h-48" loading="lazy" />
+                  ) : (
+                    <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg"></div>
+                  )}
                 </div>
 
-                <button
-                  onClick={downloadQRCode}
-                  className="mt-4 flex items-center gap-2 px-4 py-2 bg-primaryButtonBackgroundColor text-white rounded-full hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <Download className="w-4 h-4" />
-                  Download QR Code
-                </button>
+                <div className="flex flex-col h-full py-2">
+                  <div>
+                    <h3 className="text-lg font-semibold md:text-start text-center text-gray-800">Store QR Code</h3>
+                    <p className="text-sm text-gray-600 md:text-start text-center mt-1">Scan to visit store</p>
+                  </div>
+
+                  <button
+                    onClick={downloadQRCode}
+                    className="mt-4 flex items-center gap-2 px-4 py-2 bg-primaryButtonBackgroundColor text-white rounded-full hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download QR Code
+                  </button>
+                </div>
+
               </div>
-
             </div>
-          </div>
-        )}
-
+          )}
+        </div>
       </div>
 
       {store?.vendorStatus === "approved" && (

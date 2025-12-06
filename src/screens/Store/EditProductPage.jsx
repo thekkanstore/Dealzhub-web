@@ -6,6 +6,7 @@ import { updateProductDetails, getProductById } from '../../services/productServ
 import { getStoreByUserId } from '../../services/storeFirestoreService';
 import { uploadMultipleImages, deleteMultipleImages } from '../../services/firebaseStorageService';
 import { getCategoryById } from '../../services/firestore';
+import { ArrowLeft } from 'lucide-react';
 
 // Utility function to convert to snake_case
 function toSnakeCase(str) {
@@ -194,7 +195,7 @@ const EditProductPage = () => {
             onClick={() => navigate(`/vendor/${storeId}`)}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Back to Store
+            Back
           </button>
         </div>
       </div>
@@ -215,10 +216,10 @@ const EditProductPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <button
           onClick={() => navigate(`/vendor/${storeId}`)}
-          className="flex items-center gap-2 text-gray-600 mb-6 hover:underline"
+          className="px-4 py-1.5 mb-4 cursor-pointer text-sm text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit"
           disabled={uploading}
         >
-          ← Back to Store
+          <ArrowLeft/>
         </button>
         <div className="max-w-sm w-full mx-auto">
           <h2 className="text-2xl font-bold text-center mt-4 mb-6">Edit Product</h2>

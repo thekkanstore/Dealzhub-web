@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import VendorDetailsForm from '../../components/vendor/VendorDetailsForm';
 import { useAppContext } from '../../context/AppContext';
 import { getStoreByUserId, updateStore } from '../../services/firestore'; // Assuming updateStore exists
+import { ArrowLeft } from 'lucide-react';
 
 const EditStorePage = () => {
   const { user } = useAppContext();
@@ -77,9 +78,9 @@ const EditStorePage = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <button
           onClick={() => navigate('/home')}
-          className="flex items-center gap-2 text-gray-600 mb-6 hover:underline"
+          className="px-4 py-1.5 mb-4 cursor-pointer text-sm text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit"
         >
-          ← Back
+          <ArrowLeft/>
         </button>
         <div className="max-w-sm w-full mx-auto">
           <h2 className="text-2xl font-bold text-center mt-4">Edit Store</h2>
