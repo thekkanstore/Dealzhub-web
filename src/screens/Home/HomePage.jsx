@@ -51,9 +51,11 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Banner Carousel */}
-      <div className="max-w-7xl mx-auto px-4 my-6">
-        <BannerCarousel appConfigs={appConfigs} />
-      </div>
+      {appConfigs?.[0]?.banners?.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 my-6">
+          <BannerCarousel appConfigs={appConfigs} />
+        </div>
+      )}
 
       {/* Categories */}
       <CategoryScroller
