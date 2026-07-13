@@ -11,6 +11,7 @@ import ProductPage from './screens/Home/ProductPage';
 import CartPage from './screens/Home/CartPage';
 import FavoritesPage from './screens/Home/FavoritesPage';
 import StorePage from './screens/Store/StorePage';
+import StoreRedirectPage from './screens/Store/StoreRedirectPage'; // Import StoreRedirectPage
 import EditStorePage from './screens/Store/EditStorePage'; // Import EditStorePage
 import AddProductPage from './screens/Store/AddProductPage'; // Import AddProductPage
 import EditProductPage from './screens/Store/EditProductPage';
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Navigate to="/home" replace />,
+  },
+  {
+    path: '/store-redirect',
+    element: <StoreRedirectPage />,
   },
   {
     path: '/login',

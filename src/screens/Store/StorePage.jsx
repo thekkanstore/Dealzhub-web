@@ -55,7 +55,7 @@ const StorePage = () => {
 
     const generateQRCode = async () => {
       try {
-        const deepLink = `dealszhub://vendor/${storeId}`;
+        const deepLink = `https://dealzhub.co.in/store-redirect?id=${storeId}`;
         const qrDataUrl = await QRCode.toDataURL(deepLink, {
           width: 200,
           margin: 2,
