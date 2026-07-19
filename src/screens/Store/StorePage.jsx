@@ -264,18 +264,24 @@ const StorePage = () => {
             </h1>
             <p className="text-gray-600 mb-6">{store.address}</p>
             {store?.vendorStatus === "approved" && isStoreOwner && (
-              <div className='flex items-center gap-4'>
+              <div className='flex flex-wrap items-center gap-3'>
                 <button
                   onClick={() => navigate('/editstore')}
-                  className="p-2 bg-red-500/10 gap-2 rounded-full w-5/12 flex items-center justify-center text-red-700 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-6 py-2 bg-red-500/10 gap-2 rounded-full flex items-center justify-center text-red-700 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => navigate('/add-product')}
-                  className="p-2 bg-primaryButtonBackgroundColor gap-2 rounded-full w-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-6 py-2 bg-primaryButtonBackgroundColor gap-2 rounded-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Add Product
+                </button>
+                <button
+                  onClick={() => navigate('/bulk-add-product')}
+                  className="px-6 py-2 bg-primaryButtonBackgroundColor gap-2 rounded-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Bulk Add Products
                 </button>
               </div>)}
           </div>

@@ -14,6 +14,7 @@ import StorePage from './screens/Store/StorePage';
 import StoreRedirectPage from './screens/Store/StoreRedirectPage'; // Import StoreRedirectPage
 import EditStorePage from './screens/Store/EditStorePage'; // Import EditStorePage
 import AddProductPage from './screens/Store/AddProductPage'; // Import AddProductPage
+import BulkAddProductPage from './screens/Store/BulkAddProductPage'; // Import BulkAddProductPage
 import EditProductPage from './screens/Store/EditProductPage';
 import SearchResultsPage from './screens/Search/SearchResultsPage'; // Import search page
 import { AppProvider } from './context/AppContext';
@@ -88,6 +89,10 @@ const router = createBrowserRouter([
       {
         path: '/add-product', // New route for AddProductPage
         element: <AddProductPage />,
+      },
+      {
+        path: '/bulk-add-product', // New route for BulkAddProductPage
+        element: <BulkAddProductPage />,
       },
       {
         path:'/edit-product/:productId',
