@@ -20,7 +20,8 @@ const SearchResultsPage = () => {
       setIsLoading(true);
       setProducts([]);
       searchProducts(null, null, debouncedQuery).then((response) => {
-        setProducts(response);
+        const activeProducts = response.filter(p => p.store && p.store.vendorStatus !== 'inactive' && p.store.vendorStatus !== 'private');
+        setProducts(activeProducts);
         setIsLoading(false);
       });
     } else {
