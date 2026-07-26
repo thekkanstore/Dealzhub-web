@@ -223,13 +223,31 @@ const StorePage = () => {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Store not found.</div>;
   }
 
-  // Assuming store status check is needed
-  if (store.vendorStatus === 'rejected') {
-    if (isStoreOwner) {
-      return <div className="min-h-screen bg-gray-50 flex items-center justify-center">This store is currently rejected by admin. Please connect with admin.</div>;
-    } else {
-      return <div className="min-h-screen bg-gray-50 flex items-center justify-center">This store is currently inactive.</div>;
-    }
+  // Store status check
+  if (!isStoreOwner && (store.vendorStatus === 'inactive' || store.vendorStatus === 'rejected')) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-20 h-20 flex items-center justify-center mx-auto mb-6 p-2 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
+            <img src={appLogo} alt="DealzHub Logo" className="w-full h-full object-contain" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Store Inactive</h2>
+          <p className="text-gray-600 mb-8">
+            This store is currently inactive and cannot be viewed.
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="w-full bg-primaryButtonBackgroundColor text-white border border-gray-200 font-semibold py-3.5 px-6 rounded-full shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Go to Home Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (store.vendorStatus === 'rejected' && isStoreOwner) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">This store is currently rejected by admin. Please connect with admin.</div>;
   }
 
   const getStatusColor = (status) => {
@@ -263,7 +281,7 @@ const StorePage = () => {
               </span>
             </h1>
             <p className="text-gray-600 mb-6">{store.address}</p>
-            {store?.vendorStatus === "approved" && isStoreOwner && (
+            {(store?.vendorStatus === "approved" || store?.vendorStatus === "private") && isStoreOwner && (
               <div className='flex flex-wrap items-center gap-3'>
                 <button
                   onClick={() => navigate('/editstore')}
@@ -287,7 +305,7 @@ const StorePage = () => {
           </div>
           
           {/* QR Code Section - Only show to store owner */}
-          {store?.vendorStatus === "approved" && isStoreOwner && (
+          {(store?.vendorStatus === "approved" || store?.vendorStatus === "private") && isStoreOwner && (
             <div className="flex flex-col bg-gray-50 p-6 rounded-xl border border-gray-200">
               <div className="flex flex-wrap items-start md:justify-start justify-center w-fit gap-6">
 
@@ -321,7 +339,7 @@ const StorePage = () => {
         </div>
       </div>
 
-      {store?.vendorStatus === "approved" && (
+      {(store?.vendorStatus === "approved" || store?.vendorStatus === "private" || isStoreOwner) && (
         <>
           {categories.length !== 0 && (
             <CategoryScroller
