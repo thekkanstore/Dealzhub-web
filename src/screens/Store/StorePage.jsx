@@ -224,7 +224,8 @@ const StorePage = () => {
   }
 
   // Store status check
-  if (!isStoreOwner && (store.vendorStatus === 'inactive' || store.vendorStatus === 'rejected')) {
+  const currentStatus = store.vendorStatus?.toLowerCase() || 'pending';
+  if (!isStoreOwner && (currentStatus === 'inactive' || currentStatus === 'rejected')) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
@@ -246,12 +247,13 @@ const StorePage = () => {
     );
   }
 
-  if (store.vendorStatus === 'rejected' && isStoreOwner) {
+  if (currentStatus === 'rejected' && isStoreOwner) {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center">This store is currently rejected by admin. Please connect with admin.</div>;
   }
 
   const getStatusColor = (status) => {
-    switch (status) {
+    const s = status?.toLowerCase();
+    switch (s) {
       case 'approved':
         return 'bg-green-200/50 text-green-400';
       case 'rejected':
@@ -281,7 +283,7 @@ const StorePage = () => {
               </span>
             </h1>
             <p className="text-gray-600 mb-6">{store.address}</p>
-            {(store?.vendorStatus === "approved" || store?.vendorStatus === "private") && isStoreOwner && (
+            {(currentStatus === "approved" || currentStatus === "private") && isStoreOwner && (
               <div className='flex flex-wrap items-center gap-3'>
                 <button
                   onClick={() => navigate('/editstore')}
@@ -305,7 +307,7 @@ const StorePage = () => {
           </div>
           
           {/* QR Code Section - Only show to store owner */}
-          {(store?.vendorStatus === "approved" || store?.vendorStatus === "private") && isStoreOwner && (
+          {(currentStatus === "approved" || currentStatus === "private") && isStoreOwner && (
             <div className="flex flex-col bg-gray-50 p-6 rounded-xl border border-gray-200">
               <div className="flex flex-wrap items-start md:justify-start justify-center w-fit gap-6">
 
@@ -339,7 +341,7 @@ const StorePage = () => {
         </div>
       </div>
 
-      {(store?.vendorStatus === "approved" || store?.vendorStatus === "private" || isStoreOwner) && (
+      {(currentStatus === "approved" || currentStatus === "private" || isStoreOwner) && (
         <>
           {categories.length !== 0 && (
             <CategoryScroller

@@ -20,7 +20,10 @@ const SearchResultsPage = () => {
       setIsLoading(true);
       setProducts([]);
       searchProducts(null, null, debouncedQuery).then((response) => {
-        const activeProducts = response.filter(p => p.store && p.store.vendorStatus !== 'inactive' && p.store.vendorStatus !== 'private');
+        const activeProducts = response.filter(p => {
+          const status = p.store?.vendorStatus?.toLowerCase();
+          return status !== 'inactive' && status !== 'private';
+        });
         setProducts(activeProducts);
         setIsLoading(false);
       });
