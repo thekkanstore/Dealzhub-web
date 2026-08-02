@@ -26,7 +26,10 @@ const HomePage = () => {
       setProducts([]); // Clear products immediately
       setHasFetchedProducts(false);
       fetchAllProducts(selectedCategory, selectedLocation, null).then((response) => {
-        const activeProducts = response.filter(p => p.store && p.store.vendorStatus !== 'inactive' && p.store.vendorStatus !== 'private');
+        const activeProducts = response.filter(p => {
+          const status = p.store?.vendorStatus?.toLowerCase();
+          return status !== 'inactive' && status !== 'private';
+        });
         setProducts(activeProducts);
         setIsLoading(false);
         setHasFetchedProducts(true);
