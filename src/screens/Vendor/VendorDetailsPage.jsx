@@ -12,7 +12,10 @@ const VendorDetailsPage = () => {
   const handelMessage = (storeName) => {
     const message = `Vendor request for ${storeName} has been submitted. Kindly review the store details and proceed with the approval.`;
   
-    const phone = appConfigs[0]?.adminNo?.replace(/[^0-9]/g, ""); // ensure clean number
+    let phone = appConfigs[0]?.adminNo?.replace(/[^0-9]/g, ""); // ensure clean number
+    if (phone && phone.length === 10) {
+      phone = '91' + phone;
+    }
     console.log("Admin Phone Number:", phone);
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   
