@@ -15,6 +15,8 @@ const MainLayout = () => {
     logout, 
     loginModalOpen, 
     setLoginModalOpen,
+    onLoginModalContinue,
+    setOnLoginModalContinue,
     searchQuery,
     setSearchQuery,
   } = appContext;
@@ -43,7 +45,14 @@ const MainLayout = () => {
         cartCount={cart ? cart.length : 0}
         logout={logout}
       />
-      <LoginModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
+      <LoginModal 
+        isOpen={loginModalOpen} 
+        onClose={() => {
+          setLoginModalOpen(false);
+          setOnLoginModalContinue(null);
+        }} 
+        onContinue={onLoginModalContinue}
+      />
       <Outlet context={appContext} />
     </div>
   );

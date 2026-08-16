@@ -17,6 +17,7 @@ export const AppProvider = ({ children }) => {
   const [products, setProducts] = useState([]); // This is used for filtering on StorePage
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [onLoginModalContinue, setOnLoginModalContinue] = useState(null);
   const [searchQuery, setSearchQuery] = useState(''); // New state for search
   const [appConfigs, setAppConfigs] = useState([]);
 
@@ -198,6 +199,8 @@ export const AppProvider = ({ children }) => {
         isNewUser,
         loginModalOpen,
         setLoginModalOpen,
+        onLoginModalContinue,
+        setOnLoginModalContinue,
         selectedLocation,
         updateLocation,
         searchQuery,      // Provide search query

@@ -8,7 +8,7 @@ import { TKArrowIcon } from '../../components/common/Icons/TKArrowIcon';
 const ProductPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { isInCart, toggleFavorite, isFavorite, user, addToCart } = useAppContext();
+  const { isInCart, toggleFavorite, isFavorite, user, addToCart, setLoginModalOpen, setOnLoginModalContinue } = useAppContext();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -57,6 +57,23 @@ const ProductPage = () => {
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleBuyNow = () => {
+    if (!selectedProduct) return;
+    const storePhoneNumber = selectedProduct.store?.phoneNumber;
+    if (storePhoneNumber) {
+      let cleanedPhoneNumber = storePhoneNumber.replace(/\D/g, '');
+      if (cleanedPhoneNumber.length === 10) {
+        cleanedPhoneNumber = '91' + cleanedPhoneNumber;
+      }
+      const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description}\n\nCan you tell me more?`;
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${cleanedPhoneNumber}?text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank');
+    } else {
+      alert("This store's contact information is not available.");
+    }
   };
 
   return (
@@ -196,21 +213,10 @@ const ProductPage = () => {
                   <button
                     onClick={() => {
                       if (!user) {
-                        addToCart(selectedProduct);
+                        setOnLoginModalContinue(() => handleBuyNow);
+                        setLoginModalOpen(true);
                       } else {
-                        const storePhoneNumber = selectedProduct.store?.phoneNumber;
-                        if (storePhoneNumber) {
-                          let cleanedPhoneNumber = storePhoneNumber.replace(/\D/g, '');
-                          if (cleanedPhoneNumber.length === 10) {
-                            cleanedPhoneNumber = '91' + cleanedPhoneNumber;
-                          }
-                          const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description}\n\nCan you tell me more?`;
-                          const encodedMessage = encodeURIComponent(message);
-                          const whatsappUrl = `https://wa.me/${cleanedPhoneNumber}?text=${encodedMessage}`;
-                          window.open(whatsappUrl, '_blank');
-                        } else {
-                          alert("This store's contact information is not available.");
-                        }
+                        handleBuyNow();
                       }
                     }}
                     disabled={isUnavailable}
