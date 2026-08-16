@@ -200,7 +200,10 @@ const ProductPage = () => {
                       } else {
                         const storePhoneNumber = selectedProduct.store?.phoneNumber;
                         if (storePhoneNumber) {
-                          const cleanedPhoneNumber = storePhoneNumber.replace(/\D/g, '');
+                          let cleanedPhoneNumber = storePhoneNumber.replace(/\D/g, '');
+                          if (cleanedPhoneNumber.length === 10) {
+                            cleanedPhoneNumber = '91' + cleanedPhoneNumber;
+                          }
                           const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description}\nImage: ${selectedProduct.image}.Can you tell me more?`;
                           const encodedMessage = encodeURIComponent(message);
                           const whatsappUrl = `https://wa.me/${cleanedPhoneNumber}?text=${encodedMessage}`;
