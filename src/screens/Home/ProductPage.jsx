@@ -204,7 +204,7 @@ const ProductPage = () => {
                           if (cleanedPhoneNumber.length === 10) {
                             cleanedPhoneNumber = '91' + cleanedPhoneNumber;
                           }
-                          const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description}\nImage: ${selectedProduct.image}.Can you tell me more?`;
+                          const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description}\n\nCan you tell me more?`;
                           const encodedMessage = encodeURIComponent(message);
                           const whatsappUrl = `https://wa.me/${cleanedPhoneNumber}?text=${encodedMessage}`;
                           window.open(whatsappUrl, '_blank');
