@@ -253,14 +253,17 @@ export const addProduct = async (productData) => {
   }
 };
 
-export const getCategoryById = async (categoryId) => {
-  try {
-    // Validate categoryId is a string
-    if (!categoryId || typeof categoryId !== 'string') {
-      console.error('Invalid categoryId:', categoryId);
-      return null;
-    }
+const categoryCache = new Map();
 
+export const getCategoryById = async (categoryId) => {
+  if (!categoryId || typeof categoryId !== 'string') {
+    console.error('Invalid categoryId:', categoryId);
+    return null;
+  }
+  if (categoryCache.has(categoryId)) {
+    return categoryCache.get(categoryId);
+  }
+  try {
     const categoryRef = doc(db, 'categories', categoryId);
     console.log('Fetching category with ID:', categoryId);
     const categorySnap = await getDoc(categoryRef);
@@ -270,10 +273,12 @@ export const getCategoryById = async (categoryId) => {
       return null;
     }
 
-    return {
+    const categoryData = {
       id: categorySnap.id,
       ...categorySnap.data()
     };
+    categoryCache.set(categoryId, categoryData);
+    return categoryData;
   } catch (error) {
     console.error('Error fetching category by ID:', error);
     return null;

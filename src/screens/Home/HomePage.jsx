@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import 'react-virtualized/styles.css';
 import noDataFound from '../../assets/images/noDataFound@3x.png';
 import { useAppContext } from '../../context/AppContext';
@@ -6,37 +6,122 @@ import { fetchAllProducts } from '../../services/productService';
 import CategoryScroller from '../../components/common/CategoryScroller';
 import VirtualizedProductGrid from '../../components/common/VirtualizedProductGrid';
 import BannerCarousel from '../../components/home/BannerCarousel';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const HomePage = () => {
   console.log('Rendering HomePage');
   const { categories, selectedLocation, appConfigs } = useAppContext();
 
   const [selectedCategory, setSelectedCategory] = useState(null);
-  // const [isPending, startTransition] = useTransition();
 
-  // Local state for infinite scrolling
+  // Local state for pagination
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasFetchedProducts, setHasFetchedProducts] = useState(false);
+  const [lastDoc, setLastDoc] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+
+  const observerTarget = useRef(null);
+  const isFetchingRef = useRef(false);
+  const lastDocRef = useRef(null);
+
+  const categoryRef = useRef(selectedCategory);
+  const locationRef = useRef(selectedLocation);
+
+  useEffect(() => {
+    categoryRef.current = selectedCategory;
+    locationRef.current = selectedLocation;
+  }, [selectedCategory, selectedLocation]);
 
   // Effect for fetching data when filters change
   useEffect(() => {
-    // startTransition(() => {
-      setIsLoading(true);
-      setProducts([]); // Clear products immediately
-      setHasFetchedProducts(false);
-      fetchAllProducts(selectedCategory, selectedLocation, null).then((response) => {
-        const activeProducts = response.filter(p => {
-          const status = p.store?.vendorStatus?.toLowerCase();
-          return status !== 'inactive' && status !== 'private';
-        });
-        setProducts(activeProducts);
-        setIsLoading(false);
-        setHasFetchedProducts(true);
+    console.log('[HomePage] Initial fetch triggered. selectedCategory:', selectedCategory, 'selectedLocation:', selectedLocation);
+    setIsLoading(true);
+    setProducts([]); // Clear products immediately
+    setLastDoc(null);
+    lastDocRef.current = null;
+    setHasMore(false);
+    setHasFetchedProducts(false);
+    isFetchingRef.current = false;
+
+    fetchAllProducts(selectedCategory, selectedLocation, null, 12, null).then((response) => {
+      const activeProducts = response.products.filter(p => {
+        const status = p.store?.vendorStatus?.toLowerCase();
+        return status !== 'inactive' && status !== 'private';
       });
-    // });
+      console.log('[HomePage] Initial fetch resolved. Products count returned:', response.products.length, 'Filtered count:', activeProducts.length);
+      setProducts(activeProducts);
+      setLastDoc(response.lastDoc);
+      lastDocRef.current = response.lastDoc;
+      setHasMore(response.hasMore);
+      setIsLoading(false);
+      setHasFetchedProducts(true);
+    });
   }, [selectedCategory, selectedLocation]);
 
+  const handleLoadMore = () => {
+    if (!hasMore || isLoadingMore || isLoading || isFetchingRef.current) {
+      console.log('[HomePage] handleLoadMore blocked. hasMore:', hasMore, 'isLoadingMore:', isLoadingMore, 'isLoading:', isLoading, 'isFetchingRef.current:', isFetchingRef.current);
+      return;
+    }
+
+    const currentCategory = selectedCategory;
+    const currentLocation = selectedLocation;
+
+    console.log('[HomePage] handleLoadMore initiated. lastDocRef.current ID:', lastDocRef.current ? lastDocRef.current.id : 'null');
+    isFetchingRef.current = true;
+    setIsLoadingMore(true);
+
+    fetchAllProducts(selectedCategory, selectedLocation, null, 12, lastDocRef.current).then((response) => {
+      if (categoryRef.current !== currentCategory || locationRef.current !== currentLocation) {
+        console.log('[HomePage] handleLoadMore aborted because filters changed.');
+        isFetchingRef.current = false;
+        setIsLoadingMore(false);
+        return;
+      }
+      const activeProducts = response.products.filter(p => {
+        const status = p.store?.vendorStatus?.toLowerCase();
+        return status !== 'inactive' && status !== 'private';
+      });
+      console.log('[HomePage] handleLoadMore resolved. Products count returned:', response.products.length, 'Filtered count:', activeProducts.length);
+      setProducts(prev => {
+        const nextProducts = [...prev, ...activeProducts];
+        console.log('[HomePage] handleLoadMore setting products. Prev count:', prev.length, 'New count:', nextProducts.length);
+        return nextProducts;
+      });
+      setLastDoc(response.lastDoc);
+      lastDocRef.current = response.lastDoc;
+      setHasMore(response.hasMore);
+      setIsLoadingMore(false);
+      isFetchingRef.current = false;
+    }).catch((err) => {
+      console.error(err);
+      setIsLoadingMore(false);
+      isFetchingRef.current = false;
+    });
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+          handleLoadMore();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [hasMore, isLoadingMore, isLoading, lastDoc]);
 
   const handleCategoryClick = useCallback((categoryId) => {
     setSelectedCategory(categoryId);
@@ -77,10 +162,17 @@ const HomePage = () => {
             <p className="text-gray-600 mb-6">Select a location to see products available in your area.</p>
           </div>
         ) : (products.length > 0 || isLoading) ? (
-          <VirtualizedProductGrid
-            products={products}
-            isLoading={isLoading}
-          />
+          <>
+            <VirtualizedProductGrid
+              products={products}
+              isLoading={isLoading}
+            />
+            {hasMore && (
+              <div ref={observerTarget} className="flex justify-center mt-8 min-h-[50px]">
+                {isLoadingMore && <LoadingSpinner />}
+              </div>
+            )}
+          </>
         ) : (hasFetchedProducts && products.length === 0 && !isLoading) ? (
           <div className="bg-white rounded-lg p-12 text-center">
             <img src={noDataFound} alt="No Products Found" className="w-48 h-48 mx-auto mb-6" loading="lazy" />

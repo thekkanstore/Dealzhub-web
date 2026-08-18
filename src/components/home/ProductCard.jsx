@@ -48,10 +48,8 @@ const ProductCard = memo(({ product, isFavorite, toggleFavorite, viewProduct, ad
           <img
             src={productImage}
             alt={product.name}
-            className="w-full h-full object-cover rounded-3xl transition-opacity duration-300"
+            className="w-full h-full object-cover rounded-3xl"
             loading="lazy"
-            onLoad={(e) => (e.currentTarget.style.opacity = '1')}
-            style={{ opacity: 0 }}
           />
         </div>
         <h3 className="font-semibold text-sm my-2 line-clamp-2">{product.name}</h3>

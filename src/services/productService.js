@@ -7,7 +7,9 @@ import {
   doc,
   getDoc,
   updateDoc,
-  setDoc
+  setDoc,
+  limit,
+  startAfter
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getStoreById } from './storeFirestoreService';
@@ -15,60 +17,48 @@ import { getStoreById } from './storeFirestoreService';
 export const fetchAllProducts = async (
   category,
   location,
-  searchQuery
+  searchQuery,
+  limitVal = 10,
+  lastVisibleDoc = null
 ) => {
   try {
-    let q;
-    
+    let q = collection(db, 'products');
+
+    // Apply category filter
     if (category) {
-      // Only filter by category in Firestore
-      q = query(
-        collection(db, 'products'),
-        where('categoryId', '==', category)
-      );
-    } else if (searchQuery) {
-      // Only search query (no category filter)
-      q = query(
-        collection(db, 'products'),
-        where('name', '>=', searchQuery),
-        where('name', '<=', searchQuery + '\uf8ff')
-      );
-    } else {
-      // No filters
-      q = query(collection(db, 'products'), orderBy('name'));
+      q = query(q, where('categoryId', '==', category));
     }
+
+    // Apply location filter directly to database query
+    if (location && location !== 'Select Location') {
+      q = query(q, where('store.city', '==', location));
+    }
+
+    // Only apply name sorting if no category or location is active to avoid index requirements
+    if (!category && (!location || location === 'Select Location')) {
+      q = query(q, orderBy('name'));
+    }
+
+    if (lastVisibleDoc) {
+      q = query(q, startAfter(lastVisibleDoc));
+    }
+    
+    q = query(q, limit(limitVal));
 
     const snapshot = await getDocs(q);
-    
-    let products = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    
-    // If both category and searchQuery exist, filter by name in JavaScript
-    if (category && searchQuery) {
-      const lowerSearchQuery = searchQuery.toLowerCase();
-      products = products.filter(product => 
-        product.name.toLowerCase().includes(lowerSearchQuery)
-      );
-    }
+    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+    const hasMore = snapshot.docs.length === limitVal;
 
-    const productsWithStores = await Promise.all(
-      products.map(async (product) => {
-        const store = await getStoreById(product.storeId);
-        return { 
-          ...product, 
-          store: store || undefined
-        };
-      })
-    );
+    const products = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-    if (location && location !== 'Select Location') {
-      const filtered = productsWithStores.filter(p => p.store && p.store.city === location);
-      return filtered;
-    }
-
-    return productsWithStores;
+    return {
+      products,
+      lastDoc,
+      hasMore
+    };
   } catch (error) {
     console.error('Error fetching products:', error);
-    return [];
+    return { products: [], lastDoc: null, hasMore: false };
   }
 };
 
@@ -105,69 +95,112 @@ export const getProductById = async (id) => {
 export const searchProducts = async (
   category,
   location,
-  searchQuery
+  searchQuery,
+  limitVal = 10,
+  lastVisibleDoc = null
 ) => {
   try {
-    let q = query(collection(db, 'products'));
+    let productsList = [];
+    let currentLastDoc = lastVisibleDoc;
+    let hasMore = true;
+    let searchWords = [];
 
-    // Filter category only if provided
-    if (category) {
-      q = query(q, where("categoryId", "==", category));
-    }
-
-    // Search using tokens
     if (searchQuery && searchQuery.trim().length > 0) {
-      const cleanQuery = searchQuery.trim().toLowerCase();
-      q = query(q, where("searchTokens", "array-contains", cleanQuery));
+      searchWords = searchQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
     }
 
-    const snapshot = await getDocs(q);
+    while (productsList.length < limitVal && hasMore) {
+      let q = query(collection(db, 'products'));
 
-    const products = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+      if (category) {
+        q = query(q, where("categoryId", "==", category));
+      }
 
-    const productsWithStores = await Promise.all(
-      products.map(async (product) => {
-        const store = await getStoreById(product.storeId);
-        return { 
-          ...product, 
-          store: store || undefined
-        };
-      })
-    );
+      if (location && location !== 'Select Location') {
+        q = query(q, where('store.city', '==', location));
+      }
 
-    // Filter location if provided
-    if (location && location !== "Select Location") {
-      return productsWithStores.filter(
-        (p) => p.store && p.store.city === location
-      );
+      if (searchWords.length > 0) {
+        const sortedWords = [...searchWords].sort((a, b) => b.length - a.length);
+        const queryWord = sortedWords[0];
+        if (queryWord.length < 2) {
+          q = query(
+            q,
+            where('nameLower', '>=', queryWord),
+            where('nameLower', '<=', queryWord + '\uf8ff')
+          );
+        } else {
+          q = query(q, where('searchTokens', 'array-contains', queryWord));
+        }
+      }
+
+      if (currentLastDoc) {
+        q = query(q, startAfter(currentLastDoc));
+      }
+      q = query(q, limit(15)); // Fetch in chunks of 15
+
+      const snapshot = await getDocs(q);
+      if (snapshot.docs.length === 0) {
+        hasMore = false;
+        break;
+      }
+
+      currentLastDoc = snapshot.docs[snapshot.docs.length - 1];
+      hasMore = snapshot.docs.length === 15;
+
+      let chunkProducts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        docSnapshot: doc,
+        ...doc.data(),
+      }));
+
+      if (searchWords.length > 0) {
+        chunkProducts = chunkProducts.filter((product) => {
+          const productNameLower = product.name?.toLowerCase() || '';
+          const tokens = product.searchTokens || [];
+          return searchWords.every((word) =>
+            productNameLower.includes(word) || tokens.includes(word)
+          );
+        });
+      }
+
+      productsList = [...productsList, ...chunkProducts];
     }
 
-    return productsWithStores;
+    const slicedProducts = productsList.slice(0, limitVal);
+    const lastProduct = slicedProducts[slicedProducts.length - 1];
+    const finalLastDoc = lastProduct ? lastProduct.docSnapshot : currentLastDoc;
+
+    // Clean up temporary docSnapshot field
+    const cleanedProducts = slicedProducts.map(({ docSnapshot, ...rest }) => rest);
+
+    return {
+      products: cleanedProducts,
+      lastDoc: finalLastDoc,
+      hasMore: hasMore || productsList.length > limitVal
+    };
   } catch (error) {
     console.error("Error searching products:", error);
-    return [];
+    return { products: [], lastDoc: null, hasMore: false };
   }
 };
 
 export const fetchProductsByStoreAndCategory = async (
   storeId,
-  categoryId
+  categoryId,
+  limitVal = 10,
+  lastVisibleDoc = null
 ) => {
   try {
     let q;
     
     if (categoryId) {
-      // Filter by both storeId and categoryId
       q = query(
         collection(db, 'products'),
         where('storeId', '==', storeId),
         where('categoryId', '==', categoryId)
       );
     } else {
-      // Filter only by storeId
       q = query(
         collection(db, 'products'),
         where('storeId', '==', storeId),
@@ -175,7 +208,15 @@ export const fetchProductsByStoreAndCategory = async (
       );
     }
 
+    if (lastVisibleDoc) {
+      q = query(q, startAfter(lastVisibleDoc));
+    }
+    q = query(q, limit(limitVal));
+
     const snapshot = await getDocs(q);
+    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+    const hasMore = snapshot.docs.length === limitVal;
+
     const products = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
     // Fetch store data for each product
@@ -186,10 +227,14 @@ export const fetchProductsByStoreAndCategory = async (
       })
     );
 
-    return productsWithStores;
+    return {
+      products: productsWithStores,
+      lastDoc,
+      hasMore
+    };
   } catch (error) {
     console.error('Error fetching products by store and category:', error);
-    return [];
+    return { products: [], lastDoc: null, hasMore: false };
   }
 };
 
