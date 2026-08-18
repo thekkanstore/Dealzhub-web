@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { getProductById } from '../../services/productService';
 import { TKArrowIcon } from '../../components/common/Icons/TKArrowIcon';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const ProductPage = () => {
   const { productId } = useParams();
@@ -34,7 +35,11 @@ const ProductPage = () => {
   }, [productId]);
 
   if (loading) {
-    return <div>Loading product details...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (!selectedProduct) {

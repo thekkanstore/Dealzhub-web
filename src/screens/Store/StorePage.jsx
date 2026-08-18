@@ -6,11 +6,12 @@ import { getStoreById } from '../../services/storeFirestoreService';
 import 'react-virtualized/styles.css';
 import noDataFound from '../../assets/images/noDataFound@3x.png';
 import VirtualizedProductGrid from '../../components/common/VirtualizedProductGrid';
-import { fetchAllProducts } from '../../services/productService';
+import { fetchAllProducts, fetchProductsByStoreAndCategory } from '../../services/productService';
 import QRCode from 'qrcode';
 import { ArrowLeft, Download } from 'lucide-react';
 import appLogo from '../../assets/images/appLogo@2x.png';
 import { getCategoryById } from '../../services/firestore';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const StorePage = () => {
   const { id: storeId } = useParams();
@@ -24,13 +25,26 @@ const StorePage = () => {
 
   // State for category filtering
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [categories, setCategories] = useState(null);
+  const [categories, setCategories] = useState([]);
   // State for products
   const [products, setProducts] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [lastDoc, setLastDoc] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
 
-  // State for QR code
   const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const observerTarget = useRef(null);
+  const isFetchingRef = useRef(false);
+  const lastDocRef = useRef(null);
+
+  const categoryRef = useRef(selectedCategory);
+  const storeIdRef = useRef(storeId);
+
+  useEffect(() => {
+    categoryRef.current = selectedCategory;
+    storeIdRef.current = storeId;
+  }, [selectedCategory, storeId]);
 
   // Check if current user owns this store
   const isStoreOwner = useMemo(() => {
@@ -73,20 +87,24 @@ const StorePage = () => {
     generateQRCode();
   }, [storeId, isStoreOwner]);
 
-  // Fetch products when store or category changes
+  // Fetch products when storeId or selectedCategory changes
   useEffect(() => {
     if (!storeId) return;
 
     const fetchProducts = async () => {
       setIsLoadingProducts(true);
+      setProducts([]);
+      setLastDoc(null);
+      lastDocRef.current = null;
+      setHasMore(false);
+      isFetchingRef.current = false;
       try {
-        // Fetch all products
-        const allProducts = await fetchAllProducts(null, null, null);
-
-        // Filter products by storeId
-        const storeProducts = allProducts.filter(product => product.storeId === storeId);
-
-        setProducts(storeProducts);
+        const catId = selectedCategory === 'all' ? null : selectedCategory;
+        const response = await fetchProductsByStoreAndCategory(storeId, catId, 12, null);
+        setProducts(response.products);
+        setLastDoc(response.lastDoc);
+        lastDocRef.current = response.lastDoc;
+        setHasMore(response.hasMore);
       } catch (error) {
         console.error('Error fetching store products:', error);
         setProducts([]);
@@ -95,10 +113,65 @@ const StorePage = () => {
       }
     };
 
+    fetchProducts();
+  }, [storeId, selectedCategory]);
+
+  const handleLoadMore = async () => {
+    if (!hasMore || isLoadingMore || isLoadingProducts || isFetchingRef.current) return;
+
+    const currentCategory = selectedCategory;
+    const currentStoreId = storeId;
+
+    isFetchingRef.current = true;
+    setIsLoadingMore(true);
+    try {
+      const catId = selectedCategory === 'all' ? null : selectedCategory;
+      const response = await fetchProductsByStoreAndCategory(storeId, catId, 12, lastDocRef.current);
+      
+      if (categoryRef.current !== currentCategory || storeIdRef.current !== currentStoreId) {
+        isFetchingRef.current = false;
+        setIsLoadingMore(false);
+        return;
+      }
+
+      setProducts(prev => [...prev, ...response.products]);
+      setLastDoc(response.lastDoc);
+      lastDocRef.current = response.lastDoc;
+      setHasMore(response.hasMore);
+    } catch (error) {
+      console.error('Error loading more store products:', error);
+    } finally {
+      setIsLoadingMore(false);
+      isFetchingRef.current = false;
+    }
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoadingProducts) {
+          handleLoadMore();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [hasMore, isLoadingMore, isLoadingProducts, lastDoc]);
+
+  // Fetch store categories when store data changes
+  useEffect(() => {
     const fetchCategory = async () => {
       if (store?.categories) {
         try {
-
           // Check if categories is an array
           if (Array.isArray(store.categories)) {
             // Map through each category ID and fetch it
@@ -128,9 +201,8 @@ const StorePage = () => {
       }
     };
 
-    fetchProducts();
     fetchCategory();
-  }, [storeId, store]);
+  }, [store]);
 
   // --- Filtering ---
 
@@ -138,12 +210,7 @@ const StorePage = () => {
     setSelectedCategory(categoryId);
   }, []);
 
-  const filteredProducts = useMemo(() => {
-    if (!selectedCategory) {
-      return products;
-    }
-    return products.filter(product => product.categoryId === selectedCategory);
-  }, [products, selectedCategory]);
+  const filteredProducts = products;
 
   // Download QR Code with logo and store name
   const downloadQRCode = async () => {
@@ -216,7 +283,11 @@ const StorePage = () => {
   // --- Render ---
 
   if (isStoreLoading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading Store...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (!store) {
@@ -353,10 +424,17 @@ const StorePage = () => {
           <div className="mt-8 max-w-7xl mx-auto px-4 py-8">
             <h2 className="text-2xl font-bold mb-4">Products</h2>
             {filteredProducts.length > 0 || isLoadingProducts ? (
-              <VirtualizedProductGrid
-                products={filteredProducts}
-                isLoading={isLoadingProducts}
-              />
+              <>
+                <VirtualizedProductGrid
+                  products={filteredProducts}
+                  isLoading={isLoadingProducts}
+                />
+                {hasMore && (
+                  <div ref={observerTarget} className="flex justify-center mt-8 min-h-[50px]">
+                    {isLoadingMore && <LoadingSpinner />}
+                  </div>
+                )}
+              </>
             ) : (
               <div className="bg-white rounded-lg p-12 text-center">
                 <img src={noDataFound} alt="No Products Found" className="w-48 h-48 mx-auto mb-6" loading="lazy" />

@@ -4,6 +4,7 @@ import VendorDetailsForm from '../../components/vendor/VendorDetailsForm';
 import { useAppContext } from '../../context/AppContext';
 import { getStoreByUserId, updateStore } from '../../services/firestore'; // Assuming updateStore exists
 import { ArrowLeft } from 'lucide-react';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const EditStorePage = () => {
   const { user } = useAppContext();
@@ -66,7 +67,11 @@ const EditStorePage = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading store details...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (!initialStoreData) {
