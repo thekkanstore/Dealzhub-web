@@ -22,81 +22,39 @@ export const fetchAllProducts = async (
   lastVisibleDoc = null
 ) => {
   try {
-    let productsList = [];
-    let currentLastDoc = lastVisibleDoc;
-    let hasMore = true;
+    let q = collection(db, 'products');
 
-    // We loop to fetch chunks until we get enough products matching the location filter,
-    // or until there are no more products to fetch.
-    while (productsList.length < limitVal && hasMore) {
-      let q;
-      if (category) {
-        q = query(
-          collection(db, 'products'),
-          where('categoryId', '==', category)
-        );
-      } else if (searchQuery) {
-        q = query(
-          collection(db, 'products'),
-          where('name', '>=', searchQuery),
-          where('name', '<=', searchQuery + '\uf8ff')
-        );
-      } else {
-        q = query(collection(db, 'products'), orderBy('name'));
-      }
-
-      if (currentLastDoc) {
-        q = query(q, startAfter(currentLastDoc));
-      }
-      q = query(q, limit(15)); // Fetch in chunks of 15
-
-      const snapshot = await getDocs(q);
-      if (snapshot.docs.length === 0) {
-        hasMore = false;
-        break;
-      }
-
-      currentLastDoc = snapshot.docs[snapshot.docs.length - 1];
-      hasMore = snapshot.docs.length === 15;
-
-      let chunkProducts = snapshot.docs.map((doc) => ({ id: doc.id, docSnapshot: doc, ...doc.data() }));
-
-      if (category && searchQuery) {
-        const lowerSearchQuery = searchQuery.toLowerCase();
-        chunkProducts = chunkProducts.filter(product => 
-          product.name.toLowerCase().includes(lowerSearchQuery)
-        );
-      }
-
-      const productsWithStores = await Promise.all(
-        chunkProducts.map(async (product) => {
-          const store = await getStoreById(product.storeId);
-          return { 
-            ...product, 
-            store: store || undefined
-          };
-        })
-      );
-
-      let filteredChunk = productsWithStores;
-      if (location && location !== 'Select Location') {
-        filteredChunk = productsWithStores.filter(p => p.store && p.store.city === location);
-      }
-
-      productsList = [...productsList, ...filteredChunk];
+    // Apply category filter
+    if (category) {
+      q = query(q, where('categoryId', '==', category));
     }
 
-    const slicedProducts = productsList.slice(0, limitVal);
-    const lastProduct = slicedProducts[slicedProducts.length - 1];
-    const finalLastDoc = lastProduct ? lastProduct.docSnapshot : currentLastDoc;
+    // Apply location filter directly to database query
+    if (location && location !== 'Select Location') {
+      q = query(q, where('store.city', '==', location));
+    }
 
-    // Clean up temporary docSnapshot field
-    const cleanedProducts = slicedProducts.map(({ docSnapshot, ...rest }) => rest);
+    // Only apply name sorting if no category or location is active to avoid index requirements
+    if (!category && (!location || location === 'Select Location')) {
+      q = query(q, orderBy('name'));
+    }
+
+    if (lastVisibleDoc) {
+      q = query(q, startAfter(lastVisibleDoc));
+    }
+    
+    q = query(q, limit(limitVal));
+
+    const snapshot = await getDocs(q);
+    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+    const hasMore = snapshot.docs.length === limitVal;
+
+    const products = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
     return {
-      products: cleanedProducts,
-      lastDoc: finalLastDoc,
-      hasMore: hasMore || productsList.length > limitVal
+      products,
+      lastDoc,
+      hasMore
     };
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -158,6 +116,10 @@ export const searchProducts = async (
         q = query(q, where("categoryId", "==", category));
       }
 
+      if (location && location !== 'Select Location') {
+        q = query(q, where('store.city', '==', location));
+      }
+
       if (searchWords.length > 0) {
         const sortedWords = [...searchWords].sort((a, b) => b.length - a.length);
         const queryWord = sortedWords[0];
@@ -202,24 +164,7 @@ export const searchProducts = async (
         });
       }
 
-      const productsWithStores = await Promise.all(
-        chunkProducts.map(async (product) => {
-          const store = await getStoreById(product.storeId);
-          return { 
-            ...product, 
-            store: store || undefined
-          };
-        })
-      );
-
-      let filteredChunk = productsWithStores;
-      if (location && location !== "Select Location") {
-        filteredChunk = productsWithStores.filter(
-          (p) => p.store && p.store.city === location
-        );
-      }
-
-      productsList = [...productsList, ...filteredChunk];
+      productsList = [...productsList, ...chunkProducts];
     }
 
     const slicedProducts = productsList.slice(0, limitVal);

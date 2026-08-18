@@ -36,6 +36,7 @@ const HomePage = () => {
 
   // Effect for fetching data when filters change
   useEffect(() => {
+    console.log('[HomePage] Initial fetch triggered. selectedCategory:', selectedCategory, 'selectedLocation:', selectedLocation);
     setIsLoading(true);
     setProducts([]); // Clear products immediately
     setLastDoc(null);
@@ -49,6 +50,7 @@ const HomePage = () => {
         const status = p.store?.vendorStatus?.toLowerCase();
         return status !== 'inactive' && status !== 'private';
       });
+      console.log('[HomePage] Initial fetch resolved. Products count returned:', response.products.length, 'Filtered count:', activeProducts.length);
       setProducts(activeProducts);
       setLastDoc(response.lastDoc);
       lastDocRef.current = response.lastDoc;
@@ -59,16 +61,21 @@ const HomePage = () => {
   }, [selectedCategory, selectedLocation]);
 
   const handleLoadMore = () => {
-    if (!hasMore || isLoadingMore || isLoading || isFetchingRef.current) return;
+    if (!hasMore || isLoadingMore || isLoading || isFetchingRef.current) {
+      console.log('[HomePage] handleLoadMore blocked. hasMore:', hasMore, 'isLoadingMore:', isLoadingMore, 'isLoading:', isLoading, 'isFetchingRef.current:', isFetchingRef.current);
+      return;
+    }
 
     const currentCategory = selectedCategory;
     const currentLocation = selectedLocation;
 
+    console.log('[HomePage] handleLoadMore initiated. lastDocRef.current ID:', lastDocRef.current ? lastDocRef.current.id : 'null');
     isFetchingRef.current = true;
     setIsLoadingMore(true);
 
     fetchAllProducts(selectedCategory, selectedLocation, null, 12, lastDocRef.current).then((response) => {
       if (categoryRef.current !== currentCategory || locationRef.current !== currentLocation) {
+        console.log('[HomePage] handleLoadMore aborted because filters changed.');
         isFetchingRef.current = false;
         setIsLoadingMore(false);
         return;
@@ -77,7 +84,12 @@ const HomePage = () => {
         const status = p.store?.vendorStatus?.toLowerCase();
         return status !== 'inactive' && status !== 'private';
       });
-      setProducts(prev => [...prev, ...activeProducts]);
+      console.log('[HomePage] handleLoadMore resolved. Products count returned:', response.products.length, 'Filtered count:', activeProducts.length);
+      setProducts(prev => {
+        const nextProducts = [...prev, ...activeProducts];
+        console.log('[HomePage] handleLoadMore setting products. Prev count:', prev.length, 'New count:', nextProducts.length);
+        return nextProducts;
+      });
       setLastDoc(response.lastDoc);
       lastDocRef.current = response.lastDoc;
       setHasMore(response.hasMore);
