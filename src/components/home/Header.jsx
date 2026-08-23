@@ -218,19 +218,12 @@ const Header = ({
                     </div>
                   )}
                 </div>
-                {role && storeId ? (
+                 {storeId ? (
                   <button
                     className="p-2 bg-secondaryButtonBackgroundColor gap-2 rounded-full flex items-center justify-center text-gray-700 border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
                     onClick={() => navigateTo(`/vendor/${storeId}`)}
                   >
                     My Store
-                  </button>
-                ) : role ? (
-                  <button
-                    className="p-2 bg-secondaryButtonBackgroundColor gap-2 rounded-full flex items-center justify-center text-gray-700 border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
-                    onClick={() => navigateTo('/vendordetails')}
-                  >
-                    Create Store
                   </button>
                 ) : (
                   <button
@@ -400,7 +393,7 @@ const Header = ({
                   )}
                 </button>
 
-                {role && storeId ? (
+                {storeId ? (
                   <button
                     className="flex items-center gap-3 w-full px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
                     onClick={() => {

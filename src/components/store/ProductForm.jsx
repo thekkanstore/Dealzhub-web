@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getActiveCategories } from '../../services/firestore';
+import SubCategoryInput from './SubCategoryInput';
 
 const ProductForm = ({
   initialData,
@@ -21,6 +22,13 @@ const ProductForm = ({
   const [isSecondHand, setIsSecondHand] = useState(initialData?.isSecondHand || false);
   const [isOutOfStock, setIsOutOfStock] = useState(initialData?.isOutOfStock || false);
   const [isSoldOut, setIsSoldOut] = useState(initialData?.isSoldOut || false);
+  const [subcategoryIds, setSubcategoryIds] = useState(initialData?.subcategoryIds || []);
+
+  const handleCategoryChange = (e) => {
+    const value = e.target.value;
+    setCategoryId(value);
+    setSubcategoryIds([]); // Reset sub-categories on category change
+  };
 
   const [errors, setErrors] = useState({
     name: '',
@@ -49,6 +57,7 @@ const ProductForm = ({
     setIsSecondHand(initialData?.isSecondHand || false);
     setIsOutOfStock(initialData?.isOutOfStock || false);
     setIsSoldOut(initialData?.isSoldOut || false);
+    setSubcategoryIds(initialData?.subcategoryIds || []);
     
     // Handle existing images for edit mode
     if (initialData?.images && Array.isArray(initialData.images) && initialData.images.length > 0) {
@@ -138,6 +147,7 @@ const ProductForm = ({
         actualPrice, 
         discountPrice, 
         categoryId,
+        subcategoryIds,
         images, // New images (File objects)
         existingImages, // Existing images (URLs)
         status,
@@ -241,7 +251,7 @@ const ProductForm = ({
           className={`bg-gray-50/80 appearance-none border rounded-lg h-12 w-full p-3 text-[#524B6B] leading-tight focus:outline-none focus:shadow-outline ${errors.categoryId ? 'border-red-500' : 'border-transparent'}`}
           id="categoryId"
           value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
+          onChange={handleCategoryChange}
           required
         >
           <option value="">Select Category</option>
@@ -253,6 +263,15 @@ const ProductForm = ({
         </select>
         {errors.categoryId && <p className="text-red-500 text-xs italic mt-1">{errors.categoryId}</p>}
       </div>
+
+      {categoryId && (
+        <SubCategoryInput
+          storeId={storeId}
+          categoryId={categoryId}
+          selectedIds={subcategoryIds}
+          onChange={setSubcategoryIds}
+        />
+      )}
 
       <div className="mb-4">
         <label className="block text-[#150A33] text-sm font-bold mb-2" htmlFor="status">

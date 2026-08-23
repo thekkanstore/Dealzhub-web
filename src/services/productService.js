@@ -9,10 +9,12 @@ import {
   updateDoc,
   setDoc,
   limit,
-  startAfter
+  startAfter,
+  deleteDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getStoreById } from './storeFirestoreService';
+import { deleteMultipleImages } from './firebaseStorageService';
 
 export const fetchAllProducts = async (
   category,
@@ -203,8 +205,7 @@ export const fetchProductsByStoreAndCategory = async (
     } else {
       q = query(
         collection(db, 'products'),
-        where('storeId', '==', storeId),
-        orderBy('name')
+        where('storeId', '==', storeId)
       );
     }
 
@@ -332,5 +333,31 @@ export const updateProductDetails = async (
       productId: null,
       message: `Error updating Product: ${error}`,
     };
+  }
+};
+
+export const deleteProduct = async (product) => {
+  try {
+    if (!product || !product.id) {
+      throw new Error('Invalid product data');
+    }
+    
+    // Delete product document from Firestore
+    const productRef = doc(db, 'products', product.id);
+    await deleteDoc(productRef);
+    
+    // Delete images from Firebase Storage
+    const imageUrls = product.images && product.images.length > 0
+      ? product.images
+      : (product.image ? [product.image] : []);
+      
+    if (imageUrls.length > 0) {
+      await deleteMultipleImages(imageUrls);
+    }
+    
+    return { success: true, message: 'Product deleted successfully' };
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    return { success: false, message: `Error deleting product: ${error.message}` };
   }
 };

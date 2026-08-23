@@ -12,6 +12,7 @@ import { ArrowLeft, Download } from 'lucide-react';
 import appLogo from '../../assets/images/appLogo@2x.png';
 import { getCategoryById } from '../../services/firestore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { getSubCategories } from '../../services/subcategoryService';
 
 const StorePage = () => {
   const { id: storeId } = useParams();
@@ -210,7 +211,40 @@ const StorePage = () => {
     setSelectedCategory(categoryId);
   }, []);
 
-  const filteredProducts = products;
+  const [subCategories, setSubCategories] = useState([]);
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
+  const [isSubCategoriesLoading, setIsSubCategoriesLoading] = useState(false);
+
+  useEffect(() => {
+    if (!storeId || !selectedCategory) {
+      setSubCategories([]);
+      setSelectedSubCategoryId(null);
+      return;
+    }
+
+    const fetchSubCategories = async () => {
+      setIsSubCategoriesLoading(true);
+      try {
+        const subs = await getSubCategories(storeId, selectedCategory);
+        setSubCategories(subs);
+      } catch (error) {
+        console.error('Error fetching subcategories:', error);
+        setSubCategories([]);
+      } finally {
+        setIsSubCategoriesLoading(false);
+      }
+    };
+
+    fetchSubCategories();
+    setSelectedSubCategoryId(null); // Reset sub-category filter on main category change
+  }, [storeId, selectedCategory]);
+
+  const filteredProducts = useMemo(() => {
+    if (!selectedSubCategoryId) {
+      return products;
+    }
+    return products.filter((p) => p.subcategoryIds?.includes(selectedSubCategoryId));
+  }, [products, selectedSubCategoryId]);
 
   // Download QR Code with logo and store name
   const downloadQRCode = async () => {
@@ -420,6 +454,37 @@ const StorePage = () => {
               selectedCategory={selectedCategory}
               onCategoryClick={handleCategoryClick}
             />)}
+
+          {/* Subcategory Filter Chips */}
+          {selectedCategory && subCategories.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide py-2 px-4 max-w-7xl mx-auto -mt-2 mb-4">
+              <button
+                type="button"
+                onClick={() => setSelectedSubCategoryId(null)}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold cursor-pointer border transition-all duration-300 ${
+                  !selectedSubCategoryId
+                    ? 'bg-primaryButtonBackgroundColor text-white border-transparent shadow-sm'
+                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                All
+              </button>
+              {subCategories.map((sub) => (
+                <button
+                  key={sub.id}
+                  type="button"
+                  onClick={() => setSelectedSubCategoryId(sub.id)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold cursor-pointer border whitespace-nowrap transition-all duration-300 ${
+                    selectedSubCategoryId === sub.id
+                      ? 'bg-primaryButtonBackgroundColor text-white border-transparent shadow-sm'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {sub.name}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="mt-8 max-w-7xl mx-auto px-4 py-8">
             <h2 className="text-2xl font-bold mb-4">Products</h2>
