@@ -109,6 +109,7 @@ const AddProductPage = () => {
         imagePath: imagePath,
         categoryId: formData.categoryId,
         category: categoryData, // Add full category object
+        subcategoryIds: formData.subcategoryIds || [],
         storeId: storeId,
         store: storeData, // Add full store object
         userId: user.providerData[0].uid,

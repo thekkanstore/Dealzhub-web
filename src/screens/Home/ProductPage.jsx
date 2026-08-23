@@ -2,9 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Star, Heart, ChevronLeft, ChevronRight, Edit, ArrowLeft } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
-import { getProductById } from '../../services/productService';
+import { getProductById, deleteProduct } from '../../services/productService';
 import { TKArrowIcon } from '../../components/common/Icons/TKArrowIcon';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { getSubCategories } from '../../services/subcategoryService';
 
 const ProductPage = () => {
   const { productId } = useParams();
@@ -13,12 +14,30 @@ const ProductPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [resolvedSubCategoryNames, setResolvedSubCategoryNames] = useState([]);
 
   // Check if current user owns this product
   const isProductOwner = useMemo(() => {
     if (!user || !selectedProduct) return false;
     return selectedProduct.userId === user.providerData[0].uid;
   }, [user, selectedProduct]);
+
+  const handleDeleteProduct = async () => {
+    if (window.confirm('Are you sure you want to permanently delete this product? This action cannot be undone.')) {
+      try {
+        const result = await deleteProduct(selectedProduct);
+        if (result.success) {
+          alert('Product deleted successfully!');
+          navigate(`/vendor/${selectedProduct.storeId}`);
+        } else {
+          alert(result.message || 'Failed to delete product.');
+        }
+      } catch (error) {
+        console.error('Error in handleDeleteProduct:', error);
+        alert('Failed to delete product.');
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -27,6 +46,23 @@ const ProductPage = () => {
         const product = await getProductById(productId);
         setSelectedProduct(product);
         setCurrentImageIndex(0); // Reset to first image when product changes
+        
+        if (product && product.storeId && product.categoryId) {
+          try {
+            const activeSubs = await getSubCategories(product.storeId, product.categoryId);
+            const resolved = product.subcategoryIds
+              ? product.subcategoryIds
+                  .map(id => activeSubs.find(sub => sub.id === id)?.name)
+                  .filter(Boolean)
+              : [];
+            setResolvedSubCategoryNames(resolved);
+          } catch (error) {
+            console.error('Error fetching subcategories for product:', error);
+            setResolvedSubCategoryNames([]);
+          }
+        } else {
+          setResolvedSubCategoryNames([]);
+        }
       }
       setLoading(false);
     };
@@ -174,6 +210,13 @@ const ProductPage = () => {
               </div>
             </div>
             <p className="text-gray-600 mb-6">{selectedProduct.description}</p>
+            {selectedProduct.category?.name && (
+              <div className="mb-6 text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <span className="font-semibold text-gray-700">Category: </span>
+                {selectedProduct.category.name}
+                {resolvedSubCategoryNames.length > 0 && ` > ${resolvedSubCategoryNames.join(', ')}`}
+              </div>
+            )}
             {selectedProduct.store && selectedProduct.store.storeName && (
               <div 
                 onClick={() => navigate(`/vendor/${selectedProduct.store.id}`)}
@@ -191,13 +234,19 @@ const ProductPage = () => {
             )}
 
             {/* Conditional Button Rendering */}
-            {isProductOwner ? (
-              <div className='w-full flex items-center'>
+             {isProductOwner ? (
+              <div className='w-full flex items-center gap-4'>
                 <button
                   onClick={() => navigate(`/edit-product/${selectedProduct.id}`)}
-                  className="p-2 gap-2 rounded-full w-5/12 flex items-center justify-center text-xl bg-primaryButtonBackgroundColor text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  className="p-2 gap-2 rounded-full w-1/2 flex items-center justify-center text-xl bg-primaryButtonBackgroundColor text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Edit Product
+                </button>
+                <button
+                  onClick={handleDeleteProduct}
+                  className="p-2 gap-2 rounded-full w-1/2 flex items-center justify-center text-xl bg-red-600 text-white border border-transparent shadow-sm hover:shadow-md hover:bg-red-700 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Delete Product
                 </button>
               </div>
             ) : (

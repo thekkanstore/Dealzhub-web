@@ -148,6 +148,7 @@ const EditProductPage = () => {
         imagePath: imagePath,
         categoryId: formData.categoryId,
         category: categoryData,
+        subcategoryIds: formData.subcategoryIds || [],
         storeId: storeId,
         store: storeData,
         userId: user.providerData[0].uid,
