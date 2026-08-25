@@ -19,6 +19,10 @@ import EditProductPage from './screens/Store/EditProductPage';
 import SearchResultsPage from './screens/Search/SearchResultsPage'; // Import search page
 import { AppProvider } from './context/AppContext';
 import MainLayout from './components/layouts/MainLayout';
+import AboutUsPage from './screens/Info/AboutUsPage';
+import PrivacyPolicyPage from './screens/Info/PrivacyPolicyPage';
+import RefundPolicyPage from './screens/Info/RefundPolicyPage';
+
 
 const router = createBrowserRouter([
   {
@@ -97,6 +101,18 @@ const router = createBrowserRouter([
       {
         path:'/edit-product/:productId',
         element: <EditProductPage />,
+      },
+      {
+        path: '/about',
+        element: <AboutUsPage />,
+      },
+      {
+        path: '/privacy',
+        element: <PrivacyPolicyPage />,
+      },
+      {
+        path: '/cancellation-refund',
+        element: <RefundPolicyPage />,
       }
     ],
   },

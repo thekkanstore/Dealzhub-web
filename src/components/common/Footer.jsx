@@ -1,11 +1,12 @@
 import React from 'react';
-import { MapPin, User, Mail, Phone, Info } from 'lucide-react';
+import { MapPin, User, Mail, Phone, Info, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import appLogo from '../../assets/images/appLogo@2x.png';
 
 const Footer = () => {
   return (
     <footer className="bg-[#1b3024] text-white border-t border-[#254030] pt-12 pb-6 mt-16 font-sans">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         
         {/* Brand Section */}
         <div className="flex flex-col space-y-4">
@@ -31,19 +32,43 @@ const Footer = () => {
           </h3>
           <ul className="space-y-2 text-sm text-gray-300">
             <li>
-              <a href="/home" className="hover:text-white transition-colors duration-200">
+              <Link to="/home" className="hover:text-white transition-colors duration-200">
                 Home
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/favorites" className="hover:text-white transition-colors duration-200">
+              <Link to="/favorites" className="hover:text-white transition-colors duration-200">
                 Favorites
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/cart" className="hover:text-white transition-colors duration-200">
+              <Link to="/cart" className="hover:text-white transition-colors duration-200">
                 Cart
-              </a>
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Company/Legal Section */}
+        <div className="flex flex-col space-y-4">
+          <h3 className="text-lg font-semibold text-[#82C39B] flex items-center gap-2">
+            <Shield className="w-5 h-5" /> Company
+          </h3>
+          <ul className="space-y-2 text-sm text-gray-300">
+            <li>
+              <Link to="/about" className="hover:text-white transition-colors duration-200">
+                About Us
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacy" className="hover:text-white transition-colors duration-200">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link to="/cancellation-refund" className="hover:text-white transition-colors duration-200">
+                Refund Policy
+              </Link>
             </li>
           </ul>
         </div>
