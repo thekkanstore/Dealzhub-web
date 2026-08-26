@@ -198,7 +198,7 @@ const PersonalDetailsForm = ({
                 )}
               </div>
               <span className="text-[#7d7d7d] text-sm w-11/12">
-                By proceeding, I acknowledge that I have read and agree to the  <a href="/terms-conditions.html" className="text-black hover:underline">Terms and Conditions</a>
+                By proceeding, I acknowledge that I have read and agree to the  <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-black hover:underline">Terms and Conditions</a>
               </span>
             </label>
           </div>
