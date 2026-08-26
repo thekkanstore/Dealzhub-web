@@ -22,6 +22,7 @@ import MainLayout from './components/layouts/MainLayout';
 import AboutUsPage from './screens/Info/AboutUsPage';
 import PrivacyPolicyPage from './screens/Info/PrivacyPolicyPage';
 import RefundPolicyPage from './screens/Info/RefundPolicyPage';
+import TermsAndConditionsPage from './screens/Info/TermsAndConditionsPage';
 
 
 const router = createBrowserRouter([
@@ -113,6 +114,10 @@ const router = createBrowserRouter([
       {
         path: '/cancellation-refund',
         element: <RefundPolicyPage />,
+      },
+      {
+        path: '/terms',
+        element: <TermsAndConditionsPage />,
       }
     ],
   },
