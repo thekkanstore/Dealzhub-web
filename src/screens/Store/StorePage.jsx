@@ -388,7 +388,7 @@ const StorePage = () => {
               </span>
             </h1>
             <p className="text-gray-600 mb-6">{store.address}</p>
-            {(currentStatus === "approved" || currentStatus === "private") && isStoreOwner && (
+            {isStoreOwner && (
               <div className='flex flex-wrap items-center gap-3'>
                 <button
                   onClick={() => navigate('/editstore')}
@@ -396,19 +396,28 @@ const StorePage = () => {
                 >
                   Edit
                 </button>
-                <button
-                  onClick={() => navigate('/add-product')}
-                  className="px-6 py-2 bg-primaryButtonBackgroundColor gap-2 rounded-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  Add Product
-                </button>
-                <button
-                  onClick={() => navigate('/bulk-add-product')}
-                  className="px-6 py-2 bg-primaryButtonBackgroundColor gap-2 rounded-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  Bulk Add Products
-                </button>
-              </div>)}
+                {(currentStatus === "approved" || currentStatus === "private") ? (
+                  <>
+                    <button
+                      onClick={() => navigate('/add-product')}
+                      className="px-6 py-2 bg-primaryButtonBackgroundColor gap-2 rounded-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      Add Product
+                    </button>
+                    <button
+                      onClick={() => navigate('/bulk-add-product')}
+                      className="px-6 py-2 bg-primaryButtonBackgroundColor gap-2 rounded-full flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      Bulk Add Products
+                    </button>
+                  </>
+                ) : currentStatus === "pending" ? (
+                  <span className="px-6 py-2 bg-amber-100 text-amber-800 border border-amber-200 rounded-full font-medium text-sm flex items-center gap-2 shadow-sm">
+                    Wait for approval to add product
+                  </span>
+                ) : null}
+              </div>
+            )}
           </div>
           
           {/* QR Code Section - Only show to store owner */}
@@ -510,12 +519,27 @@ const StorePage = () => {
                   {selectedCategory ? "Select a different category or check back later." : "Check back later for new products."}
                 </p>
                 <div className="w-full flex items-center justify-center">
-                  <button
-                    onClick={() => navigate(isStoreOwner ? '/add-product' : '/home')}
-                    className="p-2 bg-primaryButtonBackgroundColor gap-2 rounded-full w-4/12 flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    {isStoreOwner ? "Add Product" : "Continue Shopping"}
-                  </button>
+                  {isStoreOwner ? (
+                    currentStatus === 'pending' ? (
+                      <span className="px-6 py-2.5 bg-amber-100 text-amber-800 rounded-full font-medium border border-amber-200 shadow-sm text-sm">
+                        Wait for approval to add product
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => navigate('/add-product')}
+                        className="p-2 bg-primaryButtonBackgroundColor gap-2 rounded-full w-4/12 flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        Add Product
+                      </button>
+                    )
+                  ) : (
+                    <button
+                      onClick={() => navigate('/home')}
+                      className="p-2 bg-primaryButtonBackgroundColor gap-2 rounded-full w-4/12 flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      Continue Shopping
+                    </button>
+                  )}
                 </div>
               </div>
             )}
