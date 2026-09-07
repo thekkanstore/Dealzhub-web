@@ -87,11 +87,32 @@ export const createNewUser = async (userData, isUpdate = false) => {
 export const createNewStore = async (storeData) => {
   try {
     const storesCollectionRef = collection(db, 'stores');
+
+    // Prevent duplicate stores for the same user or email
+    if (storeData.userId) {
+      const qUser = query(storesCollectionRef, where('userId', '==', storeData.userId), limit(1));
+      const userSnap = await getDocs(qUser);
+      if (!userSnap.empty) {
+        const existingDoc = userSnap.docs[0];
+        await setDoc(existingDoc.ref, storeData, { merge: true });
+        return existingDoc.id;
+      }
+    }
+
+    if (storeData.email) {
+      const qEmail = query(storesCollectionRef, where('email', '==', storeData.email), limit(1));
+      const emailSnap = await getDocs(qEmail);
+      if (!emailSnap.empty) {
+        const existingDoc = emailSnap.docs[0];
+        await setDoc(existingDoc.ref, storeData, { merge: true });
+        return existingDoc.id;
+      }
+    }
+
     const newStoreDocRef = await addDoc(storesCollectionRef, storeData);
-    
-    return newStoreDocRef.id; // Return the generated store ID
+    return newStoreDocRef.id;
   } catch (error) {
-    console.error('Error creating new store:', error);
+    console.error('Error creating/updating store:', error);
     throw error;
   }
 };
@@ -129,18 +150,13 @@ export const updateUserRole = async (userId, role) => {
       const userData = userDoc.data();
       const currentRoles = userData.role || [];
       
-      // Add the new role if it doesn't already exist
       if (!currentRoles.includes(role)) {
         const updatedRoles = [...currentRoles, role];
         await updateDoc(userDocRef, {
           role: updatedRoles,
           updatedAt: new Date()
         });
-      } else {
-        console.log('User already has this role');
       }
-    } else {
-      console.error('User document does not exist');
     }
   } catch (error) {
     console.error('Error updating user role:', error);
@@ -201,23 +217,42 @@ export const updateUserProfile = async (userId, userData) => {
   }
 };
 
-export const getStoreByUserId = async (userId) => {
+export const getStoreByUserId = async (userId, userEmail = null) => {
+  if (!userId && !userEmail) return null;
   try {
-    const q = query(
-      collection(db, "stores"),
-      where("userId", "==", userId)
-    );
+    if (userId) {
+      const q = query(
+        collection(db, "stores"),
+        where("userId", "==", userId),
+        limit(1)
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const docSnap = snap.docs[0];
+        return {
+          id: docSnap.id,
+          ...docSnap.data(),
+        };
+      }
+    }
 
-    const snap = await getDocs(q);
+    if (userEmail) {
+      const qEmail = query(
+        collection(db, "stores"),
+        where("email", "==", userEmail),
+        limit(1)
+      );
+      const emailSnap = await getDocs(qEmail);
+      if (!emailSnap.empty) {
+        const docSnap = emailSnap.docs[0];
+        return {
+          id: docSnap.id,
+          ...docSnap.data(),
+        };
+      }
+    }
 
-    if (snap.empty) return null;
-
-    const docSnap = snap.docs[0];
-
-    return {
-      id: docSnap.id,
-      ...docSnap.data(),
-    };    
+    return null;
   } catch (error) {
     console.error("Error fetching store by userId:", error);
     return null;

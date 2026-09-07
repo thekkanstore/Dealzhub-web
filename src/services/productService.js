@@ -16,6 +16,28 @@ import { db } from '../firebase';
 import { getStoreById } from './storeFirestoreService';
 import { deleteMultipleImages } from './firebaseStorageService';
 
+export const isStoreSubscriptionValid = (store) => {
+  if (!store) return false;
+  
+  const status = store.vendorStatus?.toLowerCase();
+  if (status !== 'approved' && status !== 'private') {
+    return false;
+  }
+
+  if (store.paymentStatus && store.paymentStatus.toLowerCase() !== 'paid') {
+    return false;
+  }
+
+  if (store.subscriptionEndDate) {
+    const endDate = store.subscriptionEndDate.toDate ? store.subscriptionEndDate.toDate() : new Date(store.subscriptionEndDate);
+    if (new Date() > endDate) {
+      return false; // Subscription expired
+    }
+  }
+
+  return true;
+};
+
 export const fetchAllProducts = async (
   category,
   location,
@@ -51,7 +73,21 @@ export const fetchAllProducts = async (
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
     const hasMore = snapshot.docs.length === limitVal;
 
-    const products = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const rawProducts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    // Fetch store info and filter out products whose stores are expired or unpaid
+    const productsWithStore = await Promise.all(
+      rawProducts.map(async (product) => {
+        if (!product.storeId) return product;
+        const store = await getStoreById(product.storeId);
+        return { ...product, store };
+      })
+    );
+
+    const products = productsWithStore.filter((p) => {
+      if (!p.store) return true; // fallback if store not found
+      return isStoreSubscriptionValid(p.store);
+    });
 
     return {
       products,

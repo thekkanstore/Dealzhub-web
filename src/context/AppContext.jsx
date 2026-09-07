@@ -25,8 +25,9 @@ export const AppProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
+        const uid = currentUser.uid || currentUser.providerData?.[0]?.uid;
         // Fetch user-specific data like favorites and cart
-        const userData = await getUserData(currentUser.providerData[0].uid);
+        const userData = await getUserData(uid);
         if (userData) {
           setFavorites(userData.favorites || []);
           setCart(userData.cart || []); // Load cart from Firestore
@@ -123,7 +124,8 @@ export const AppProvider = ({ children }) => {
     setCart(updatedCart);
 
     try {
-      await updateUserCart(user.providerData[0].uid, updatedCart);
+      const uid = user.uid || user.providerData?.[0]?.uid;
+      await updateUserCart(uid, updatedCart);
     } catch (error) {
       console.error('Failed to update cart in Firestore:', error);
     }
@@ -140,7 +142,8 @@ export const AppProvider = ({ children }) => {
     setCart(updatedCart);
 
     try {
-      await updateUserCart(user.providerData[0].uid, updatedCart);
+      const uid = user.uid || user.providerData?.[0]?.uid;
+      await updateUserCart(uid, updatedCart);
     } catch (error) {
       console.error('Failed to update cart in Firestore:', error);
     }
@@ -164,7 +167,8 @@ export const AppProvider = ({ children }) => {
     }
     
     try {
-      await updateUserFavorites(user.providerData[0].uid, updatedFavorites);
+      const uid = user.uid || user.providerData?.[0]?.uid;
+      await updateUserFavorites(uid, updatedFavorites);
       setFavorites(updatedFavorites);
     } catch (error) {
       console.error('Failed to update favorites in Firestore:', error);
