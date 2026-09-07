@@ -197,6 +197,25 @@ const BulkAddProductPage = () => {
     );
   }
 
+  if (storeData && storeData.vendorStatus?.toLowerCase() === 'pending') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Pending Approval</h2>
+          <p className="text-gray-600 mb-8">
+            Wait for approval to add product.
+          </p>
+          <button
+            onClick={() => navigate(`/vendor/${storeId}`)}
+            className="w-full bg-primaryButtonBackgroundColor text-white border border-gray-200 font-semibold py-3 px-6 rounded-full shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Back to Store
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
