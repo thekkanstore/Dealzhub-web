@@ -54,6 +54,11 @@ const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
   },
   {
+    path: '/shop/:slug',
+    element: withSuspense(StoreRedirectPage),
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
     path: '/payment-status',
     element: withSuspense(PaymentStatusPage),
     errorElement: <RouteErrorBoundary />,
@@ -98,10 +103,6 @@ const router = createBrowserRouter([
       },
       {
         path: '/vendor/:id',
-        element: withSuspense(StorePage),
-      },
-      {
-        path: '/shop/:slug',
         element: withSuspense(StorePage),
       },
       {

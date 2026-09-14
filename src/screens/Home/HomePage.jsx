@@ -7,6 +7,7 @@ import CategoryScroller from '../../components/common/CategoryScroller';
 import VirtualizedProductGrid from '../../components/common/VirtualizedProductGrid';
 import BannerCarousel from '../../components/home/BannerCarousel';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { CategoryScrollerSkeleton, BannerSkeleton, ProductGridSkeleton } from '../../components/common/SkeletonLoader';
 import SEO from '../../components/common/SEO';
 
 const HomePage = () => {
@@ -193,11 +194,15 @@ const HomePage = () => {
       )}
 
       {/* Categories */}
-      <CategoryScroller
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryClick={handleCategoryClick}
-      />
+      {(!categories || categories.length === 0) ? (
+        <CategoryScrollerSkeleton />
+      ) : (
+        <CategoryScroller
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryClick={handleCategoryClick}
+        />
+      )}
 
       {/* Products Grid */}
       <div className="max-w-7xl mx-auto px-4 pb-8">

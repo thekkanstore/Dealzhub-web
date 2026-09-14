@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { getProductById, deleteProduct } from '../../services/productService';
 import { TKArrowIcon } from '../../components/common/Icons/TKArrowIcon';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { ProductPageSkeleton } from '../../components/common/SkeletonLoader';
 import { getSubCategories } from '../../services/subcategoryService';
 import SEO from '../../components/common/SEO';
 
@@ -15,6 +16,7 @@ const ProductPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const [resolvedSubCategoryNames, setResolvedSubCategoryNames] = useState([]);
 
   // Check if current user owns this product
@@ -101,11 +103,7 @@ const ProductPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <LoadingSpinner />
-      </div>
-    );
+    return <ProductPageSkeleton />;
   }
 
   if (!selectedProduct) {
@@ -143,11 +141,20 @@ const ProductPage = () => {
   const hasMultipleImages = images.length > 1;
 
   const nextImage = () => {
+    setIsImageLoading(true);
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
 
   const prevImage = () => {
+    setIsImageLoading(true);
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleThumbnailClick = (index) => {
+    if (index !== currentImageIndex) {
+      setIsImageLoading(true);
+      setCurrentImageIndex(index);
+    }
   };
 
   const handleBuyNow = () => {
@@ -250,20 +257,29 @@ const ProductPage = () => {
           <ArrowLeft className="w-4 h-4" />
           <span className="font-medium text-xs">Back</span>
         </button>
-        <div className="bg-white rounded-lg p-8 grid md:grid-cols-2 gap-8">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 grid md:grid-cols-2 gap-8 border border-gray-100 shadow-sm">
           <div>
-            <div className="relative bg-white">
+            <div className="relative bg-gray-50 rounded-2xl flex items-center justify-center min-h-[20rem] sm:min-h-[24rem] overflow-hidden">
+              {/* Image Loading Skeleton */}
+              {isImageLoading && (
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full border-2 border-gray-300 border-t-emerald-600 animate-spin opacity-40" />
+                </div>
+              )}
+
               {/* Main Image Display */}
               <img 
                 src={images[currentImageIndex]} 
                 alt={`${selectedProduct.name} - Image ${currentImageIndex + 1}`} 
-                className={`w-full h-96 object-contain rounded-lg transition-opacity duration-300 ${isUnavailable ? 'opacity-50' : ''}`} 
-                loading="lazy"
+                onLoad={() => setIsImageLoading(false)}
+                onError={() => setIsImageLoading(false)}
+                className={`w-full h-80 sm:h-96 object-contain rounded-2xl transition-all duration-300 ${isImageLoading ? 'opacity-0 scale-98' : 'opacity-100 scale-100'} ${isUnavailable ? 'opacity-50' : ''}`} 
+                loading="eager"
               />
               
               {/* Unavailable Overlay */}
               {isUnavailable && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-200/50 rounded-lg">
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-200/50 rounded-2xl">
                   <span className="text-red-600 font-bold px-4 py-2 rounded-xl bg-white border border-red-600">{statusText}</span>
                 </div>
               )}
@@ -273,14 +289,14 @@ const ProductPage = () => {
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110 cursor-pointer"
                     aria-label="Previous image"
                   >
                     <ChevronLeft className="w-6 h-6 text-gray-700" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110 cursor-pointer"
                     aria-label="Next image"
                   >
                     <ChevronRight className="w-6 h-6 text-gray-700" />
@@ -290,7 +306,7 @@ const ProductPage = () => {
 
               {/* Image Counter */}
               {hasMultipleImages && (
-                <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+                <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-xs">
                   {currentImageIndex + 1} / {images.length}
                 </div>
               )}
@@ -298,15 +314,15 @@ const ProductPage = () => {
 
             {/* Thumbnail Navigation - Only show if multiple images */}
             {hasMultipleImages && (
-              <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+              <div className="flex gap-2.5 mt-4 overflow-x-auto pb-2">
                 {images.map((img, index) => (
                   <button
                     key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                    onClick={() => handleThumbnailClick(index)}
+                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 cursor-pointer bg-gray-50 ${
                       currentImageIndex === index 
-                        ? 'border-gray-700 scale-105' 
-                        : 'border-gray-200 hover:border-gray-400'
+                        ? 'border-emerald-600 shadow-sm scale-102 ring-2 ring-emerald-600/20' 
+                        : 'border-gray-200 hover:border-gray-400 opacity-70 hover:opacity-100'
                     }`}
                   >
                     <img 

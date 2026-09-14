@@ -4,7 +4,7 @@ import noDataFound from '../../assets/images/noDataFound@3x.png';
 import { useAppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { getProductById } from '../../services/productService';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { ProductGridSkeleton } from '../../components/common/SkeletonLoader';
 
 const FavoritesPage = () => {
   const { favorites, toggleFavorite, isFavorite, addToCart } = useAppContext();
@@ -46,9 +46,7 @@ const FavoritesPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">My Favorites ({favoriteProducts.length})</h1>
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <LoadingSpinner />
-          </div>
+          <ProductGridSkeleton count={6} />
         ) : favoriteProducts.length === 0 ? (
           <div className="bg-white rounded-lg p-12 text-center">
             <img src={noDataFound} alt="No Favorites" className="w-48 h-48 mx-auto mb-6" loading="lazy" />
