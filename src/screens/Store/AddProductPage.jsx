@@ -28,7 +28,9 @@ const AddProductPage = () => {
     const fetchStore = async () => {
       if (user) {
         try {
-          const store = await getStoreByUserId(user.providerData[0].uid);
+          const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+          const userEmail = user?.email || user?.providerData?.[0]?.email;
+          const store = await getStoreByUserId(currentUserId, userEmail);
           if (store) {
             setStoreId(store.id);
             setStoreData(store);
@@ -112,7 +114,7 @@ const AddProductPage = () => {
         subcategoryIds: formData.subcategoryIds || [],
         storeId: storeId,
         store: storeData, // Add full store object
-        userId: user.providerData[0].uid,
+        userId: user.uid || user?.providerData?.[0]?.uid || '',
         isSecondHand: formData.isSecondHand || false,
         isOutOfStock: formData.isOutOfStock || false,
         isSoldOut: formData.isSoldOut || false,
@@ -204,7 +206,7 @@ const AddProductPage = () => {
             onSubmit={handleSubmit}
             submitButtonText={uploading ? "Uploading..." : "Add Product"}
             storeId={storeId}
-            userId={user?.providerData[0].uid || ''}
+            userId={user?.uid || user?.providerData?.[0]?.uid || ''}
           />
         </div>
       </div>

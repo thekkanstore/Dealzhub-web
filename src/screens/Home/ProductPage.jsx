@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Star, Heart, ChevronLeft, ChevronRight, Edit, ArrowLeft } from 'lucide-react';
+import { Star, Heart, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { getProductById, deleteProduct } from '../../services/productService';
 import { TKArrowIcon } from '../../components/common/Icons/TKArrowIcon';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getSubCategories } from '../../services/subcategoryService';
+import SEO from '../../components/common/SEO';
 
 const ProductPage = () => {
   const { productId } = useParams();
@@ -19,16 +20,66 @@ const ProductPage = () => {
   // Check if current user owns this product
   const isProductOwner = useMemo(() => {
     if (!user || !selectedProduct) return false;
-    return selectedProduct.userId === user.providerData[0].uid;
+    const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+    return selectedProduct.userId === currentUserId || 
+           (user.uid && selectedProduct.userId === user.uid) || 
+           (user.providerData?.[0]?.uid && selectedProduct.userId === user.providerData[0].uid);
   }, [user, selectedProduct]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        if (productId) {
+          const product = await getProductById(productId);
+          if (!isMounted) return;
+
+          setSelectedProduct(product);
+          setCurrentImageIndex(0);
+          
+          if (product && product.storeId && product.categoryId) {
+            try {
+              const activeSubs = await getSubCategories(product.storeId, product.categoryId);
+              if (!isMounted) return;
+
+              const resolved = product.subcategoryIds
+                ? product.subcategoryIds
+                    .map(id => activeSubs.find(sub => sub.id === id || sub.matchedIds?.includes(id))?.name)
+                    .filter(Boolean)
+                : [];
+              setResolvedSubCategoryNames(resolved);
+            } catch (error) {
+              console.error('Error fetching subcategories for product:', error);
+              if (isMounted) setResolvedSubCategoryNames([]);
+            }
+          } else {
+            if (isMounted) setResolvedSubCategoryNames([]);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchProduct();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [productId]);
+
   const handleDeleteProduct = async () => {
+    if (!selectedProduct) return;
     if (window.confirm('Are you sure you want to permanently delete this product? This action cannot be undone.')) {
       try {
         const result = await deleteProduct(selectedProduct);
         if (result.success) {
           alert('Product deleted successfully!');
-          navigate(`/vendor/${selectedProduct.storeId}`);
+          navigate(selectedProduct.storeId ? `/vendor/${selectedProduct.storeId}` : '/home');
         } else {
           alert(result.message || 'Failed to delete product.');
         }
@@ -39,56 +90,55 @@ const ProductPage = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      setLoading(true);
-      if (productId) {
-        const product = await getProductById(productId);
-        setSelectedProduct(product);
-        setCurrentImageIndex(0); // Reset to first image when product changes
-        
-        if (product && product.storeId && product.categoryId) {
-          try {
-            const activeSubs = await getSubCategories(product.storeId, product.categoryId);
-            const resolved = product.subcategoryIds
-              ? product.subcategoryIds
-                  .map(id => activeSubs.find(sub => sub.id === id)?.name)
-                  .filter(Boolean)
-              : [];
-            setResolvedSubCategoryNames(resolved);
-          } catch (error) {
-            console.error('Error fetching subcategories for product:', error);
-            setResolvedSubCategoryNames([]);
-          }
-        } else {
-          setResolvedSubCategoryNames([]);
-        }
-      }
-      setLoading(false);
-    };
-
-    fetchProduct();
-  }, [productId]);
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else if (selectedProduct?.storeId) {
+      navigate(`/vendor/${selectedProduct.storeId}`);
+    } else {
+      navigate('/home');
+    }
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner />
       </div>
     );
   }
 
   if (!selectedProduct) {
-    return <div>Product not found.</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
+          <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+            The product you are looking for is no longer available or may have been removed by the store owner.
+          </p>
+          <button
+            onClick={() => navigate('/home')}
+            className="w-full bg-primaryButtonBackgroundColor text-white font-semibold py-3.5 px-6 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+          >
+            Browse More Products
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const statusText = selectedProduct.isSoldOut ? 'SOLD OUT' : (selectedProduct.isOutOfStock ? 'OUT OF STOCK' : '');
   const isUnavailable = !!statusText;
 
   // Determine which images to display
-  const images = selectedProduct.images && selectedProduct.images.length > 0 
+  const rawImages = selectedProduct.images && Array.isArray(selectedProduct.images) && selectedProduct.images.length > 0 
     ? selectedProduct.images 
-    : [selectedProduct.image];
+    : (selectedProduct.image ? [selectedProduct.image] : []);
+  
+  const images = rawImages.filter(img => typeof img === 'string' && img.trim() !== '');
+  if (images.length === 0) {
+    images.push('https://dealzhub.co.in/appLogo@2x.png');
+  }
 
   const hasMultipleImages = images.length > 1;
 
@@ -101,14 +151,13 @@ const ProductPage = () => {
   };
 
   const handleBuyNow = () => {
-    if (!selectedProduct) return;
     const storePhoneNumber = selectedProduct.store?.phoneNumber;
     if (storePhoneNumber) {
       let cleanedPhoneNumber = storePhoneNumber.replace(/\D/g, '');
       if (cleanedPhoneNumber.length === 10) {
         cleanedPhoneNumber = '91' + cleanedPhoneNumber;
       }
-      const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description}\n\nCan you tell me more?`;
+      const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description || ''}\n\nCan you tell me more?`;
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${cleanedPhoneNumber}?text=${encodedMessage}`;
       window.open(whatsappUrl, '_blank');
@@ -117,14 +166,89 @@ const ProductPage = () => {
     }
   };
 
+  const primaryImg = images[0] || 'https://dealzhub.co.in/appLogo@2x.png';
+  const storeName = selectedProduct.store?.storeName || 'DealzHub Vendor';
+
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Product',
+        '@id': `https://dealzhub.co.in/product/${selectedProduct.id}#product`,
+        name: selectedProduct.name,
+        description: selectedProduct.description || `${selectedProduct.name} from ${storeName} on DealzHub`,
+        image: images,
+        sku: selectedProduct.id,
+        brand: {
+          '@type': 'Brand',
+          name: storeName,
+        },
+        offers: {
+          '@type': 'Offer',
+          url: `https://dealzhub.co.in/product/${selectedProduct.id}`,
+          priceCurrency: 'INR',
+          price: selectedProduct.discountPrice || selectedProduct.actualPrice || '0',
+          priceValidUntil: '2028-12-31',
+          itemCondition: selectedProduct.isSecondHand
+            ? 'https://schema.org/UsedCondition'
+            : 'https://schema.org/NewCondition',
+          availability: isUnavailable
+            ? 'https://schema.org/OutOfStock'
+            : 'https://schema.org/InStock',
+          seller: {
+            '@type': 'Organization',
+            name: storeName,
+          },
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://dealzhub.co.in/home',
+          },
+          ...(selectedProduct.category?.name
+            ? [
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: selectedProduct.category.name,
+                  item: `https://dealzhub.co.in/home?category=${selectedProduct.categoryId}`,
+                },
+              ]
+            : []),
+          {
+            '@type': 'ListItem',
+            position: selectedProduct.category?.name ? 3 : 2,
+            name: selectedProduct.name,
+            item: `https://dealzhub.co.in/product/${selectedProduct.id}`,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50/70">
+    <main className="min-h-screen bg-gray-50/70">
+      <SEO
+        title={`${selectedProduct.name} - ₹${selectedProduct.discountPrice}`}
+        description={selectedProduct.description ? `${selectedProduct.description.slice(0, 155)}... Buy online at ₹${selectedProduct.discountPrice}` : `Buy ${selectedProduct.name} for ₹${selectedProduct.discountPrice} on DealzHub.`}
+        image={images[0]}
+        url={`/product/${selectedProduct.id}`}
+        type="product"
+        schema={productSchema}
+      />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <button
-          onClick={() => navigate('/home')}
-          className="px-4 py-1.5 mb-4 text-sm cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit"
+          onClick={handleBack}
+          className="px-4 py-1.5 mb-4 text-sm cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit flex items-center gap-1.5"
+          aria-label="Go Back"
         >
-          <ArrowLeft/>
+          <ArrowLeft className="w-4 h-4" />
+          <span className="font-medium text-xs">Back</span>
         </button>
         <div className="bg-white rounded-lg p-8 grid md:grid-cols-2 gap-8">
           <div>
@@ -234,7 +358,7 @@ const ProductPage = () => {
             )}
 
             {/* Conditional Button Rendering */}
-             {isProductOwner ? (
+            {isProductOwner ? (
               <div className='w-full flex items-center gap-4'>
                 <button
                   onClick={() => navigate(`/edit-product/${selectedProduct.id}`)}
@@ -304,7 +428,7 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

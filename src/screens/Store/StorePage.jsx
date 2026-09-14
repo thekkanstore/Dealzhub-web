@@ -2,27 +2,35 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import CategoryScroller from '../../components/common/CategoryScroller';
-import { getStoreById } from '../../services/storeFirestoreService';
+import { getStoreById, getStoreBySlug } from '../../services/storeFirestoreService';
 import 'react-virtualized/styles.css';
 import noDataFound from '../../assets/images/noDataFound@3x.png';
 import VirtualizedProductGrid from '../../components/common/VirtualizedProductGrid';
 import { fetchAllProducts, fetchProductsByStoreAndCategory } from '../../services/productService';
 import QRCode from 'qrcode';
-import { ArrowLeft, Download } from 'lucide-react';
+import { Download, Store as StoreIcon, Phone, MapPin } from 'lucide-react';
 import appLogo from '../../assets/images/appLogo@2x.png';
-import { getCategoryById } from '../../services/firestore';
+import { getCategoryById, getActiveCategories } from '../../services/firestore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getSubCategories } from '../../services/subcategoryService';
+import { getImageBlobFromStorage } from '../../services/firebaseStorageService';
+import SEO from '../../components/common/SEO';
+import SubscriptionPlanModal from '../../components/vendor/SubscriptionPlanModal';
+import { createCashfreeOrder, initiateCashfreeWebCheckout } from '../../services/cashfreeService';
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 const StorePage = () => {
-  const { id: storeId } = useParams();
+  const { id: storeIdParam, slug: storeSlugParam } = useParams();
   const navigate = useNavigate();
-  const { user } = useAppContext();
+  const { user, setActiveStore } = useAppContext();
   const qrCanvasRef = useRef(null);
 
   // State for store data
   const [store, setStore] = useState(null);
   const [isStoreLoading, setIsStoreLoading] = useState(true);
+
+  const storeId = store?.id || storeIdParam || '';
 
   // State for category filtering
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -42,6 +50,83 @@ const StorePage = () => {
   const categoryRef = useRef(selectedCategory);
   const storeIdRef = useRef(storeId);
 
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
+  const isPendingStatus = store?.vendorStatus?.toLowerCase() === 'pending';
+  const isPaymentPending = store?.paymentStatus === 'pending' || store?.paymentStatus === 'FAILED' || (isPendingStatus && store?.paymentStatus !== 'PAID');
+  const subscriptionEndDate = store?.subscriptionEndDate
+    ? store.subscriptionEndDate.toDate
+      ? store.subscriptionEndDate.toDate()
+      : new Date(store.subscriptionEndDate)
+    : null;
+  const isSubscriptionExpired = subscriptionEndDate ? new Date() > subscriptionEndDate : false;
+
+  const handleLaunchPayment = async (planId = '12_months', amount = 2999) => {
+    if (!store || !user) return;
+    try {
+      setPaymentLoading(true);
+      const timestamp = Date.now();
+      let targetStoreRef = null;
+      const storeDocId = store.id || storeId;
+
+      if (storeDocId) {
+        const candidateRef = doc(db, 'stores', storeDocId);
+        const snap = await getDoc(candidateRef);
+        if (snap.exists()) {
+          targetStoreRef = candidateRef;
+        }
+      }
+
+      const currentUserId = user?.uid || user?.providerData?.[0]?.uid || '';
+
+      if (!targetStoreRef && currentUserId) {
+        const q = query(collection(db, 'stores'), where('userId', '==', currentUserId));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          targetStoreRef = snap.docs[0].ref;
+        }
+      }
+
+      const activeStoreId = targetStoreRef ? targetStoreRef.id : (storeDocId || currentUserId);
+      const orderId = `order_${activeStoreId}_${timestamp}`;
+      const returnUrl = `${window.location.origin}/payment-status?order_id=${orderId}`;
+
+      if (targetStoreRef) {
+        await setDoc(targetStoreRef, {
+          paymentStatus: 'pending',
+          subscriptionPlan: planId,
+          subscriptionAmount: amount,
+          paymentOrderId: orderId,
+          updatedAt: new Date(),
+        }, { merge: true });
+      }
+
+      const cashfreeOrder = await createCashfreeOrder({
+        orderId,
+        orderAmount: amount,
+        customerName: store.storeName,
+        customerEmail: store.email,
+        customerPhone: store.phoneNumber,
+        returnUrl,
+      });
+
+      if (cashfreeOrder && cashfreeOrder.payment_session_id) {
+        await initiateCashfreeWebCheckout(cashfreeOrder.payment_session_id);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Error launching payment: ' + (error.message || 'Please try again.'));
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleSelectRenewalPlan = (plan) => {
+    setIsPlanModalOpen(false);
+    handleLaunchPayment(plan.id, plan.price);
+  };
+
   useEffect(() => {
     categoryRef.current = selectedCategory;
     storeIdRef.current = storeId;
@@ -50,19 +135,53 @@ const StorePage = () => {
   // Check if current user owns this store
   const isStoreOwner = useMemo(() => {
     if (!user || !store) return false;
-    return store.userId === user.providerData[0].uid;
+    const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+    return store.userId === currentUserId || (user.uid && store.userId === user.uid) || (user.providerData?.[0]?.uid && store.userId === user.providerData[0].uid);
   }, [user, store]);
 
   // --- Data Fetching ---
   // Fetch store details
   useEffect(() => {
-    if (!storeId) return;
+    const targetId = storeIdParam;
+    const targetSlug = storeSlugParam;
+    if (!targetId && !targetSlug) return;
+
     setIsStoreLoading(true);
-    getStoreById(storeId).then(storeData => {
-      setStore(storeData);
-      setIsStoreLoading(false);
-    });
-  }, [storeId]);
+    const fetchStoreDetails = async () => {
+      try {
+        let storeData = null;
+        if (targetId) {
+          storeData = await getStoreById(targetId, true);
+        } else if (targetSlug) {
+          storeData = await getStoreBySlug(targetSlug);
+        }
+
+        setStore(storeData);
+        if (setActiveStore) {
+          setActiveStore(storeData);
+        }
+      } catch (err) {
+        console.error('Error fetching store details:', err);
+      } finally {
+        setIsStoreLoading(false);
+      }
+    };
+
+    fetchStoreDetails();
+
+    return () => {
+      if (setActiveStore) {
+        setActiveStore(null);
+      }
+    };
+  }, [storeIdParam, storeSlugParam, setActiveStore]);
+
+  const storeSlug = useMemo(() => {
+    return (store?.storeName || 'shop')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }, [store?.storeName]);
 
   // Generate QR Code
   useEffect(() => {
@@ -70,9 +189,9 @@ const StorePage = () => {
 
     const generateQRCode = async () => {
       try {
-        const deepLink = `https://dealzhub.co.in/store-redirect?id=${storeId}`;
+        const deepLink = `https://dealzhub.co.in/shop/${storeSlug}`;
         const qrDataUrl = await QRCode.toDataURL(deepLink, {
-          width: 200,
+          width: 250,
           margin: 2,
           color: {
             dark: '#000000',
@@ -86,7 +205,7 @@ const StorePage = () => {
     };
 
     generateQRCode();
-  }, [storeId, isStoreOwner]);
+  }, [storeId, isStoreOwner, storeSlug]);
 
   // Fetch products when storeId or selectedCategory changes
   useEffect(() => {
@@ -168,42 +287,88 @@ const StorePage = () => {
     };
   }, [hasMore, isLoadingMore, isLoadingProducts, lastDoc]);
 
-  // Fetch store categories when store data changes
+  // Fetch store categories: from store document, store products, or all active categories
   useEffect(() => {
     const fetchCategory = async () => {
-      if (store?.categories) {
+      if (!store) return;
+      try {
+        let catIds = [];
+        if (Array.isArray(store.categories) && store.categories.length > 0) {
+          catIds = [...store.categories];
+        } else if (typeof store.categories === 'string' && store.categories.trim() !== '') {
+          catIds = [store.categories.trim()];
+        }
+
+        // Also query products of this store to collect any categoryIds used by its products
+        const storeDocId = store.id || storeId;
+        if (storeDocId) {
+          try {
+            const q = query(
+              collection(db, 'products'),
+              where('storeId', '==', storeDocId)
+            );
+            const snap = await getDocs(q);
+            snap.docs.forEach(docSnap => {
+              const p = docSnap.data();
+              if (p.categoryId && !catIds.includes(p.categoryId)) {
+                catIds.push(p.categoryId);
+              }
+            });
+          } catch (err) {
+            console.warn('Error fetching store product categories:', err);
+          }
+        }
+
+        let resolvedCategories = [];
+        if (catIds.length > 0) {
+          const categoryPromises = catIds.map(cId => getCategoryById(cId));
+          const fetchedCategories = await Promise.all(categoryPromises);
+          resolvedCategories = fetchedCategories.filter(cat => cat !== null && cat !== undefined);
+        }
+
+        if (resolvedCategories.length === 0) {
+          const allActive = await getActiveCategories();
+          resolvedCategories = allActive || [];
+        }
+
+        // Strict deduplication by ID and normalized Name
+        const seenIds = new Set();
+        const seenNames = new Set();
+        const uniqueCategories = [];
+
+        for (const cat of resolvedCategories) {
+          if (!cat || !cat.id) continue;
+          const normName = (cat.name || '').trim().toLowerCase();
+          if (!seenIds.has(cat.id) && (!normName || !seenNames.has(normName))) {
+            seenIds.add(cat.id);
+            if (normName) seenNames.add(normName);
+            uniqueCategories.push(cat);
+          }
+        }
+
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error('Error fetching categories for store:', error);
         try {
-          // Check if categories is an array
-          if (Array.isArray(store.categories)) {
-            // Map through each category ID and fetch it
-            const categoryPromises = store.categories.map(catId => getCategoryById(catId));
-            const fetchedCategories = await Promise.all(categoryPromises);
-            // Filter out null values
-            const validCategories = fetchedCategories.filter(cat => cat !== null);
-            setCategories(validCategories);
-          }
-          // If categories is a single string ID
-          else if (typeof store.categories === 'string') {
-            const category = await getCategoryById(store.categories);
-            setCategories(category ? [category] : []);
-          }
-          // Handle unexpected format
-          else {
-            console.warn('Unexpected categories format:', store.categories);
-            setCategories([]);
-          }
-        } catch (error) {
-          console.error('Error fetching category:', error);
+          const allActive = await getActiveCategories();
+          const seen = new Set();
+          const unique = (allActive || []).filter(c => {
+            const n = (c.name || '').trim().toLowerCase();
+            if (!seen.has(n)) {
+              seen.add(n);
+              return true;
+            }
+            return false;
+          });
+          setCategories(unique);
+        } catch {
           setCategories([]);
         }
-      } else {
-        // If no categories, set empty array
-        setCategories([]);
       }
     };
 
     fetchCategory();
-  }, [store]);
+  }, [store, storeId]);
 
   // --- Filtering ---
 
@@ -243,10 +408,84 @@ const StorePage = () => {
     if (!selectedSubCategoryId) {
       return products;
     }
-    return products.filter((p) => p.subcategoryIds?.includes(selectedSubCategoryId));
-  }, [products, selectedSubCategoryId]);
+    const selectedSub = subCategories.find(s => s.id === selectedSubCategoryId);
+    const targetIds = selectedSub?.matchedIds || [selectedSubCategoryId];
 
-  // Download QR Code with logo and store name
+    return products.filter((p) =>
+      p.subcategoryIds?.some(id => targetIds.includes(id))
+    );
+  }, [products, selectedSubCategoryId, subCategories]);
+
+  // Robust image loader for canvas to avoid CORS/cache errors with remote images
+  const loadQrImage = async (url) => {
+    if (!url) return null;
+
+    // 1. If local data URL or blob URL (100% same-origin, 0 CORS issues)
+    if (url.startsWith('data:') || url.startsWith('blob:')) {
+      const img = new Image();
+      return new Promise((resolve) => {
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    }
+
+    // 2. Try CORS Proxy (images.weserv.nl) for remote Firebase Storage / external URLs
+    // This allows canvas to load and export remote images with Access-Control-Allow-Origin: *
+    try {
+      const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=300&h=300&fit=cover&output=png`;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const loaded = await new Promise((resolve) => {
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = proxyUrl;
+      });
+      if (loaded) return loaded;
+    } catch (err) {
+      console.warn('CORS Proxy image load failed:', err);
+    }
+
+    // 3. Try alternative CORS proxy (corsproxy.io)
+    try {
+      const altProxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+      const res = await fetch(altProxyUrl);
+      if (res.ok) {
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        const loaded = await new Promise((resolve) => {
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = blobUrl;
+        });
+        if (loaded) return loaded;
+      }
+    } catch (err) {
+      console.warn('Alternative CORS proxy fetch failed:', err);
+    }
+
+    // 4. Try Firebase Storage SDK direct getBlob
+    try {
+      const blob = await getImageBlobFromStorage(url);
+      if (blob) {
+        const blobUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        const loaded = await new Promise((resolve) => {
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = blobUrl;
+        });
+        if (loaded) return loaded;
+      }
+    } catch (err) {
+      console.warn('Firebase SDK getBlob failed:', err);
+    }
+
+    return null;
+  };
+
+  // Download QR Code with store logo and store name
   const downloadQRCode = async () => {
     if (!store || !qrCodeUrl) return;
 
@@ -263,40 +502,78 @@ const StorePage = () => {
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Load and draw QR code (larger size)
+      // Load and draw QR code
       const qrImage = new Image();
       qrImage.src = qrCodeUrl;
       await new Promise((resolve) => {
         qrImage.onload = resolve;
       });
 
-      const qrSize = 500;
+      const qrSize = 480;
       const qrX = (canvas.width - qrSize) / 2;
-      const qrY = 100;
+      const qrY = 80;
       ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
 
-      // Load and draw logo
-      const logo = new Image();
-      logo.src = appLogo;
-      await new Promise((resolve) => {
-        logo.onload = resolve;
-      });
+      // Load Store Logo (prioritize Base64 -> customLogoUrl -> appLogo)
+      const customLogoUrl = store.logoBase64 || store.logoUrl || store.logo || store.storeLogo || store.imageUrl || store.image;
+      let logo = null;
+      if (customLogoUrl) {
+        logo = await loadQrImage(customLogoUrl);
+      }
+      if (!logo) {
+        logo = await loadQrImage(appLogo);
+      }
 
-      const logoSize = 150;
+      const logoSize = 120;
       const logoX = (canvas.width - logoSize) / 2;
-      const logoY = qrY + qrSize + 40;
-      ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+      const logoY = qrY + qrSize + 35;
+
+      if (logo && (logo.naturalWidth || logo.width)) {
+        ctx.save();
+        const radius = 24;
+        ctx.beginPath();
+        ctx.moveTo(logoX + radius, logoY);
+        ctx.lineTo(logoX + logoSize - radius, logoY);
+        ctx.quadraticCurveTo(logoX + logoSize, logoY, logoX + logoSize, logoY + radius);
+        ctx.lineTo(logoX + logoSize, logoY + logoSize - radius);
+        ctx.quadraticCurveTo(logoX + logoSize, logoY + logoSize, logoX + logoSize - radius, logoY + logoSize);
+        ctx.lineTo(logoX + radius, logoY + logoSize);
+        ctx.quadraticCurveTo(logoX, logoY + logoSize, logoX, logoY + logoSize - radius);
+        ctx.lineTo(logoX, logoY + radius);
+        ctx.quadraticCurveTo(logoX, logoY, logoX + radius, logoY);
+        ctx.closePath();
+
+        // Background & border for logo
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fill();
+        ctx.strokeStyle = '#E2E8F0';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.clip();
+
+        // Crop & center logo inside square
+        const nw = logo.naturalWidth || logo.width;
+        const nh = logo.naturalHeight || logo.height;
+        const scale = Math.max(logoSize / nw, logoSize / nh);
+        const sw = logoSize / scale;
+        const sh = logoSize / scale;
+        const sx = (nw - sw) / 2;
+        const sy = (nh - sh) / 2;
+
+        ctx.drawImage(logo, sx, sy, sw, sh, logoX, logoY, logoSize, logoSize);
+        ctx.restore();
+      }
 
       // Draw store name
-      ctx.fillStyle = '#000000';
-      ctx.font = 'bold 40px Arial';
+      ctx.fillStyle = '#0F172A';
+      ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(store.storeName, canvas.width / 2, logoY + logoSize + 80);
+      ctx.fillText(store.storeName || 'Our Store', canvas.width / 2, logoY + logoSize + 55);
 
       // Draw subtitle
-      ctx.font = '24px Arial';
-      ctx.fillStyle = '#666666';
-      ctx.fillText('Scan to visit our store', canvas.width / 2, logoY + logoSize + 120);
+      ctx.font = '500 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
+      ctx.fillStyle = '#64748B';
+      ctx.fillText('Scan to visit our store', canvas.width / 2, logoY + logoSize + 92);
 
       // Convert to blob and download
       canvas.toBlob((blob) => {
@@ -304,7 +581,7 @@ const StorePage = () => {
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = `${store.storeName}-QRCode.png`;
+          link.download = `${(store.storeName || 'Store').replace(/\s+/g, '_')}-QRCode.png`;
           link.click();
           URL.revokeObjectURL(url);
         }
@@ -313,6 +590,50 @@ const StorePage = () => {
       console.error('Error downloading QR code:', error);
     }
   };
+
+  const storeSchema = useMemo(() => {
+    if (!store) return null;
+    const storeLogo = store.logoUrl || store.logo || 'https://dealzhub.co.in/appLogo@2x.png';
+    return {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': ['LocalBusiness', 'Store'],
+          '@id': `https://dealzhub.co.in/vendor/${store.id || storeId}#store`,
+          name: store.storeName,
+          description: `Visit ${store.storeName} on DealzHub. Explore local products, discounts and contact directly in ${store.city || 'Kerala'}.`,
+          image: storeLogo,
+          telephone: store.phoneNumber || '',
+          email: store.email || '',
+          url: `https://dealzhub.co.in/vendor/${store.id || storeId}`,
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: store.address || '',
+            addressLocality: store.city || 'Kerala',
+            addressRegion: store.state || 'Kerala',
+            addressCountry: 'IN',
+          },
+        },
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://dealzhub.co.in/home',
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: store.storeName,
+              item: `https://dealzhub.co.in/vendor/${store.id || storeId}`,
+            },
+          ],
+        },
+      ],
+    };
+  }, [store, storeId]);
 
   // --- Render ---
 
@@ -370,33 +691,77 @@ const StorePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white">
+      <SEO
+        title={`${store.storeName} - Local Store in ${store.city || 'Kerala'}`}
+        description={`Explore products, exclusive deals and store updates from ${store.storeName}, located at ${store.address || store.city || 'Kerala'} on DealzHub.`}
+        image={store.logoUrl || store.logo || store.storeLogo || store.imageUrl || appLogo}
+        url={`/vendor/${storeId}`}
+        type="profile"
+        schema={storeSchema}
+      />
       <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col">
-        <button
-          onClick={() => navigate('/home')}
-          className="px-4 py-1.5 mb-4 text-sm cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit"
-        >
-          <ArrowLeft />
-        </button>
-        <div className='flex flex-wrap justify-between'>
-          <div className='mb-6'>
-            <h1 className="text-3xl font-bold mb-2 flex gap-5 items-center">{store.storeName}
-              <span
-                className={`text-sm px-3 py-1 rounded-full border ${getStatusColor(store.vendorStatus)}`}
-              >
-                {store.vendorStatus}
-              </span>
-            </h1>
-            <p className="text-gray-600 mb-6">{store.address}</p>
+        <div className='flex flex-wrap justify-between items-start gap-6'>
+          <div className='mb-6 max-w-xl'>
+            {/* Store Logo and Name Header */}
+            <div className='flex items-center gap-4 mb-3'>
+              {store.logoUrl || store.logo || store.storeLogo || store.imageUrl ? (
+                <img
+                  src={store.logoUrl || store.logo || store.storeLogo || store.imageUrl}
+                  alt={`${store.storeName} logo`}
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-gray-200 shadow-sm"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-2xl shadow-sm">
+                  {store.storeName ? store.storeName.charAt(0).toUpperCase() : <StoreIcon className="w-8 h-8" />}
+                </div>
+              )}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold flex flex-wrap gap-3 items-center">
+                  {store.storeName}
+                  <span
+                    className={`text-xs sm:text-sm px-3 py-1 rounded-full border font-medium ${getStatusColor(store.vendorStatus)}`}
+                  >
+                    {store.vendorStatus}
+                  </span>
+                </h1>
+                <p className="text-gray-600 text-sm mt-1">{store.address}{store.city ? `, ${store.city}` : ''}</p>
+                {store.phoneNumber && (
+                  <p className="text-gray-500 text-xs mt-0.5">📞 {store.phoneNumber}</p>
+                )}
+              </div>
+            </div>
+            
             {isStoreOwner && (
-              <div className='flex flex-wrap items-center gap-3'>
+              <div className='flex flex-wrap items-center gap-3 mt-4'>
                 <button
                   onClick={() => navigate('/editstore')}
                   className="px-6 py-2 bg-red-500/10 gap-2 rounded-full flex items-center justify-center text-red-700 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Edit
                 </button>
-                {(currentStatus === "approved" || currentStatus === "private") ? (
+                {isPaymentPending ? (
+                  <button
+                    onClick={() => {
+                      if (store.subscriptionPlan) {
+                        handleLaunchPayment(store.subscriptionPlan, store.subscriptionAmount || 2999);
+                      } else {
+                        setIsPlanModalOpen(true);
+                      }
+                    }}
+                    className="px-6 py-2 bg-primaryButtonBackgroundColor text-white font-semibold gap-2 rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Complete Payment {store.subscriptionAmount ? `(₹${store.subscriptionAmount})` : ''}
+                  </button>
+                ) : isSubscriptionExpired ? (
+                  <button
+                    onClick={() => setIsPlanModalOpen(true)}
+                    className="px-6 py-2 bg-primaryButtonBackgroundColor text-white font-semibold gap-2 rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Renew Subscription
+                  </button>
+                ) : (currentStatus === "approved" || currentStatus === "private") ? (
                   <>
                     <button
                       onClick={() => navigate('/add-product')}
@@ -422,27 +787,28 @@ const StorePage = () => {
           
           {/* QR Code Section - Only show to store owner */}
           {(currentStatus === "approved" || currentStatus === "private") && isStoreOwner && (
-            <div className="flex flex-col bg-gray-50 p-6 rounded-xl border border-gray-200">
-              <div className="flex flex-wrap items-start md:justify-start justify-center w-fit gap-6">
+            <div className="flex flex-col bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm">
+              <div className="flex flex-wrap items-center md:justify-start justify-center w-fit gap-6">
 
                 {/* LEFT: QR CODE */}
-                <div className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                   {qrCodeUrl ? (
-                    <img src={qrCodeUrl} alt="Store QR Code" className="w-48 h-48" loading="lazy" />
+                    <img src={qrCodeUrl} alt="Store QR Code" className="w-44 h-44" loading="lazy" />
                   ) : (
-                    <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg"></div>
+                    <div className="w-44 h-44 bg-gray-200 animate-pulse rounded-lg"></div>
                   )}
                 </div>
 
                 <div className="flex flex-col h-full py-2">
                   <div>
-                    <h3 className="text-lg font-semibold md:text-start text-center text-gray-800">Store QR Code</h3>
-                    <p className="text-sm text-gray-600 md:text-start text-center mt-1">Scan to visit store</p>
+                    <h3 className="text-lg font-semibold md:text-start text-center text-gray-800">{store.storeName} QR Code</h3>
+                    <p className="text-xs text-gray-500 font-mono mt-1 break-all">dealzhub.co.in/shop/{storeSlug}</p>
+                    <p className="text-xs text-gray-600 md:text-start text-center mt-1">Customers can scan to visit your shop</p>
                   </div>
 
                   <button
                     onClick={downloadQRCode}
-                    className="mt-4 flex items-center gap-2 px-4 py-2 bg-primaryButtonBackgroundColor text-white rounded-full hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                    className="mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-primaryButtonBackgroundColor text-white rounded-full hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] text-sm"
                   >
                     <Download className="w-4 h-4" />
                     Download QR Code
@@ -466,7 +832,10 @@ const StorePage = () => {
 
           {/* Subcategory Filter Chips */}
           {selectedCategory && subCategories.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide py-2 px-4 max-w-7xl mx-auto -mt-2 mb-4">
+            <div 
+              className="flex gap-2 overflow-x-auto overflow-y-hidden scrollbar-hide py-2 px-4 max-w-7xl mx-auto -mt-2 mb-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               <button
                 type="button"
                 onClick={() => setSelectedSubCategoryId(null)}
@@ -548,7 +917,14 @@ const StorePage = () => {
       )}
 
       <canvas ref={qrCanvasRef} style={{ display: 'none' }} />
-    </div>
+
+      <SubscriptionPlanModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        onSelectPlan={handleSelectRenewalPlan}
+        initialPlanId={store?.subscriptionPlan || '12_months'}
+      />
+    </main>
   );
 };
 

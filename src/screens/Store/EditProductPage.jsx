@@ -31,7 +31,9 @@ const EditProductPage = () => {
       if (user) {
         try {
           // Fetch store data
-          const store = await getStoreByUserId(user.providerData[0].uid);
+          const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+          const userEmail = user?.email || user?.providerData?.[0]?.email;
+          const store = await getStoreByUserId(currentUserId, userEmail);
           if (!store) {
             console.error('No store found for this user.');
             alert('You need to create a store first!');
@@ -151,7 +153,7 @@ const EditProductPage = () => {
         subcategoryIds: formData.subcategoryIds || [],
         storeId: storeId,
         store: storeData,
-        userId: user.providerData[0].uid,
+        userId: user.uid || user?.providerData?.[0]?.uid || '',
         isSecondHand: formData.isSecondHand || false,
         isOutOfStock: formData.isOutOfStock || false,
         isSoldOut: formData.isSoldOut || false,
@@ -229,7 +231,7 @@ const EditProductPage = () => {
             onSubmit={handleSubmit}
             submitButtonText={uploading ? "Updating..." : "Update Product"}
             storeId={storeId}
-            userId={user?.providerData[0].uid || ''}
+            userId={user?.uid || user?.providerData?.[0]?.uid || ''}
           />
         </div>
       </div>

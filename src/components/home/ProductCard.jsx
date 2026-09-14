@@ -55,7 +55,17 @@ const ProductCard = memo(({ product, isFavorite, toggleFavorite, viewProduct, ad
         <h3 className="font-semibold text-sm my-2 line-clamp-2">{product.name}</h3>
         <div className="mb-2">
           {product.store && product.store.storeName && (
-            <p className="text-xs text-gray-500 mb-2">From: {product.store.storeName}</p>
+            <div className="flex items-center gap-1.5 mb-2">
+              {product.store.logoUrl || product.store.logo ? (
+                <img
+                  src={product.store.logoUrl || product.store.logo}
+                  alt={product.store.storeName}
+                  className="w-4 h-4 rounded-full object-cover shrink-0 border border-gray-200"
+                  loading="lazy"
+                />
+              ) : null}
+              <p className="text-xs text-gray-500 truncate">From: {product.store.storeName}</p>
+            </div>
           )}
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-400 line-through">

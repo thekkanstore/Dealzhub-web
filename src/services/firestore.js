@@ -1,6 +1,7 @@
 import { collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, query, where, limit, startAfter } from 'firebase/firestore';
 import { db } from '../firebase';
 import { FireStoreCollections } from "../config/common";
+import { clearStoreCache } from './storeFirestoreService';
 
 export const getActiveCategories = async () => {
   try {
@@ -22,22 +23,37 @@ export const getAppConfigBanners = async () => {
   }
 };
 
-export const getUserData = async (uid) => {
+export const getUserData = async (uid, email = null) => {
   try {
-    const userDocRef = doc(db, "users", uid);
-    const userDoc = await getDoc(userDocRef);
+    if (uid) {
+      const userDocRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userDocRef);
 
-    if (!userDoc.exists()) {
-      return null;
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        return {
+          id: userDoc.id,
+          cart: data.cart || [],
+          ...data,
+        };
+      }
     }
 
-    const data = userDoc.data();
+    if (email) {
+      const q = query(collection(db, "users"), where("email", "==", email), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const docSnap = snap.docs[0];
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          cart: data.cart || [],
+          ...data,
+        };
+      }
+    }
 
-    return {
-      id: userDoc.id,
-      cart: data.cart || [],
-      ...data,
-    };
+    return null;
   } catch (error) {
     console.error("Error fetching user data:", error);
     return null;
@@ -87,11 +103,32 @@ export const createNewUser = async (userData, isUpdate = false) => {
 export const createNewStore = async (storeData) => {
   try {
     const storesCollectionRef = collection(db, 'stores');
+
+    // Prevent duplicate stores for the same user or email
+    if (storeData.userId) {
+      const qUser = query(storesCollectionRef, where('userId', '==', storeData.userId), limit(1));
+      const userSnap = await getDocs(qUser);
+      if (!userSnap.empty) {
+        const existingDoc = userSnap.docs[0];
+        await setDoc(existingDoc.ref, storeData, { merge: true });
+        return existingDoc.id;
+      }
+    }
+
+    if (storeData.email) {
+      const qEmail = query(storesCollectionRef, where('email', '==', storeData.email), limit(1));
+      const emailSnap = await getDocs(qEmail);
+      if (!emailSnap.empty) {
+        const existingDoc = emailSnap.docs[0];
+        await setDoc(existingDoc.ref, storeData, { merge: true });
+        return existingDoc.id;
+      }
+    }
+
     const newStoreDocRef = await addDoc(storesCollectionRef, storeData);
-    
-    return newStoreDocRef.id; // Return the generated store ID
+    return newStoreDocRef.id;
   } catch (error) {
-    console.error('Error creating new store:', error);
+    console.error('Error creating/updating store:', error);
     throw error;
   }
 };
@@ -120,31 +157,40 @@ export const updateUserCart = async (userId, cart) => {
   }
 };
 
-export const updateUserRole = async (userId, role) => {
+export const updateUserRole = async (userId, role, userEmail = null) => {
   try {
-    const userDocRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userDocRef);
-    
-    if (userDoc.exists()) {
+    let userDocRef = null;
+    if (userId) {
+      const ref = doc(db, 'users', userId);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        userDocRef = ref;
+      }
+    }
+
+    if (!userDocRef && userEmail) {
+      const q = query(collection(db, 'users'), where('email', '==', userEmail), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        userDocRef = snap.docs[0].ref;
+      }
+    }
+
+    if (userDocRef) {
+      const userDoc = await getDoc(userDocRef);
       const userData = userDoc.data();
       const currentRoles = userData.role || [];
       
-      // Add the new role if it doesn't already exist
       if (!currentRoles.includes(role)) {
         const updatedRoles = [...currentRoles, role];
         await updateDoc(userDocRef, {
           role: updatedRoles,
           updatedAt: new Date()
         });
-      } else {
-        console.log('User already has this role');
       }
-    } else {
-      console.error('User document does not exist');
     }
   } catch (error) {
     console.error('Error updating user role:', error);
-    throw error;
   }
 };
 
@@ -191,33 +237,74 @@ export const getAppConfigs = async () => {
   }
 };
 
-export const updateUserProfile = async (userId, userData) => {
+export const updateUserProfile = async (userId, userData, userEmail = null) => {
   try {
-    const userDocRef = doc(db, 'users', userId);
-    await updateDoc(userDocRef, userData);
+    let userDocRef = null;
+    if (userId) {
+      const ref = doc(db, 'users', userId);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        userDocRef = ref;
+      }
+    }
+
+    if (!userDocRef && userEmail) {
+      const q = query(collection(db, 'users'), where('email', '==', userEmail), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        userDocRef = snap.docs[0].ref;
+      }
+    }
+
+    if (!userDocRef && userId) {
+      userDocRef = doc(db, 'users', userId);
+    }
+
+    if (userDocRef) {
+      await setDoc(userDocRef, userData, { merge: true });
+    }
   } catch (error) {
     console.error('Error updating user profile:', error);
     throw error;
   }
 };
 
-export const getStoreByUserId = async (userId) => {
+export const getStoreByUserId = async (userId, userEmail = null) => {
+  if (!userId && !userEmail) return null;
   try {
-    const q = query(
-      collection(db, "stores"),
-      where("userId", "==", userId)
-    );
+    if (userId) {
+      const q = query(
+        collection(db, "stores"),
+        where("userId", "==", userId),
+        limit(1)
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const docSnap = snap.docs[0];
+        return {
+          id: docSnap.id,
+          ...docSnap.data(),
+        };
+      }
+    }
 
-    const snap = await getDocs(q);
+    if (userEmail) {
+      const qEmail = query(
+        collection(db, "stores"),
+        where("email", "==", userEmail),
+        limit(1)
+      );
+      const emailSnap = await getDocs(qEmail);
+      if (!emailSnap.empty) {
+        const docSnap = emailSnap.docs[0];
+        return {
+          id: docSnap.id,
+          ...docSnap.data(),
+        };
+      }
+    }
 
-    if (snap.empty) return null;
-
-    const docSnap = snap.docs[0];
-
-    return {
-      id: docSnap.id,
-      ...docSnap.data(),
-    };    
+    return null;
   } catch (error) {
     console.error("Error fetching store by userId:", error);
     return null;
@@ -229,8 +316,10 @@ export const updateStore = async (userId, storeData) => {
     const q = query(collection(db, 'stores'), where('userId', '==', userId), limit(1));
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
-      const storeDocRef = doc(db, 'stores', querySnapshot.docs[0].id);
+      const storeDocId = querySnapshot.docs[0].id;
+      const storeDocRef = doc(db, 'stores', storeDocId);
       await updateDoc(storeDocRef, storeData);
+      clearStoreCache(storeDocId);
       console.log('Store updated successfully!');
     } else {
       console.error('No store found for this user to update.');

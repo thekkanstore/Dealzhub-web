@@ -7,4 +7,13 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  server: {
+    proxy: {
+      '/api/cashfree': {
+        target: 'https://sandbox.cashfree.com/pg',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/cashfree/, ''),
+      },
+    },
+  },
 })

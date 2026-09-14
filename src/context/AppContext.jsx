@@ -14,22 +14,36 @@ export const AppProvider = ({ children }) => {
   const [isNewUser, setIsNewUser] = useState(false);
   const [categories, setCategories] = useState([]);
   const [banners, setBanners] = useState([]);
-  const [products, setProducts] = useState([]); // This is used for filtering on StorePage
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [products, setProducts] = useState([]); // Kept for backwards compatibility
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    try {
+      return localStorage.getItem('selectedLocation') || null;
+    } catch {
+      return null;
+    }
+  });
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [onLoginModalContinue, setOnLoginModalContinue] = useState(null);
   const [searchQuery, setSearchQuery] = useState(''); // New state for search
   const [appConfigs, setAppConfigs] = useState([]);
+  const [activeStore, setActiveStore] = useState(null); // Active store context for exclusive store views
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
+        const uid = currentUser.uid || currentUser.providerData?.[0]?.uid;
         // Fetch user-specific data like favorites and cart
-        const userData = await getUserData(currentUser.providerData[0].uid);
+        const userData = await getUserData(uid);
         if (userData) {
           setFavorites(userData.favorites || []);
           setCart(userData.cart || []); // Load cart from Firestore
+          if (userData.city && !localStorage.getItem('selectedLocation')) {
+            setSelectedLocation(userData.city);
+            try {
+              localStorage.setItem('selectedLocation', userData.city);
+            } catch {}
+          }
         } else {
           setFavorites([]);
           setCart([]);
@@ -70,17 +84,19 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      // Fetch categories, banners, and all products in parallel
-      const [fetchedCategories, fetchedBanners, fetchedProducts, fetchedAppConfigs] = await Promise.all([
-        getActiveCategories(),
-        getAppConfigBanners(),
-        getAllProducts(), // Still needed for StorePage filtering for now
-        getAppConfigs()
-      ]);
-      setCategories(fetchedCategories);
-      setBanners(fetchedBanners);
-      setProducts(fetchedProducts);
-      setAppConfigs(fetchedAppConfigs);
+      try {
+        // Fetch lightweight initial app configs, categories and banners in parallel
+        const [fetchedCategories, fetchedBanners, fetchedAppConfigs] = await Promise.all([
+          getActiveCategories(),
+          getAppConfigBanners(),
+          getAppConfigs()
+        ]);
+        setCategories(fetchedCategories || []);
+        setBanners(fetchedBanners || []);
+        setAppConfigs(fetchedAppConfigs || []);
+      } catch (err) {
+        console.error('Error fetching initial config data:', err);
+      }
     };
 
     fetchInitialData();
@@ -123,7 +139,8 @@ export const AppProvider = ({ children }) => {
     setCart(updatedCart);
 
     try {
-      await updateUserCart(user.providerData[0].uid, updatedCart);
+      const uid = user.uid || user.providerData?.[0]?.uid;
+      await updateUserCart(uid, updatedCart);
     } catch (error) {
       console.error('Failed to update cart in Firestore:', error);
     }
@@ -140,7 +157,8 @@ export const AppProvider = ({ children }) => {
     setCart(updatedCart);
 
     try {
-      await updateUserCart(user.providerData[0].uid, updatedCart);
+      const uid = user.uid || user.providerData?.[0]?.uid;
+      await updateUserCart(uid, updatedCart);
     } catch (error) {
       console.error('Failed to update cart in Firestore:', error);
     }
@@ -164,7 +182,8 @@ export const AppProvider = ({ children }) => {
     }
     
     try {
-      await updateUserFavorites(user.providerData[0].uid, updatedFavorites);
+      const uid = user.uid || user.providerData?.[0]?.uid;
+      await updateUserFavorites(uid, updatedFavorites);
       setFavorites(updatedFavorites);
     } catch (error) {
       console.error('Failed to update favorites in Firestore:', error);
@@ -185,6 +204,13 @@ export const AppProvider = ({ children }) => {
 
   const updateLocation = useCallback((location) => {
     setSelectedLocation(location);
+    try {
+      if (location && location !== 'Select Location') {
+        localStorage.setItem('selectedLocation', location);
+      }
+    } catch (err) {
+      console.error('Error saving location to localStorage:', err);
+    }
   }, []);
 
   return (
@@ -216,6 +242,8 @@ export const AppProvider = ({ children }) => {
         getTotalPrice,
         getTotalDiscount,
         logout,
+        activeStore,
+        setActiveStore,
       }}
     >
       {children}

@@ -5,13 +5,26 @@ import { FireStoreCollections } from '../config/common';
 const storeCache = new Map();
 
 /**
+ * Clears the in-memory store cache
+ * @param storeId Optional store ID to clear specific entry
+ */
+export const clearStoreCache = (storeId) => {
+  if (storeId) {
+    storeCache.delete(storeId);
+  } else {
+    storeCache.clear();
+  }
+};
+
+/**
  * Fetches a single store document from Firestore by its ID.
  * @param storeId The ID of the store to fetch.
+ * @param forceRefresh Whether to bypass cache and fetch fresh document.
  * @returns The store data object or null if not found.
  */
-export const getStoreById = async (storeId) => {
+export const getStoreById = async (storeId, forceRefresh = false) => {
   if (!storeId) return null;
-  if (storeCache.has(storeId)) {
+  if (!forceRefresh && storeCache.has(storeId)) {
     return storeCache.get(storeId);
   }
   try {
@@ -32,24 +45,73 @@ export const getStoreById = async (storeId) => {
   }
 };
 
-export const getStoreByUserId = async (userId) => {
+export const getStoreByUserId = async (userId, userEmail = null) => {
+  if (!userId && !userEmail) return null;
   try {
     const storesRef = collection(db, 'stores');
-    const q = query(storesRef, where('userId', '==', userId));
-    const snapshot = await getDocs(q);
+    if (userId) {
+      const q = query(storesRef, where('userId', '==', userId));
+      const snapshot = await getDocs(q);
 
-    if (snapshot.empty) {
-      return null;
+      if (!snapshot.empty) {
+        const storeDoc = snapshot.docs[0];
+        return {
+          id: storeDoc.id,
+          ...storeDoc.data()
+        };
+      }
     }
 
-    // Return the first store found (assuming one store per user)
-    const storeDoc = snapshot.docs[0];
-    return {
-      id: storeDoc.id,
-      ...storeDoc.data()
-    };
+    if (userEmail) {
+      const qEmail = query(storesRef, where('email', '==', userEmail));
+      const snapshotEmail = await getDocs(qEmail);
+
+      if (!snapshotEmail.empty) {
+        const storeDoc = snapshotEmail.docs[0];
+        return {
+          id: storeDoc.id,
+          ...storeDoc.data()
+        };
+      }
+    }
+
+    return null;
   } catch (error) {
-    console.error('Error fetching store by userId:', error);
+    console.error('Error fetching store by userId/email:', error);
+    return null;
+  }
+};
+
+/**
+ * Fetches a store document matching a shop URL slug (e.g. 'test-store')
+ */
+export const getStoreBySlug = async (slug) => {
+  if (!slug) return null;
+  try {
+    const cleanSlug = slug.toLowerCase().trim();
+    // Check if slug is directly the doc id
+    if (storeCache.has(slug)) {
+      return storeCache.get(slug);
+    }
+    const storesRef = collection(db, FireStoreCollections.STORES);
+    const snapshot = await getDocs(storesRef);
+    const matched = snapshot.docs.find(d => {
+      const data = d.data();
+      const sSlug = (data.storeName || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      return sSlug === cleanSlug || d.id === slug;
+    });
+
+    if (matched) {
+      const storeData = { id: matched.id, ...matched.data() };
+      storeCache.set(matched.id, storeData);
+      return storeData;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching store by slug:', error);
     return null;
   }
 };

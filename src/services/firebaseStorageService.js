@@ -1,5 +1,20 @@
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject, getBlob } from 'firebase/storage';
 import { storage } from '../firebase';
+
+/**
+ * Fetch image blob directly via Firebase Storage SDK (bypasses CORS)
+ */
+export const getImageBlobFromStorage = async (imageUrl) => {
+  try {
+    if (!imageUrl || typeof imageUrl !== 'string') return null;
+    const storageRef = ref(storage, imageUrl);
+    const blob = await getBlob(storageRef);
+    return blob;
+  } catch (error) {
+    console.warn('Firebase Storage getBlob error:', error);
+    return null;
+  }
+};
 
 /**
  * Upload a single image to Firebase Storage with specific path

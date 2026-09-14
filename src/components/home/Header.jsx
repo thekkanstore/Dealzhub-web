@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, Heart, ShoppingCart, Menu, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Search, User, Heart, ShoppingCart, Menu, X, Store, Phone } from 'lucide-react';
 import appLogo from '../../assets/images/appLogo@2x.png'
 import { TKFrameIcon } from '../common/Icons/TKFrameIcon';
 import { useAppContext } from '../../context/AppContext';
@@ -16,69 +17,91 @@ const Header = ({
   cartCount,
   logout,
 }) => {
+  const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, selectedLocation, updateLocation } = useAppContext();
+  const { user, selectedLocation, updateLocation, activeStore } = useAppContext();
   const [role, setRole] = useState(false);
   const [storeId, setStoreId] = useState(null);
-  const uid = user?.providerData[0].uid;
+  const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+  const currentUserEmail = user?.email || user?.providerData?.[0]?.email;
+
+  const isStorePage = location.pathname.startsWith('/vendor/') || location.pathname.startsWith('/shop/');
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (uid) {
+      if (currentUserId || currentUserEmail) {
         // User is logged in. Fetch all user-related data.
-        const userData = await getUserData(uid);
+        const userData = await getUserData(currentUserId, currentUserEmail);
         if (userData) {
           // Set location from user profile. This is the source of truth on login.
           if (userData.city) {
             updateLocation(userData.city);
           }
-          // Set role
-          if (Array.isArray(userData.role)) {
-            const isVendor = userData.role.includes("vendor");
-            setRole(isVendor);
+          if (userData.role) {
+            setRole(userData.role);
           }
-        }
-        
-        // Fetch store info
-        try {
-          const store = await getStoreByUserId(uid);
-          setStoreId(store ? store.id : null);
-        } catch (error) {
-          console.error('Error fetching user store:', error);
-          setStoreId(null);
-        }
-      } else {
-        // User is not logged in.
-        // Clear user-specific state.
-        setRole(false);
-        setStoreId(null);
-        // Check for a location in localStorage.
-        const storedLocation = localStorage.getItem('selectedLocation');
-        if (storedLocation) {
-          updateLocation(storedLocation);
-        } else {
-          updateLocation('Select Location');
-          setShowLocationPrompt(true);
         }
       }
     };
-
     fetchUserData();
-  }, [uid]);
-  
+  }, [currentUserId, currentUserEmail]);
+
   useEffect(() => {
-    if (selectedLocation && selectedLocation !== 'Select Location') {
-      localStorage.setItem('selectedLocation', selectedLocation);
+    const fetchStore = async () => {
+      if (currentUserId) {
+        try {
+          const store = await getStoreByUserId(currentUserId);
+          if (store) {
+            setStoreId(store.id);
+          }
+        } catch (error) {
+          console.error('Error fetching store:', error);
+        }
+      }
+    };
+    fetchStore();
+  }, [currentUserId]);
+
+  const handleLocationSelect = (district) => {
+    updateLocation(district);
+    setIsLocationDropdownOpen(false);
+  };
+
+  const handleProfileClick = () => {
+    if (user) {
+      setIsDropdownOpen(!isDropdownOpen);
+    } else {
+      navigateTo('/login');
     }
-  }, [selectedLocation]);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setIsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
+    navigateTo('/login');
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        setIsDropdownOpen(false);
+        setIsLocationDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isMobileMenuOpen && !event.target.closest('.mobile-menu-container')) {
+      if (isMobileMenuOpen && !event.target.closest('.mobile-menu-container') && !event.target.closest('.mobile-menu-button')) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -86,6 +109,55 @@ const Header = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMobileMenuOpen]);
+  
+  useEffect(() => {
+    if (selectedLocation && selectedLocation !== 'Select Location') {
+      localStorage.setItem('selectedLocation', selectedLocation);
+    }
+  }, [selectedLocation]);
+
+  // Exclusive Store Page Navbar
+  if (isStorePage) {
+    const storeLogo = activeStore?.logoUrl || activeStore?.logo || activeStore?.storeLogo || activeStore?.imageUrl;
+    const storeName = activeStore?.storeName || 'Store';
+
+    return (
+      <header className="bg-white shadow-xs border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            {/* Store Brand: Store Logo replacing DealzHub logo */}
+            <div className="flex items-center gap-3">
+              {storeLogo ? (
+                <img
+                  src={storeLogo}
+                  alt={`${storeName} Logo`}
+                  className="h-10 sm:h-11 w-auto max-w-[160px] rounded-xl object-contain"
+                />
+              ) : (
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#E5EEE9] border border-[#528E6B]/30 flex items-center justify-center text-[#254030] font-black text-xl shadow-xs">
+                  {storeName ? storeName.charAt(0).toUpperCase() : <Store className="w-6 h-6 text-[#528E6B]" />}
+                </div>
+              )}
+            </div>
+
+            {/* Right Side: Store Direct Contact */}
+            <div className="flex items-center gap-3">
+              {activeStore?.phoneNumber && (
+                <a
+                  href={`tel:${activeStore.phoneNumber}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 bg-[#E5EEE9]/60 hover:bg-[#E5EEE9] text-[#254030] border border-[#528E6B]/20 rounded-full transition-colors"
+                >
+                  <Phone className="w-3.5 h-3.5 text-[#528E6B]" />
+                  <span className="hidden sm:inline">{activeStore.phoneNumber}</span>
+                  <span className="sm:hidden">Call</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -103,39 +175,46 @@ const Header = ({
                   window.location.href = "/home";
                 }}
               />
-              <div className="relative">
+              <div className="relative dropdown-container">
                 <button
-                  className="flex gap-1 text-sm"
+                  type="button"
+                  className="flex gap-1 text-sm cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsLocationDropdownOpen(!isLocationDropdownOpen);
+                    setIsLocationDropdownOpen((prev) => !prev);
                   }}
                 >
                   <TKFrameIcon />
                   <div className='flex flex-col justify-start items-start'>
                     <p className='text-sm font-bold'>Location</p>
                     <span className='flex items-center gap-1 text-quaternaryTextColor'>
-                      <span>{selectedLocation}</span>
+                      <span>{selectedLocation || 'Select Location'}</span>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                     </span>
                   </div>
                 </button>
                 {isLocationDropdownOpen && (
-                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50 max-h-[calc(100vh-100px)] overflow-y-auto">
+                  <div 
+                    className="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-xl py-2 z-50 max-h-[calc(100vh-100px)] overflow-y-auto border border-gray-100"
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
                     {KERALA_DISTRICTS.map((district) => (
-                      <a
+                      <button
+                        type="button"
                         key={district}
-                        href="#"
-                        className="block px-4 py-2 m-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className={`block w-[calc(100%-16px)] text-left px-4 py-2 mx-2 text-sm rounded-lg transition-colors cursor-pointer ${
+                          selectedLocation === district ? 'bg-[#E5EEE9] text-[#254030] font-bold' : 'text-gray-700 hover:bg-gray-100'
+                        }`}
                         onClick={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           updateLocation(district);
                           setIsLocationDropdownOpen(false);
                           setShowLocationPrompt(false);
                         }}
                       >
                         {district}
-                      </a>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -180,37 +259,66 @@ const Header = ({
           <div className="hidden md:flex items-center gap-6">
             {user ? (
               <>
-                <div className="relative">
+                <div className="relative dropdown-container">
                   <button
-                    className="flex items-center gap-2 w-10 h-10 rounded-full bg-primaryButtonBackgroundColor justify-center"
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    type="button"
+                    className="flex items-center gap-2 w-10 h-10 rounded-full bg-primaryButtonBackgroundColor justify-center cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsDropdownOpen((prev) => !prev);
+                    }}
                   >
                     <User className="w-6 h-6 fill-secondaryButtonBackgroundColor text-secondaryButtonBackgroundColor" />
                   </button>
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg py-2 z-50">
+                    <div 
+                      className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl py-2 z-50 border border-gray-100"
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-green-50">
                         <img
-                          src={user.providerData[0].photoURL || ''}
+                          src={user?.photoURL || user?.providerData?.[0]?.photoURL || ''}
                           alt="Profile"
                           className="w-12 h-12 rounded-full object-cover"
                           referrerPolicy="no-referrer"
                           loading="lazy"
                         />
                         <div>
-                          <p className="text-sm font-semibold text-gray-800">{user.providerData[0].displayName}</p>
-                          <p className="text-xs text-gray-800">{user.providerData[0].email}</p>
+                          <p className="text-sm font-semibold text-gray-800">{user?.displayName || user?.providerData?.[0]?.displayName || 'User'}</p>
+                          <p className="text-xs text-gray-800">{user?.email || user?.providerData?.[0]?.email || ''}</p>
                         </div>
                       </div>
+                      {storeId ? (
+                        <button
+                          onClick={() => {
+                            setIsDropdownOpen(false);
+                            navigateTo(`/vendor/${storeId}`);
+                          }}
+                          className="block w-full text-left px-4 py-2 m-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 rounded-md transition-colors"
+                        >
+                          My Store
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setIsDropdownOpen(false);
+                            navigateTo('/vendordetails');
+                          }}
+                          className="block w-full text-left px-4 py-2 m-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                        >
+                          Create Store
+                        </button>
+                      )}
                       <a
                         href="/editprofile"
-                        className="block px-4 py-2 m-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 m-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+                        onClick={() => setIsDropdownOpen(false)}
                       >
-                        Edit
+                        Edit Profile
                       </a>
                       <a
                         href=""
-                        className="block px-4 py-2 m-2 text-sm text-gray-700 hover:bg-red-100 hover:text-red-600"
+                        className="block px-4 py-2 m-2 text-sm text-gray-700 hover:bg-red-100 hover:text-red-600 rounded-md"
                         onClick={logout}
                       >
                         Logout
@@ -298,36 +406,46 @@ const Header = ({
           </div>
 
           {/* Location Selector */}
-          <div className="mb-6 pb-4 border-b">
+          <div className="mb-6 pb-4 border-b dropdown-container">
             <button
-              className="flex items-center gap-2 w-full text-left"
-              onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
+              type="button"
+              className="flex items-center gap-2 w-full text-left cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLocationDropdownOpen((prev) => !prev);
+              }}
             >
               <TKFrameIcon />
               <div className='flex flex-col'>
                 <p className='text-sm font-bold'>Location</p>
                 <span className='flex items-center gap-1 text-quaternaryTextColor text-sm'>
-                  <span>{selectedLocation}</span>
+                  <span>{selectedLocation || 'Select Location'}</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </span>
               </div>
             </button>
             {isLocationDropdownOpen && (
-              <div className="mt-2 max-h-48 overflow-y-auto bg-gray-50 rounded-md">
+              <div 
+                className="mt-2 max-h-48 overflow-y-auto bg-gray-50 rounded-xl p-1 border border-gray-100"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 {KERALA_DISTRICTS.map((district) => (
-                  <a
+                  <button
+                    type="button"
                     key={district}
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+                      selectedLocation === district ? 'bg-[#E5EEE9] text-[#254030] font-bold' : 'text-gray-700 hover:bg-gray-200/60'
+                    }`}
                     onClick={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
                       updateLocation(district);
                       setIsLocationDropdownOpen(false);
                       setShowLocationPrompt(false);
                     }}
                   >
                     {district}
-                  </a>
+                  </button>
                 ))}
               </div>
             )}
@@ -339,15 +457,15 @@ const Header = ({
               <div className="mb-4 pb-4 border-b">
                 <div className="flex items-center gap-3 mb-3">
                   <img
-                    src={user.providerData[0].photoURL || ''}
+                    src={user?.photoURL || user?.providerData?.[0]?.photoURL || ''}
                     alt="Profile"
                     className="w-12 h-12 rounded-full object-cover"
                     referrerPolicy="no-referrer"
                     loading="lazy"
                   />
                   <div>
-                    <p className="text-sm font-semibold text-gray-800">{user.providerData[0].displayName}</p>
-                    <p className="text-xs text-gray-600">{user.providerData[0].email}</p>
+                    <p className="text-sm font-semibold text-gray-800">{user?.displayName || user?.providerData?.[0]?.displayName || 'User'}</p>
+                    <p className="text-xs text-gray-600">{user?.email || user?.providerData?.[0]?.email || ''}</p>
                   </div>
                 </div>
                 <a

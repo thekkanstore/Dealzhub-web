@@ -27,7 +27,9 @@ const BulkAddProductPage = () => {
     const fetchStoreAndCategories = async () => {
       if (user) {
         try {
-          const store = await getStoreByUserId(user.providerData[0].uid);
+          const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+          const userEmail = user?.email || user?.providerData?.[0]?.email;
+          const store = await getStoreByUserId(currentUserId, userEmail);
           if (store) {
             setStoreId(store.id);
             setStoreData(store);

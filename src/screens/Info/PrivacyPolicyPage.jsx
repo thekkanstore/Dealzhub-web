@@ -1,9 +1,15 @@
 import React from 'react';
 import { Shield, Calendar, Phone, MessageCircle, Globe, MapPin } from 'lucide-react';
+import SEO from '../../components/common/SEO';
 
 const PrivacyPolicyPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <main className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <SEO
+        title="Privacy Policy"
+        description="DealzHub Privacy Policy. Learn how we collect, use, protect and process your data across our marketplace and digital services."
+        url="/privacy"
+      />
       <div className="max-w-4xl mx-auto">
         
         {/* Header Block */}
@@ -372,7 +378,7 @@ const PrivacyPolicyPage = () => {
         </div>
 
       </div>
-    </div>
+    </main>
   );
 };
 
