@@ -7,6 +7,7 @@ import CategoryScroller from '../../components/common/CategoryScroller';
 import VirtualizedProductGrid from '../../components/common/VirtualizedProductGrid';
 import BannerCarousel from '../../components/home/BannerCarousel';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import SEO from '../../components/common/SEO';
 
 const HomePage = () => {
   console.log('Rendering HomePage');
@@ -137,8 +138,53 @@ const HomePage = () => {
     return "No products found.";
   }, [selectedCategory, selectedLocation]);
 
+  const homeSchema = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': 'https://dealzhub.co.in/#website',
+        url: 'https://dealzhub.co.in',
+        name: 'DealzHub',
+        description: 'Kerala\'s premier online marketplace connecting local shops and customers.',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: 'https://dealzhub.co.in/search?q={search_term_string}',
+          },
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://dealzhub.co.in/#organization',
+        name: 'DealzHub',
+        url: 'https://dealzhub.co.in',
+        logo: 'https://dealzhub.co.in/appLogo@2x.png',
+        contactPoint: {
+          '@type': 'ContactPoint',
+          telephone: '+91-7907074434',
+          contactType: 'customer service',
+          areaServed: 'IN',
+        },
+      },
+    ],
+  }), []);
+
   return (
-    <div className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white">
+      <SEO
+        title="DealzHub - Kerala's Local Shopping & Deals Marketplace"
+        description="Discover the best deals, local shops, and products across Kerala. Explore stores, compare prices, and support local businesses online on DealzHub."
+        url="/home"
+        type="website"
+        schema={homeSchema}
+      />
+      
+      {/* Hidden H1 for SEO semantics */}
+      <h1 className="sr-only">DealzHub - Kerala's Local Shopping, Stores and Deals Marketplace</h1>
+
       {/* Banner Carousel */}
       {appConfigs?.[0]?.banners?.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 my-6">
@@ -181,7 +227,7 @@ const HomePage = () => {
           </div>
         ) : null}
       </div>
-    </div>
+    </main>
   );
 };
 

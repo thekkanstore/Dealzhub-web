@@ -1,9 +1,15 @@
 import React from 'react';
 import { Info, HelpCircle, Eye, Target, Sparkles, Phone, MessageCircle, Globe, CheckCircle2, Building2 } from 'lucide-react';
+import SEO from '../../components/common/SEO';
 
 const AboutUsPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <main className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <SEO
+        title="About Us - Kerala's Local Marketplace"
+        description="Learn about DealzHub's mission to empower local businesses across Kerala by connecting them with shoppers online through digital storefronts."
+        url="/about"
+      />
       <div className="max-w-4xl mx-auto space-y-10">
         
         {/* Hero Section */}
@@ -208,7 +214,7 @@ const AboutUsPage = () => {
         </div>
 
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -1,9 +1,15 @@
 import React from 'react';
 import { FileText, Calendar, Phone, MessageCircle, Globe, MapPin, CheckCircle2 } from 'lucide-react';
+import SEO from '../../components/common/SEO';
 
 const TermsAndConditionsPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <main className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <SEO
+        title="Terms & Conditions"
+        description="DealzHub Terms and Conditions of service for customers and local vendor partners across Kerala."
+        url="/terms"
+      />
       <div className="max-w-4xl mx-auto">
         
         {/* Header Block */}
@@ -187,7 +193,7 @@ const TermsAndConditionsPage = () => {
         </div>
 
       </div>
-    </div>
+    </main>
   );
 };
 

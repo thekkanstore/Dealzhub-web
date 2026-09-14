@@ -6,6 +6,7 @@ import { getProductById, deleteProduct } from '../../services/productService';
 import { TKArrowIcon } from '../../components/common/Icons/TKArrowIcon';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getSubCategories } from '../../services/subcategoryService';
+import SEO from '../../components/common/SEO';
 
 const ProductPage = () => {
   const { productId } = useParams();
@@ -117,8 +118,84 @@ const ProductPage = () => {
     }
   };
 
+  const productSchema = useMemo(() => {
+    if (!selectedProduct) return null;
+    const primaryImg = images[0] || 'https://dealzhub.co.in/appLogo@2x.png';
+    const storeName = selectedProduct.store?.storeName || 'DealzHub Vendor';
+    
+    return {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Product',
+          '@id': `https://dealzhub.co.in/product/${selectedProduct.id}#product`,
+          name: selectedProduct.name,
+          description: selectedProduct.description || `${selectedProduct.name} from ${storeName} on DealzHub`,
+          image: images.length > 0 ? images : [primaryImg],
+          sku: selectedProduct.id,
+          brand: {
+            '@type': 'Brand',
+            name: storeName,
+          },
+          offers: {
+            '@type': 'Offer',
+            url: `https://dealzhub.co.in/product/${selectedProduct.id}`,
+            priceCurrency: 'INR',
+            price: selectedProduct.discountPrice || selectedProduct.actualPrice || '0',
+            priceValidUntil: '2028-12-31',
+            itemCondition: selectedProduct.isSecondHand
+              ? 'https://schema.org/UsedCondition'
+              : 'https://schema.org/NewCondition',
+            availability: isUnavailable
+              ? 'https://schema.org/OutOfStock'
+              : 'https://schema.org/InStock',
+            seller: {
+              '@type': 'Organization',
+              name: storeName,
+            },
+          },
+        },
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://dealzhub.co.in/home',
+            },
+            ...(selectedProduct.category?.name
+              ? [
+                  {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: selectedProduct.category.name,
+                    item: `https://dealzhub.co.in/home?category=${selectedProduct.categoryId}`,
+                  },
+                ]
+              : []),
+            {
+              '@type': 'ListItem',
+              position: selectedProduct.category?.name ? 3 : 2,
+              name: selectedProduct.name,
+              item: `https://dealzhub.co.in/product/${selectedProduct.id}`,
+            },
+          ],
+        },
+      ],
+    };
+  }, [selectedProduct, images, isUnavailable]);
+
   return (
-    <div className="min-h-screen bg-gray-50/70">
+    <main className="min-h-screen bg-gray-50/70">
+      <SEO
+        title={`${selectedProduct.name} - ₹${selectedProduct.discountPrice}`}
+        description={selectedProduct.description ? `${selectedProduct.description.slice(0, 155)}... Buy online at ₹${selectedProduct.discountPrice}` : `Buy ${selectedProduct.name} for ₹${selectedProduct.discountPrice} on DealzHub.`}
+        image={images[0]}
+        url={`/product/${selectedProduct.id}`}
+        type="product"
+        schema={productSchema}
+      />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <button
           onClick={() => navigate('/home')}
@@ -304,7 +381,7 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

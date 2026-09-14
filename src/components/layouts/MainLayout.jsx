@@ -36,6 +36,14 @@ const MainLayout = () => {
     }
   }, [debouncedSearchQuery, navigate, location.pathname]);
 
+  const hideFooterRoutes = [
+    /^\/vendor(\/.*)?$/,
+    /^\/store-redirect(\/.*)?$/,
+    /^\/shop(\/.*)?$/
+  ];
+
+  const shouldHideFooter = hideFooterRoutes.some(pattern => pattern.test(location.pathname));
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow">
@@ -57,7 +65,7 @@ const MainLayout = () => {
         />
         <Outlet context={appContext} />
       </div>
-      <Footer />
+      {!shouldHideFooter && <Footer />}
     </div>
   );
 };

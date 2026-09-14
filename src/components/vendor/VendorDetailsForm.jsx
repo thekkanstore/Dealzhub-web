@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { KERALA_DISTRICTS } from '../../config/common';
+import { Camera, Image as ImageIcon, X } from 'lucide-react';
 
 const VendorDetailsForm = ({
-  initialData,
+  initialData = {},
   onSubmit,
   submitButtonText = 'Create Store', // Default value
 }) => {
@@ -12,6 +13,11 @@ const VendorDetailsForm = ({
   const [state, setState] = useState(initialData.state || 'Kerala');
   const [phoneNumber, setPhoneNumber] = useState(initialData.phoneNumber || '');
   const [email, setEmail] = useState(initialData.email || '');
+  const [logoUrl, setLogoUrl] = useState(initialData.logoUrl || initialData.logo || '');
+  const [logoBase64, setLogoBase64] = useState(initialData.logoBase64 || '');
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(initialData.logoBase64 || initialData.logoUrl || initialData.logo || '');
+  const fileInputRef = useRef(null);
 
   const [errors, setErrors] = useState({
     storeName: '',
@@ -28,7 +34,59 @@ const VendorDetailsForm = ({
     setState(initialData.state || 'Kerala');
     setPhoneNumber(initialData.phoneNumber || '');
     setEmail(initialData.email || '');
+    setLogoUrl(initialData.logoUrl || initialData.logo || '');
+    setLogoBase64(initialData.logoBase64 || '');
+    setLogoPreview(initialData.logoBase64 || initialData.logoUrl || initialData.logo || '');
   }, [initialData]);
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Logo image size should be less than 5MB');
+        return;
+      }
+      setLogoFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setLogoPreview(previewUrl);
+
+      // Generate compact base64 thumbnail for fast, CORS-free canvas rendering
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const cvs = document.createElement('canvas');
+          const maxDim = 250;
+          let w = img.width;
+          let h = img.height;
+          if (w > h && w > maxDim) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else if (h > maxDim) {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+          cvs.width = w;
+          cvs.height = h;
+          const ctx = cvs.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          setLogoBase64(cvs.toDataURL('image/jpeg', 0.85));
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoUrl('');
+    setLogoBase64('');
+    setLogoPreview('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const validate = () => {
     let newErrors = {
@@ -71,12 +129,60 @@ const VendorDetailsForm = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
-      onSubmit({ storeName, address, city, state, phoneNumber, email });
+      onSubmit({ storeName, address, city, state, phoneNumber, email, logoFile, logoUrl, logoBase64 });
     }
   };
 
   return (
     <form className="mt-8" onSubmit={handleSubmit}>
+      {/* Store Logo Field */}
+      <div className="mb-6 flex flex-col items-center">
+        <label className="block text-[#150A33] text-sm font-bold mb-2 self-start">
+          Store Logo (Optional)
+        </label>
+        <div className="flex items-center gap-4 w-full">
+          <div className="relative w-20 h-20 rounded-2xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0 group">
+            {logoPreview ? (
+              <>
+                <img
+                  src={logoPreview}
+                  alt="Store Logo Preview"
+                  className="w-full h-full object-cover rounded-2xl"
+                />
+                <button
+                  type="button"
+                  onClick={removeLogo}
+                  className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white"
+                  title="Remove logo"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </>
+            ) : (
+              <ImageIcon className="w-8 h-8 text-gray-400" />
+            )}
+          </div>
+          <div className="flex-1">
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleLogoChange}
+              className="hidden"
+              id="storeLogoInput"
+            />
+            <label
+              htmlFor="storeLogoInput"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-full cursor-pointer transition-colors shadow-sm"
+            >
+              <Camera className="w-4 h-4" />
+              {logoPreview ? 'Change Logo' : 'Upload Store Logo'}
+            </label>
+            <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 5MB</p>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-4">
         <label className="block text-[#150A33] text-sm font-bold mb-2" htmlFor="storeName">
           Store Name

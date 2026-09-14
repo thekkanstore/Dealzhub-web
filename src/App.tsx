@@ -35,6 +35,10 @@ const router = createBrowserRouter([
     element: <StoreRedirectPage />,
   },
   {
+    path: '/shop/:slug',
+    element: <StoreRedirectPage />,
+  },
+  {
     path: '/login',
     element: <LoginPage />,
   },

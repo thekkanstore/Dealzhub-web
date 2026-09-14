@@ -1,5 +1,25 @@
 User-agent: *
 Allow: /
+Allow: /home
+Allow: /product/*
+Allow: /vendor/*
+Allow: /about
+Allow: /privacy
+Allow: /cancellation-refund
+Allow: /terms
 
+# Disallow private vendor management and user onboarding routes
+Disallow: /personaldetails
+Disallow: /chooseusertype
+Disallow: /vendordetails
+Disallow: /editprofile
+Disallow: /editstore
+Disallow: /add-product
+Disallow: /bulk-add-product
+Disallow: /edit-product/*
+Disallow: /cart
+Disallow: /favorites
+Disallow: /login
+
+Sitemap: https://dealzhub.co.in/sitemap.xml
 Sitemap: https://www.dealzhub.co.in/sitemap.xml
-Sitemap: https://www.dealzhub.co.in/home/sitemap.xml

@@ -1,9 +1,15 @@
 import React from 'react';
 import { RotateCcw, Calendar, Phone, MessageCircle, Globe, MapPin, CheckCircle2 } from 'lucide-react';
+import SEO from '../../components/common/SEO';
 
 const RefundPolicyPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <main className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <SEO
+        title="Cancellation & Refund Policy"
+        description="DealzHub Cancellation & Refund Policy. Understand our policies regarding vendor subscriptions, customer purchases, cancellations, and refund processing."
+        url="/cancellation-refund"
+      />
       <div className="max-w-4xl mx-auto">
         
         {/* Header Block */}
@@ -262,7 +268,7 @@ const RefundPolicyPage = () => {
         </div>
 
       </div>
-    </div>
+    </main>
   );
 };
 

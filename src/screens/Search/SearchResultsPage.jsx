@@ -6,6 +6,7 @@ import { searchProducts } from '../../services/productService';
 import useDebounce from '../../hooks/useDebounce';
 import VirtualizedProductGrid from '../../components/common/VirtualizedProductGrid';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import SEO from '../../components/common/SEO';
 
 const SearchResultsPage = () => {
   const [searchParams] = useSearchParams();
@@ -111,7 +112,13 @@ const SearchResultsPage = () => {
   }, [hasMore, isLoadingMore, isLoading, lastDoc]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white">
+      <SEO
+        title={query ? `Search: "${query}"` : 'Search Deals & Stores'}
+        description={`Search results for ${query || 'products'} on DealzHub. Explore local stores, discounts and verified deals in Kerala.`}
+        url={`/search?q=${encodeURIComponent(query)}`}
+        robots="noindex, follow"
+      />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-4">
           Search results for: <span className="text-primaryButtonBackgroundColor">{query}</span>
@@ -139,7 +146,7 @@ const SearchResultsPage = () => {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

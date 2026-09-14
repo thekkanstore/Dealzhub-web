@@ -1,6 +1,7 @@
 import { collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, query, where, limit, startAfter } from 'firebase/firestore';
 import { db } from '../firebase';
 import { FireStoreCollections } from "../config/common";
+import { clearStoreCache } from './storeFirestoreService';
 
 export const getActiveCategories = async () => {
   try {
@@ -229,8 +230,10 @@ export const updateStore = async (userId, storeData) => {
     const q = query(collection(db, 'stores'), where('userId', '==', userId), limit(1));
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
-      const storeDocRef = doc(db, 'stores', querySnapshot.docs[0].id);
+      const storeDocId = querySnapshot.docs[0].id;
+      const storeDocRef = doc(db, 'stores', storeDocId);
       await updateDoc(storeDocRef, storeData);
+      clearStoreCache(storeDocId);
       console.log('Store updated successfully!');
     } else {
       console.error('No store found for this user to update.');

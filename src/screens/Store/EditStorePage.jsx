@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import VendorDetailsForm from '../../components/vendor/VendorDetailsForm';
 import { useAppContext } from '../../context/AppContext';
 import { getStoreByUserId, updateStore } from '../../services/firestore'; // Assuming updateStore exists
+import { uploadImageToStorage } from '../../services/firebaseStorageService';
 import { ArrowLeft } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
@@ -25,6 +26,8 @@ const EditStorePage = () => {
               state: store.state,
               phoneNumber: store.phoneNumber,
               email: store.email,
+              logoUrl: store.logoUrl || store.logo || '',
+              logoBase64: store.logoBase64 || '',
             });
           } else {
             navigate('/vendor-details'); // Or a more appropriate page
@@ -43,23 +46,49 @@ const EditStorePage = () => {
     fetchStoreData();
   }, [user, navigate]);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSubmit = async (formData) => {
     if (user && initialStoreData) {
-      const updatedStoreData = {
-        storeName: formData.storeName,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        phoneNumber: formData.phoneNumber,
-        email: formData.email,
-        updatedAt: new Date(),
-      };
-
+      setIsSaving(true);
       try {
+        let finalLogoUrl = formData.logoUrl || initialStoreData.logoUrl || '';
+        if (formData.logoFile) {
+          const uploadRes = await uploadImageToStorage(
+            formData.logoFile,
+            `images/stores/${user.providerData[0].uid}`
+          );
+          if (uploadRes.success && uploadRes.url) {
+            finalLogoUrl = uploadRes.url;
+          } else {
+            console.error('Failed to upload store logo:', uploadRes.error);
+            alert(`Failed to upload store logo: ${uploadRes.error || 'Storage error'}`);
+            setIsSaving(false);
+            return;
+          }
+        }
+
+        const updatedStoreData = {
+          storeName: formData.storeName,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          phoneNumber: formData.phoneNumber,
+          email: formData.email,
+          logoUrl: finalLogoUrl,
+          logo: finalLogoUrl,
+          logoBase64: formData.logoBase64 || initialStoreData.logoBase64 || '',
+          updatedAt: new Date(),
+        };
+
         await updateStore(user.providerData[0].uid, updatedStoreData);
+        alert('Store details and logo saved successfully!');
         navigate('/home');
       } catch (error) {
         console.error('Error updating store:', error);
+        alert('Failed to update store. Please try again.');
+      } finally {
+        setIsSaving(false);
       }
     } else {
       console.error('User not logged in or initial store data not loaded.');
@@ -92,7 +121,7 @@ const EditStorePage = () => {
           <VendorDetailsForm
             initialData={initialStoreData}
             onSubmit={handleSubmit}
-            submitButtonText="Update Store"
+            submitButtonText={isSaving ? "Updating Store..." : "Update Store"}
           />
         </div>
       </div>

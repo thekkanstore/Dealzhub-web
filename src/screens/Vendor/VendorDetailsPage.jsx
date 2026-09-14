@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import appLogo from '../../assets/images/appLogo@2x.png';
 import VendorDetailsForm from '../../components/vendor/VendorDetailsForm';
 import { useAppContext } from '../../context/AppContext';
 import { createNewStore, updateUserRole } from '../../services/firestore';
+import { uploadImageToStorage } from '../../services/firebaseStorageService';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const VendorDetailsPage = () => {
   const { user, appConfigs } = useAppContext();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   console.log("App Config in VendorDetailsPage:", appConfigs);
   const handelMessage = (storeName) => {
     const message = `Vendor request for ${storeName} has been submitted. Kindly review the store details and proceed with the approval.`;
@@ -24,21 +27,36 @@ const VendorDetailsPage = () => {
 
   const handleSubmit = async (formData) => {
     if (user) {
-      const storeData = {
-        userId: user.providerData[0].uid,
-        storeName: formData.storeName,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        phoneNumber: formData.phoneNumber,
-        email: formData.email,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isActive: true,
-        vendorStatus: 'pending',
-      };
-
+      setIsSubmitting(true);
       try {
+        let finalLogoUrl = formData.logoUrl || '';
+        if (formData.logoFile) {
+          const uploadRes = await uploadImageToStorage(
+            formData.logoFile,
+            `store-logos/${user.providerData[0].uid}`
+          );
+          if (uploadRes.success) {
+            finalLogoUrl = uploadRes.url;
+          }
+        }
+
+        const storeData = {
+          userId: user.providerData[0].uid,
+          storeName: formData.storeName,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          phoneNumber: formData.phoneNumber,
+          email: formData.email,
+          logoUrl: finalLogoUrl,
+          logo: finalLogoUrl,
+          logoBase64: formData.logoBase64 || '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          isActive: true,
+          vendorStatus: 'pending',
+        };
+
         // Create the store
         await createNewStore(storeData);
 
@@ -51,7 +69,9 @@ const VendorDetailsPage = () => {
         navigate('/home');
       } catch (error) {
         console.error('Error creating store or updating user role:', error);
-        // You might want to show an error message to the user here
+        alert('Failed to register store. Please try again.');
+      } finally {
+        setIsSubmitting(false);
       }
     } else {
       console.error('User not logged in.');
