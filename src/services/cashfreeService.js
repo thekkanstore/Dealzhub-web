@@ -4,9 +4,7 @@ const CASHFREE_CONFIG = {
   APP_ID: import.meta.env.VITE_CASHFREE_APP_ID || '',
   SECRET_KEY: import.meta.env.VITE_CASHFREE_SECRET_KEY || '',
   ENV: isSandbox ? 'sandbox' : 'production',
-  BASE_URL: typeof window !== 'undefined' && window.location.hostname === 'localhost' 
-    ? '/api/cashfree' 
-    : (isSandbox ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg'),
+  BASE_URL: '/api/cashfree',
   API_VERSION: '2023-08-01',
 };
 
