@@ -4,6 +4,7 @@ import 'react-virtualized/styles.css';
 import ProductCard from '../home/ProductCard';
 import { useAppContext } from '../../context/AppContext';
 import LoadingSpinner from './LoadingSpinner';
+import { ProductGridSkeleton } from './SkeletonLoader';
 
 const VirtualizedProductGrid = React.memo(({
   products,
@@ -17,6 +18,10 @@ const VirtualizedProductGrid = React.memo(({
       navigate(`/product/${product.id}`);
     }
   }, [navigate]);
+
+  if (isLoading && (!products || products.length === 0)) {
+    return <ProductGridSkeleton count={10} />;
+  }
 
   return (
     <div>

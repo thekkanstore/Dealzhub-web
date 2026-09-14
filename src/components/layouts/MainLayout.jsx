@@ -41,30 +41,13 @@ const MainLayout = () => {
     }
   }, [debouncedSearchQuery, navigate, location.pathname]);
 
-  const hideHeaderRoutes = [
-    /^\/add-product(\/.*)?$/,
-    /^\/bulk-add-product(\/.*)?$/,
-    /^\/edit-product(\/.*)?$/,
-    /^\/editstore(\/.*)?$/,
-  ];
-
-  const hideFooterRoutes = [
-    /^\/vendor(\/.*)?$/,
-    /^\/store-redirect(\/.*)?$/,
-    /^\/shop(\/.*)?$/,
-    /^\/add-product(\/.*)?$/,
-    /^\/bulk-add-product(\/.*)?$/,
-    /^\/edit-product(\/.*)?$/,
-    /^\/editstore(\/.*)?$/,
-  ];
-
-  const shouldHideHeader = hideHeaderRoutes.some(pattern => pattern.test(location.pathname));
-  const shouldHideFooter = hideFooterRoutes.some(pattern => pattern.test(location.pathname));
+  const isHomePage = location.pathname === '/home' || location.pathname === '/';
+  const showHeader = isHomePage || location.pathname.startsWith('/search');
 
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow">
-        {!shouldHideHeader && (
+        {showHeader && (
           <Header
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -84,7 +67,7 @@ const MainLayout = () => {
         />
         <Outlet context={appContext} />
       </div>
-      {!shouldHideFooter && <Footer />}
+      {isHomePage && <Footer />}
     </div>
   );
 };

@@ -10,7 +10,8 @@ const StoreRedirectPage: React.FC = () => {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
   const rawId = searchParams.get('id');
-  const shopParamName = searchParams.get('shop') || (slug ? slug.replace(/-/g, ' ') : '');
+  const rawSlug = searchParams.get('slug');
+  const shopParamName = searchParams.get('shop') || (slug ? slug.replace(/-/g, ' ') : (rawSlug ? rawSlug.replace(/-/g, ' ') : ''));
   const navigate = useNavigate();
 
   const [store, setStore] = useState<any>(null);
@@ -23,8 +24,12 @@ const StoreRedirectPage: React.FC = () => {
         if (rawId) {
           const data = await getStoreById(rawId, true);
           setStore(data);
-        } else if (slug) {
-          const data = await getStoreBySlug(slug);
+        } else if (slug || rawSlug) {
+          const targetSlug = slug || rawSlug || '';
+          let data = await getStoreBySlug(targetSlug);
+          if (!data) {
+            data = await getStoreById(targetSlug, true);
+          }
           setStore(data);
         }
       } catch (err) {
@@ -35,7 +40,7 @@ const StoreRedirectPage: React.FC = () => {
     };
 
     fetchStore();
-  }, [rawId, slug]);
+  }, [rawId, slug, rawSlug]);
 
   const storeId = store?.id || rawId || '';
   const displayName = store?.storeName || shopParamName || 'Featured Store';
