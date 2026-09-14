@@ -13,8 +13,25 @@ export const getSubCategories = async (storeId, categoryId) => {
       where("isActive", "==", true)
     );
     const snapshot = await getDocs(q);
-    const subcategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return subcategories.sort((a, b) => a.name.localeCompare(b.name));
+    const rawSubcategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // Deduplicate by normalized name (case-insensitive & trimmed)
+    const seenNames = new Map();
+    for (const sub of rawSubcategories) {
+      if (!sub.name) continue;
+      const normalized = sub.name.trim().toLowerCase();
+      if (!seenNames.has(normalized)) {
+        seenNames.set(normalized, { ...sub, matchedIds: [sub.id] });
+      } else {
+        const existing = seenNames.get(normalized);
+        if (!existing.matchedIds.includes(sub.id)) {
+          existing.matchedIds.push(sub.id);
+        }
+      }
+    }
+
+    const uniqueSubcategories = Array.from(seenNames.values());
+    return uniqueSubcategories.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error('Error fetching subcategories:', error);
     return [];

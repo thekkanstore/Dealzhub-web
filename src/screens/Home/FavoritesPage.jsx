@@ -1,21 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from '../../components/home/ProductCard';
 import noDataFound from '../../assets/images/noDataFound@3x.png';
 import { useAppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import { getProductById } from '../../services/productService';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const FavoritesPage = () => {
-  const { favorites, products, toggleFavorite, isFavorite, addToCart } = useAppContext();
+  const { favorites, toggleFavorite, isFavorite, addToCart } = useAppContext();
   const navigate = useNavigate();
+  const [favoriteProducts, setFavoriteProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Filter products based on the favorite IDs
-  const favoriteProducts = products.filter(product => favorites.includes(product.id));
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadFavorites = async () => {
+      if (!favorites || favorites.length === 0) {
+        setFavoriteProducts([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const fetched = await Promise.all(favorites.map((id) => getProductById(id)));
+        if (isMounted) {
+          setFavoriteProducts(fetched.filter(Boolean));
+        }
+      } catch (err) {
+        console.error('Error fetching favorites:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadFavorites();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [favorites]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">My Favorites ({favoriteProducts.length})</h1>
-        {favoriteProducts.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <LoadingSpinner />
+          </div>
+        ) : favoriteProducts.length === 0 ? (
           <div className="bg-white rounded-lg p-12 text-center">
             <img src={noDataFound} alt="No Favorites" className="w-48 h-48 mx-auto mb-6" loading="lazy" />
             <h2 className="text-2xl font-medium mb-2">No favorites yet</h2>

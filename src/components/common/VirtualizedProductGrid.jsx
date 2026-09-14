@@ -13,9 +13,9 @@ const VirtualizedProductGrid = React.memo(({
   const navigate = useNavigate();
 
   const viewProduct = useCallback((product) => {
-    navigate(`/product/${product.id}`, { replace: false });
-    
-    window.location.href = `/product/${product.id}`;
+    if (product && product.id) {
+      navigate(`/product/${product.id}`);
+    }
   }, [navigate]);
 
   return (

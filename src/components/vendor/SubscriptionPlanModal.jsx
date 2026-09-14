@@ -59,16 +59,17 @@ const SubscriptionPlanModal = ({ isOpen, onClose, onSelectPlan, initialPlanId = 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-gradient-to-b from-[#064E3B] via-[#047857] to-[#064E3B] text-white rounded-3xl shadow-2xl border border-emerald-400/30 overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-white text-gray-900 rounded-3xl shadow-2xl border border-gray-100 overflow-hidden my-8 max-h-[90vh] flex flex-col">
         
         {/* Close Button */}
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-emerald-950/40 text-emerald-100 hover:bg-emerald-900 hover:text-white transition-colors"
+            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900 transition-colors cursor-pointer"
+            aria-label="Close modal"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         )}
 
@@ -76,16 +77,18 @@ const SubscriptionPlanModal = ({ isOpen, onClose, onSelectPlan, initialPlanId = 
         <div className="overflow-y-auto p-6 md:p-8 space-y-6">
           
           {/* Header Section */}
-          <div className="text-center space-y-3">
+          <div className="text-center space-y-2">
             <div className="flex justify-center items-center">
-              <img src={appLogo} alt="Dealzhub Logo" className="w-16 h-16 object-contain bg-white/90 rounded-2xl p-1.5 shadow-md" />
+              <div className="w-16 h-16 p-2 bg-[#E5EEE9]/50 rounded-2xl border border-[#528E6B]/20 flex items-center justify-center shadow-xs">
+                <img src={appLogo} alt="Dealzhub Logo" className="w-full h-full object-contain" />
+              </div>
             </div>
             <div>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-amber-300 uppercase font-serif">
-                SUBSCRIPTION PLANS
+              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 uppercase">
+                Choose Subscription Plan
               </h2>
-              <p className="text-emerald-100 text-sm md:text-base font-medium mt-1">
-                Take Your Local Store Online with <span className="text-amber-300 font-bold">Dealzhub</span>
+              <p className="text-gray-600 text-sm md:text-base font-medium mt-1">
+                Take your local store online with <span className="text-primaryButtonBackgroundColor font-bold">DealzHub</span>
               </p>
             </div>
           </div>
@@ -98,34 +101,32 @@ const SubscriptionPlanModal = ({ isOpen, onClose, onSelectPlan, initialPlanId = 
               onClick={() => setSelectedPlanId('3_months')}
               className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 flex flex-col justify-between border-2 ${
                 selectedPlanId === '3_months'
-                  ? 'bg-gradient-to-b from-amber-50 to-amber-100/95 text-emerald-950 border-amber-400 shadow-2xl scale-[1.02]'
-                  : 'bg-emerald-950/60 text-emerald-50 border-emerald-500/40 hover:border-emerald-300/80 hover:bg-emerald-900/60'
+                  ? 'bg-[#E5EEE9]/30 text-gray-900 border-primaryButtonBackgroundColor shadow-lg scale-[1.01] ring-2 ring-primaryButtonBackgroundColor/20'
+                  : 'bg-white text-gray-800 border-gray-200 hover:border-primaryButtonBackgroundColor/50 hover:bg-gray-50/50 shadow-xs'
               }`}
             >
               {selectedPlanId === '3_months' && (
-                <div className="absolute -top-3 right-4 bg-amber-500 text-emerald-950 font-bold text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-md">
+                <div className="absolute -top-3 right-4 bg-primaryButtonBackgroundColor text-white font-semibold text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Selected
                 </div>
               )}
 
               <div>
-                <div className="text-center pb-4 border-b border-emerald-600/30">
-                  <span className={`inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 ${
-                    selectedPlanId === '3_months' ? 'bg-emerald-800 text-amber-300' : 'bg-emerald-800/80 text-emerald-200'
+                <div className="text-center pb-4 border-b border-gray-200/80">
+                  <span className={`inline-block px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 ${
+                    selectedPlanId === '3_months' ? 'bg-primaryButtonBackgroundColor text-white' : 'bg-gray-100 text-gray-700'
                   }`}>
                     3 MONTHS
                   </span>
-                  <div className="text-4xl font-extrabold my-2 flex items-center justify-center tracking-tight">
-                    <span className="text-2xl mr-0.5">₹</span>899
+                  <div className="text-4xl font-extrabold my-2 flex items-center justify-center tracking-tight text-gray-900">
+                    <span className="text-2xl text-gray-500 font-bold mr-0.5">₹</span>899
                   </div>
                 </div>
 
                 <ul className="mt-4 space-y-2.5 text-xs md:text-sm">
                   {PLAN_3_MONTHS.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <CheckCircle2 className={`w-4 h-4 mt-0.5 shrink-0 ${
-                        selectedPlanId === '3_months' ? 'text-emerald-700' : 'text-emerald-300'
-                      }`} />
+                    <li key={idx} className="flex items-start gap-2 text-gray-700">
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-primaryButtonBackgroundColor" />
                       <span className="font-medium">{feature}</span>
                     </li>
                   ))}
@@ -133,7 +134,7 @@ const SubscriptionPlanModal = ({ isOpen, onClose, onSelectPlan, initialPlanId = 
               </div>
 
               <div className={`mt-6 p-3 rounded-xl text-center text-xs font-semibold ${
-                selectedPlanId === '3_months' ? 'bg-emerald-900 text-emerald-50' : 'bg-emerald-900/70 text-emerald-200'
+                selectedPlanId === '3_months' ? 'bg-primaryButtonBackgroundColor/15 text-[#254030]' : 'bg-gray-100 text-gray-600'
               }`}>
                 {PLAN_3_MONTHS.tagline}
               </div>
@@ -144,38 +145,36 @@ const SubscriptionPlanModal = ({ isOpen, onClose, onSelectPlan, initialPlanId = 
               onClick={() => setSelectedPlanId('12_months')}
               className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 flex flex-col justify-between border-2 ${
                 selectedPlanId === '12_months'
-                  ? 'bg-gradient-to-b from-amber-50 to-amber-100/95 text-emerald-950 border-amber-400 shadow-2xl scale-[1.02]'
-                  : 'bg-emerald-950/60 text-emerald-50 border-emerald-500/40 hover:border-emerald-300/80 hover:bg-emerald-900/60'
+                  ? 'bg-[#E5EEE9]/30 text-gray-900 border-primaryButtonBackgroundColor shadow-lg scale-[1.01] ring-2 ring-primaryButtonBackgroundColor/20'
+                  : 'bg-white text-gray-800 border-gray-200 hover:border-primaryButtonBackgroundColor/50 hover:bg-gray-50/50 shadow-xs'
               }`}
             >
-              <div className="absolute -top-3 left-4 bg-amber-400 text-emerald-950 font-bold text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-md">
-                <Sparkles className="w-3.5 h-3.5 fill-emerald-950" /> Most Popular
+              <div className="absolute -top-3 left-4 bg-[#254030] text-white font-bold text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300 fill-amber-300" /> Best Value
               </div>
 
               {selectedPlanId === '12_months' && (
-                <div className="absolute -top-3 right-4 bg-amber-500 text-emerald-950 font-bold text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-md">
+                <div className="absolute -top-3 right-4 bg-primaryButtonBackgroundColor text-white font-semibold text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Selected
                 </div>
               )}
 
               <div>
-                <div className="text-center pb-4 border-b border-emerald-600/30">
-                  <span className={`inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 ${
-                    selectedPlanId === '12_months' ? 'bg-emerald-900 text-amber-300' : 'bg-emerald-800/80 text-emerald-200'
+                <div className="text-center pb-4 border-b border-gray-200/80">
+                  <span className={`inline-block px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 ${
+                    selectedPlanId === '12_months' ? 'bg-primaryButtonBackgroundColor text-white' : 'bg-gray-100 text-gray-700'
                   }`}>
                     12 MONTHS
                   </span>
-                  <div className="text-4xl font-extrabold my-2 flex items-center justify-center tracking-tight">
-                    <span className="text-2xl mr-0.5">₹</span>2,999
+                  <div className="text-4xl font-extrabold my-2 flex items-center justify-center tracking-tight text-gray-900">
+                    <span className="text-2xl text-gray-500 font-bold mr-0.5">₹</span>2,999
                   </div>
                 </div>
 
                 <ul className="mt-4 space-y-2.5 text-xs md:text-sm">
                   {PLAN_12_MONTHS.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <CheckCircle2 className={`w-4 h-4 mt-0.5 shrink-0 ${
-                        selectedPlanId === '12_months' ? 'text-emerald-700' : 'text-emerald-300'
-                      }`} />
+                    <li key={idx} className="flex items-start gap-2 text-gray-700">
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-primaryButtonBackgroundColor" />
                       <span className="font-medium">{feature}</span>
                     </li>
                   ))}
@@ -183,7 +182,7 @@ const SubscriptionPlanModal = ({ isOpen, onClose, onSelectPlan, initialPlanId = 
               </div>
 
               <div className={`mt-6 p-3 rounded-xl text-center text-xs font-semibold ${
-                selectedPlanId === '12_months' ? 'bg-emerald-900 text-emerald-50' : 'bg-emerald-900/70 text-emerald-200'
+                selectedPlanId === '12_months' ? 'bg-primaryButtonBackgroundColor/15 text-[#254030]' : 'bg-gray-100 text-gray-600'
               }`}>
                 {PLAN_12_MONTHS.tagline}
               </div>
@@ -192,39 +191,49 @@ const SubscriptionPlanModal = ({ isOpen, onClose, onSelectPlan, initialPlanId = 
           </div>
 
           {/* Trust Banner Section */}
-          <div className="bg-emerald-950/70 rounded-2xl p-4 border border-emerald-500/30 text-center">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-amber-300 mb-3">
-              BUILT TO EMPOWER LOCAL BUSINESSES
+          <div className="bg-[#E5EEE9]/40 rounded-2xl p-4 border border-[#528E6B]/20 text-center">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-[#254030] mb-3">
+              Built To Empower Local Businesses
             </h4>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center text-[11px] text-emerald-100">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center text-[11px] text-gray-700">
               <div className="flex flex-col items-center gap-1">
-                <ShieldCheck className="w-5 h-5 text-amber-300" />
-                <span>Trusted by Local Stores</span>
+                <ShieldCheck className="w-5 h-5 text-primaryButtonBackgroundColor" />
+                <span className="font-medium">Trusted by Stores</span>
               </div>
               <div className="flex flex-col items-center gap-1">
-                <Users className="w-5 h-5 text-amber-300" />
-                <span>Reach More Customers</span>
+                <Users className="w-5 h-5 text-primaryButtonBackgroundColor" />
+                <span className="font-medium">Reach Customers</span>
               </div>
               <div className="flex flex-col items-center gap-1">
-                <TrendingUp className="w-5 h-5 text-amber-300" />
-                <span>Grow Your Business</span>
+                <TrendingUp className="w-5 h-5 text-primaryButtonBackgroundColor" />
+                <span className="font-medium">Grow Your Sales</span>
               </div>
               <div className="flex flex-col items-center gap-1">
-                <Clock className="w-5 h-5 text-amber-300" />
-                <span>Save Time & Effort</span>
+                <Clock className="w-5 h-5 text-primaryButtonBackgroundColor" />
+                <span className="font-medium">Save Time & Effort</span>
               </div>
               <div className="flex flex-col items-center gap-1 col-span-2 md:col-span-1">
-                <Headset className="w-5 h-5 text-amber-300" />
-                <span>Support Ready</span>
+                <Headset className="w-5 h-5 text-primaryButtonBackgroundColor" />
+                <span className="font-medium">Dedicated Support</span>
               </div>
             </div>
           </div>
 
           {/* Action Button */}
-          <div className="pt-2">
+          <div className="pt-2 flex flex-col sm:flex-row gap-3">
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full sm:w-1/3 py-3.5 px-6 bg-secondaryButtonBackgroundColor hover:bg-gray-200 text-gray-700 text-base font-semibold rounded-full border border-gray-200 shadow-sm transition-all duration-300 ease-in-out hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center cursor-pointer"
+              >
+                Cancel
+              </button>
+            )}
             <button
+              type="button"
               onClick={handleConfirm}
-              className="w-full py-4 px-6 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-emerald-950 text-base font-bold rounded-full shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
+              className={`w-full ${onClose ? 'sm:w-2/3' : ''} py-3.5 px-6 bg-primaryButtonBackgroundColor hover:bg-[#427256] text-white text-base font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer tracking-wide`}
             >
               Proceed to Pay ({selectedPlanId === '3_months' ? '₹899 for 3 Months' : '₹2,999 for 12 Months'})
             </button>
@@ -237,3 +246,4 @@ const SubscriptionPlanModal = ({ isOpen, onClose, onSelectPlan, initialPlanId = 
 };
 
 export default SubscriptionPlanModal;
+

@@ -37,6 +37,7 @@ const StoreRedirectPage: React.FC = () => {
     fetchStore();
   }, [rawId, slug]);
 
+  const storeId = store?.id || rawId || '';
   const displayName = store?.storeName || shopParamName || 'Featured Store';
   const displayLogo = store?.logoUrl || store?.logo || store?.storeLogo || store?.imageUrl || '';
   const displayAddress = store?.address ? `${store.address}${store.city ? `, ${store.city}` : ''}` : (store?.city || 'Kerala, India');
@@ -70,6 +71,8 @@ const StoreRedirectPage: React.FC = () => {
           window.location.href = storeUrl;
         }
       }, 2500);
+    } else {
+      window.location.href = getAppStoreLink();
     }
   };
 
@@ -82,7 +85,7 @@ const StoreRedirectPage: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#122319] via-[#1b3425] to-[#0f1d14] flex items-center justify-center p-4 relative overflow-hidden">
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <SEO
         title={`Visit ${displayName}`}
         description={`Explore products, exclusive deals and store updates from ${displayName} on DealzHub.`}
@@ -91,62 +94,70 @@ const StoreRedirectPage: React.FC = () => {
         robots="noindex, follow"
       />
 
-      {/* Decorative Glow Elements */}
-      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-6 sm:p-10 max-w-md w-full text-center relative z-10 border border-white/20">
+      <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center border border-gray-100">
         
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center">
             <LoadingSpinner />
             <p className="text-gray-500 text-sm mt-4 animate-pulse">Loading store details...</p>
           </div>
+        ) : !store && !rawId ? (
+          <div className="py-6 space-y-4">
+            <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto text-gray-400 border border-gray-100">
+              <StoreIcon className="w-10 h-10 text-gray-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Store Not Found</h1>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              We couldn't find the store you are looking for. It may have been renamed or removed.
+            </p>
+            <button
+              onClick={() => navigate('/home')}
+              className="w-full bg-primaryButtonBackgroundColor text-white font-semibold py-3.5 px-6 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+            >
+              Browse DealzHub
+            </button>
+          </div>
         ) : (
           <>
-            {/* Top Store Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-6">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Verified DealzHub Store</span>
-            </div>
-
-            {/* Store Logo or Stylized Icon */}
-            <div className="w-24 h-24 mx-auto mb-5 rounded-3xl p-1 bg-gradient-to-br from-emerald-500 to-teal-700 shadow-lg flex items-center justify-center">
+            {/* Store / App Logo */}
+            <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6 p-2 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               {displayLogo ? (
                 <img
                   src={displayLogo}
                   alt={`${displayName} Logo`}
-                  className="w-full h-full object-cover rounded-[22px] bg-white"
+                  className="w-full h-full object-contain rounded-xl"
                 />
               ) : (
-                <div className="w-full h-full bg-white rounded-[22px] flex items-center justify-center text-emerald-700 font-black text-3xl">
-                  {displayName ? displayName.charAt(0).toUpperCase() : <StoreIcon className="w-10 h-10" />}
-                </div>
+                <img
+                  src={appLogo}
+                  alt="DealzHub Logo"
+                  className="w-full h-full object-contain"
+                />
               )}
             </div>
 
             {/* Store Name Heading */}
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight mb-2">
-              {displayName}
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {displayName ? `Open ${displayName} in App?` : 'Open in DealzHub App?'}
             </h1>
 
             {/* Location */}
             {displayAddress && (
-              <div className="flex items-center justify-center gap-1.5 text-gray-600 text-xs sm:text-sm mb-6 max-w-xs mx-auto">
-                <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="line-clamp-2">{displayAddress}</span>
+              <div className="flex items-center justify-center gap-1.5 text-gray-600 text-xs sm:text-sm mb-3 max-w-xs mx-auto">
+                <MapPin className="w-4 h-4 text-primaryButtonBackgroundColor shrink-0" />
+                <span className="line-clamp-1">{displayAddress}</span>
               </div>
             )}
 
             <p className="text-gray-600 text-sm mb-8 leading-relaxed">
-              How would you like to explore products and deals from <strong className="text-gray-800 font-semibold">{displayName}</strong>?
+              For the best shopping experience, explore exclusive products, deals, and instant updates in the DealzHub mobile app.
             </p>
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-3.5">
               <button
                 onClick={handleOpenInApp}
-                className="w-full bg-primaryButtonBackgroundColor hover:opacity-95 text-white font-bold py-4 px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 text-base cursor-pointer"
+                className="w-full bg-primaryButtonBackgroundColor text-white border border-gray-200 font-semibold py-3.5 px-6 rounded-full shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-base cursor-pointer"
               >
                 <Smartphone className="w-5 h-5" />
                 <span>Open in DealzHub App</span>
@@ -154,7 +165,7 @@ const StoreRedirectPage: React.FC = () => {
 
               <button
                 onClick={handleContinueOnWeb}
-                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3.5 px-6 rounded-full transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-sm cursor-pointer"
+                className="w-full bg-secondaryButtonBackgroundColor text-gray-800 font-semibold py-3.5 px-6 rounded-full hover:bg-gray-200 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-sm cursor-pointer"
               >
                 <Globe className="w-4 h-4 text-gray-600" />
                 <span>Continue on Web</span>

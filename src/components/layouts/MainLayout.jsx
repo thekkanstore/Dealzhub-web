@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Header from '../home/Header';
 import { useAppContext } from '../../context/AppContext';
@@ -23,16 +23,21 @@ const MainLayout = () => {
   } = appContext;
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const prevQueryRef = useRef(debouncedSearchQuery);
 
   useEffect(() => {
-    // Only navigate if the user has typed something and is not on the home page trying to clear search
-    if (debouncedSearchQuery.trim() !== '') {
-      // Use replace to avoid polluting browser history while typing
-      navigate(`/search?q=${debouncedSearchQuery}`, { replace: location.pathname === '/search' });
-    }
-    // If the search query is cleared, and we are on the search page, navigate back home
-    else if (debouncedSearchQuery.trim() === '' && location.pathname === '/search') {
-      navigate('/home');
+    // Only trigger search navigation if the query text itself was actively modified by the user
+    if (prevQueryRef.current !== debouncedSearchQuery) {
+      prevQueryRef.current = debouncedSearchQuery;
+
+      if (debouncedSearchQuery.trim() !== '') {
+        // Use replace when already on /search to avoid polluting browser history while typing
+        navigate(`/search?q=${encodeURIComponent(debouncedSearchQuery.trim())}`, { 
+          replace: location.pathname === '/search' 
+        });
+      } else if (location.pathname === '/search') {
+        navigate('/home');
+      }
     }
   }, [debouncedSearchQuery, navigate, location.pathname]);
 

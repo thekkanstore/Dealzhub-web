@@ -311,14 +311,14 @@ const VendorDetailsForm = ({
 
         {/* Selected Subscription Plan Card - Only for initial registration */}
         {submitButtonText !== 'Update Store' && (
-          <div className="mb-6 bg-gradient-to-r from-emerald-900 to-emerald-800 text-white rounded-2xl p-4 border border-emerald-500/40 shadow-sm flex items-center justify-between">
+          <div className="mb-6 bg-[#E5EEE9]/60 text-gray-900 rounded-2xl p-4 border border-[#528E6B]/30 shadow-xs flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-amber-400 text-emerald-950 p-2 rounded-xl">
-                <Sparkles className="w-5 h-5" />
+              <div className="bg-primaryButtonBackgroundColor text-white p-2.5 rounded-xl shadow-xs">
+                <Sparkles className="w-5 h-5 text-amber-300" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-emerald-200 uppercase tracking-wider">Subscription Plan</p>
-                <p className="text-sm font-bold text-amber-300">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Subscription Plan</p>
+                <p className="text-sm font-bold text-gray-900">
                   {selectedPlan.id === '3_months' ? '3 Months (₹899)' : '12 Months (₹2,999)'}
                 </p>
               </div>
@@ -326,7 +326,7 @@ const VendorDetailsForm = ({
             <button
               type="button"
               onClick={() => setIsPlanModalOpen(true)}
-              className="text-xs font-bold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-full border border-white/20 transition-all cursor-pointer"
+              className="text-xs font-bold bg-white hover:bg-gray-50 text-gray-800 px-3.5 py-1.5 rounded-full border border-gray-200 shadow-xs transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
               Change Plan
             </button>

@@ -280,20 +280,20 @@ const EditStorePage = () => {
 
           {/* Active Subscription Card */}
           {isActive && (
-            <div className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white rounded-2xl p-5 border border-emerald-500/40 shadow-sm space-y-2">
+            <div className="bg-[#E5EEE9]/60 text-gray-900 rounded-2xl p-5 border border-[#528E6B]/30 shadow-xs space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-amber-300" />
-                  <span className="text-xs font-bold text-emerald-200 uppercase tracking-wider">Active Subscription</span>
+                  <ShieldCheck className="w-5 h-5 text-primaryButtonBackgroundColor" />
+                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Active Subscription</span>
                 </div>
-                <span className="bg-emerald-700 text-amber-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/40">
+                <span className="bg-primaryButtonBackgroundColor text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-xs">
                   {store.subscriptionPlan === '3_months' ? '3 Months' : '12 Months'}
                 </span>
               </div>
-              <p className="text-sm font-semibold text-emerald-50">
-                Valid until: <span className="text-amber-300 font-bold">{formattedEndDate}</span>
+              <p className="text-sm font-semibold text-gray-800">
+                Valid until: <span className="text-primaryButtonBackgroundColor font-bold">{formattedEndDate}</span>
               </p>
-              <p className="text-[11px] text-emerald-200/80">
+              <p className="text-[11px] text-gray-600">
                 You can renew or switch plans once your active subscription expires.
               </p>
             </div>

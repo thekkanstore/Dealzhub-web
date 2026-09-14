@@ -2,15 +2,15 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import CategoryScroller from '../../components/common/CategoryScroller';
-import { getStoreById } from '../../services/storeFirestoreService';
+import { getStoreById, getStoreBySlug } from '../../services/storeFirestoreService';
 import 'react-virtualized/styles.css';
 import noDataFound from '../../assets/images/noDataFound@3x.png';
 import VirtualizedProductGrid from '../../components/common/VirtualizedProductGrid';
 import { fetchAllProducts, fetchProductsByStoreAndCategory } from '../../services/productService';
 import QRCode from 'qrcode';
-import { ArrowLeft, Download, Store as StoreIcon } from 'lucide-react';
+import { Download, Store as StoreIcon, Phone, MapPin } from 'lucide-react';
 import appLogo from '../../assets/images/appLogo@2x.png';
-import { getCategoryById } from '../../services/firestore';
+import { getCategoryById, getActiveCategories } from '../../services/firestore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getSubCategories } from '../../services/subcategoryService';
 import { getImageBlobFromStorage } from '../../services/firebaseStorageService';
@@ -21,14 +21,16 @@ import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase
 import { db } from '../../firebase';
 
 const StorePage = () => {
-  const { id: storeId } = useParams();
+  const { id: storeIdParam, slug: storeSlugParam } = useParams();
   const navigate = useNavigate();
-  const { user } = useAppContext();
+  const { user, setActiveStore } = useAppContext();
   const qrCanvasRef = useRef(null);
 
   // State for store data
   const [store, setStore] = useState(null);
   const [isStoreLoading, setIsStoreLoading] = useState(true);
+
+  const storeId = store?.id || storeIdParam || '';
 
   // State for category filtering
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -140,13 +142,39 @@ const StorePage = () => {
   // --- Data Fetching ---
   // Fetch store details
   useEffect(() => {
-    if (!storeId) return;
+    const targetId = storeIdParam;
+    const targetSlug = storeSlugParam;
+    if (!targetId && !targetSlug) return;
+
     setIsStoreLoading(true);
-    getStoreById(storeId, true).then(storeData => {
-      setStore(storeData);
-      setIsStoreLoading(false);
-    });
-  }, [storeId]);
+    const fetchStoreDetails = async () => {
+      try {
+        let storeData = null;
+        if (targetId) {
+          storeData = await getStoreById(targetId, true);
+        } else if (targetSlug) {
+          storeData = await getStoreBySlug(targetSlug);
+        }
+
+        setStore(storeData);
+        if (setActiveStore) {
+          setActiveStore(storeData);
+        }
+      } catch (err) {
+        console.error('Error fetching store details:', err);
+      } finally {
+        setIsStoreLoading(false);
+      }
+    };
+
+    fetchStoreDetails();
+
+    return () => {
+      if (setActiveStore) {
+        setActiveStore(null);
+      }
+    };
+  }, [storeIdParam, storeSlugParam, setActiveStore]);
 
   const storeSlug = useMemo(() => {
     return (store?.storeName || 'shop')
@@ -259,42 +287,88 @@ const StorePage = () => {
     };
   }, [hasMore, isLoadingMore, isLoadingProducts, lastDoc]);
 
-  // Fetch store categories when store data changes
+  // Fetch store categories: from store document, store products, or all active categories
   useEffect(() => {
     const fetchCategory = async () => {
-      if (store?.categories) {
+      if (!store) return;
+      try {
+        let catIds = [];
+        if (Array.isArray(store.categories) && store.categories.length > 0) {
+          catIds = [...store.categories];
+        } else if (typeof store.categories === 'string' && store.categories.trim() !== '') {
+          catIds = [store.categories.trim()];
+        }
+
+        // Also query products of this store to collect any categoryIds used by its products
+        const storeDocId = store.id || storeId;
+        if (storeDocId) {
+          try {
+            const q = query(
+              collection(db, 'products'),
+              where('storeId', '==', storeDocId)
+            );
+            const snap = await getDocs(q);
+            snap.docs.forEach(docSnap => {
+              const p = docSnap.data();
+              if (p.categoryId && !catIds.includes(p.categoryId)) {
+                catIds.push(p.categoryId);
+              }
+            });
+          } catch (err) {
+            console.warn('Error fetching store product categories:', err);
+          }
+        }
+
+        let resolvedCategories = [];
+        if (catIds.length > 0) {
+          const categoryPromises = catIds.map(cId => getCategoryById(cId));
+          const fetchedCategories = await Promise.all(categoryPromises);
+          resolvedCategories = fetchedCategories.filter(cat => cat !== null && cat !== undefined);
+        }
+
+        if (resolvedCategories.length === 0) {
+          const allActive = await getActiveCategories();
+          resolvedCategories = allActive || [];
+        }
+
+        // Strict deduplication by ID and normalized Name
+        const seenIds = new Set();
+        const seenNames = new Set();
+        const uniqueCategories = [];
+
+        for (const cat of resolvedCategories) {
+          if (!cat || !cat.id) continue;
+          const normName = (cat.name || '').trim().toLowerCase();
+          if (!seenIds.has(cat.id) && (!normName || !seenNames.has(normName))) {
+            seenIds.add(cat.id);
+            if (normName) seenNames.add(normName);
+            uniqueCategories.push(cat);
+          }
+        }
+
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error('Error fetching categories for store:', error);
         try {
-          // Check if categories is an array
-          if (Array.isArray(store.categories)) {
-            // Map through each category ID and fetch it
-            const categoryPromises = store.categories.map(catId => getCategoryById(catId));
-            const fetchedCategories = await Promise.all(categoryPromises);
-            // Filter out null values
-            const validCategories = fetchedCategories.filter(cat => cat !== null);
-            setCategories(validCategories);
-          }
-          // If categories is a single string ID
-          else if (typeof store.categories === 'string') {
-            const category = await getCategoryById(store.categories);
-            setCategories(category ? [category] : []);
-          }
-          // Handle unexpected format
-          else {
-            console.warn('Unexpected categories format:', store.categories);
-            setCategories([]);
-          }
-        } catch (error) {
-          console.error('Error fetching category:', error);
+          const allActive = await getActiveCategories();
+          const seen = new Set();
+          const unique = (allActive || []).filter(c => {
+            const n = (c.name || '').trim().toLowerCase();
+            if (!seen.has(n)) {
+              seen.add(n);
+              return true;
+            }
+            return false;
+          });
+          setCategories(unique);
+        } catch {
           setCategories([]);
         }
-      } else {
-        // If no categories, set empty array
-        setCategories([]);
       }
     };
 
     fetchCategory();
-  }, [store]);
+  }, [store, storeId]);
 
   // --- Filtering ---
 
@@ -334,8 +408,13 @@ const StorePage = () => {
     if (!selectedSubCategoryId) {
       return products;
     }
-    return products.filter((p) => p.subcategoryIds?.includes(selectedSubCategoryId));
-  }, [products, selectedSubCategoryId]);
+    const selectedSub = subCategories.find(s => s.id === selectedSubCategoryId);
+    const targetIds = selectedSub?.matchedIds || [selectedSubCategoryId];
+
+    return products.filter((p) =>
+      p.subcategoryIds?.some(id => targetIds.includes(id))
+    );
+  }, [products, selectedSubCategoryId, subCategories]);
 
   // Robust image loader for canvas to avoid CORS/cache errors with remote images
   const loadQrImage = async (url) => {
@@ -622,12 +701,6 @@ const StorePage = () => {
         schema={storeSchema}
       />
       <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col">
-        <button
-          onClick={() => navigate('/home')}
-          className="px-4 py-1.5 mb-4 text-sm cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit"
-        >
-          <ArrowLeft />
-        </button>
         <div className='flex flex-wrap justify-between items-start gap-6'>
           <div className='mb-6 max-w-xl'>
             {/* Store Logo and Name Header */}
@@ -759,7 +832,10 @@ const StorePage = () => {
 
           {/* Subcategory Filter Chips */}
           {selectedCategory && subCategories.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide py-2 px-4 max-w-7xl mx-auto -mt-2 mb-4">
+            <div 
+              className="flex gap-2 overflow-x-auto overflow-y-hidden scrollbar-hide py-2 px-4 max-w-7xl mx-auto -mt-2 mb-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               <button
                 type="button"
                 onClick={() => setSelectedSubCategoryId(null)}
