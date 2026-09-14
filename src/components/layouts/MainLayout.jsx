@@ -41,25 +41,39 @@ const MainLayout = () => {
     }
   }, [debouncedSearchQuery, navigate, location.pathname]);
 
+  const hideHeaderRoutes = [
+    /^\/add-product(\/.*)?$/,
+    /^\/bulk-add-product(\/.*)?$/,
+    /^\/edit-product(\/.*)?$/,
+    /^\/editstore(\/.*)?$/,
+  ];
+
   const hideFooterRoutes = [
     /^\/vendor(\/.*)?$/,
     /^\/store-redirect(\/.*)?$/,
-    /^\/shop(\/.*)?$/
+    /^\/shop(\/.*)?$/,
+    /^\/add-product(\/.*)?$/,
+    /^\/bulk-add-product(\/.*)?$/,
+    /^\/edit-product(\/.*)?$/,
+    /^\/editstore(\/.*)?$/,
   ];
 
+  const shouldHideHeader = hideHeaderRoutes.some(pattern => pattern.test(location.pathname));
   const shouldHideFooter = hideFooterRoutes.some(pattern => pattern.test(location.pathname));
 
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow">
-        <Header
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          navigateTo={navigate}
-          favoritesCount={favorites ? favorites.length : 0}
-          cartCount={cart ? cart.length : 0}
-          logout={logout}
-        />
+        {!shouldHideHeader && (
+          <Header
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            navigateTo={navigate}
+            favoritesCount={favorites ? favorites.length : 0}
+            cartCount={cart ? cart.length : 0}
+            logout={logout}
+          />
+        )}
         <LoginModal 
           isOpen={loginModalOpen} 
           onClose={() => {
