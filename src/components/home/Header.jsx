@@ -23,13 +23,14 @@ const Header = ({
   const { user, selectedLocation, updateLocation } = useAppContext();
   const [role, setRole] = useState(false);
   const [storeId, setStoreId] = useState(null);
-  const uid = user?.providerData[0].uid;
+  const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+  const currentUserEmail = user?.email || user?.providerData?.[0]?.email;
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (uid) {
+      if (currentUserId || currentUserEmail) {
         // User is logged in. Fetch all user-related data.
-        const userData = await getUserData(uid);
+        const userData = await getUserData(currentUserId, currentUserEmail);
         if (userData) {
           // Set location from user profile. This is the source of truth on login.
           if (userData.city) {
@@ -44,7 +45,7 @@ const Header = ({
         
         // Fetch store info
         try {
-          const store = await getStoreByUserId(uid);
+          const store = await getStoreByUserId(currentUserId, currentUserEmail);
           setStoreId(store ? store.id : null);
         } catch (error) {
           console.error('Error fetching user store:', error);
@@ -67,7 +68,7 @@ const Header = ({
     };
 
     fetchUserData();
-  }, [uid]);
+  }, [currentUserId, currentUserEmail]);
   
   useEffect(() => {
     if (selectedLocation && selectedLocation !== 'Select Location') {
@@ -191,26 +192,48 @@ const Header = ({
                     <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg py-2 z-50">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-green-50">
                         <img
-                          src={user.providerData[0].photoURL || ''}
+                          src={user?.photoURL || user?.providerData?.[0]?.photoURL || ''}
                           alt="Profile"
                           className="w-12 h-12 rounded-full object-cover"
                           referrerPolicy="no-referrer"
                           loading="lazy"
                         />
                         <div>
-                          <p className="text-sm font-semibold text-gray-800">{user.providerData[0].displayName}</p>
-                          <p className="text-xs text-gray-800">{user.providerData[0].email}</p>
+                          <p className="text-sm font-semibold text-gray-800">{user?.displayName || user?.providerData?.[0]?.displayName || 'User'}</p>
+                          <p className="text-xs text-gray-800">{user?.email || user?.providerData?.[0]?.email || ''}</p>
                         </div>
                       </div>
+                      {storeId ? (
+                        <button
+                          onClick={() => {
+                            setIsDropdownOpen(false);
+                            navigateTo(`/vendor/${storeId}`);
+                          }}
+                          className="block w-full text-left px-4 py-2 m-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 rounded-md transition-colors"
+                        >
+                          My Store
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setIsDropdownOpen(false);
+                            navigateTo('/vendordetails');
+                          }}
+                          className="block w-full text-left px-4 py-2 m-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                        >
+                          Create Store
+                        </button>
+                      )}
                       <a
                         href="/editprofile"
-                        className="block px-4 py-2 m-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 m-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+                        onClick={() => setIsDropdownOpen(false)}
                       >
-                        Edit
+                        Edit Profile
                       </a>
                       <a
                         href=""
-                        className="block px-4 py-2 m-2 text-sm text-gray-700 hover:bg-red-100 hover:text-red-600"
+                        className="block px-4 py-2 m-2 text-sm text-gray-700 hover:bg-red-100 hover:text-red-600 rounded-md"
                         onClick={logout}
                       >
                         Logout
@@ -339,15 +362,15 @@ const Header = ({
               <div className="mb-4 pb-4 border-b">
                 <div className="flex items-center gap-3 mb-3">
                   <img
-                    src={user.providerData[0].photoURL || ''}
+                    src={user?.photoURL || user?.providerData?.[0]?.photoURL || ''}
                     alt="Profile"
                     className="w-12 h-12 rounded-full object-cover"
                     referrerPolicy="no-referrer"
                     loading="lazy"
                   />
                   <div>
-                    <p className="text-sm font-semibold text-gray-800">{user.providerData[0].displayName}</p>
-                    <p className="text-xs text-gray-600">{user.providerData[0].email}</p>
+                    <p className="text-sm font-semibold text-gray-800">{user?.displayName || user?.providerData?.[0]?.displayName || 'User'}</p>
+                    <p className="text-xs text-gray-600">{user?.email || user?.providerData?.[0]?.email || ''}</p>
                   </div>
                 </div>
                 <a

@@ -45,24 +45,39 @@ export const getStoreById = async (storeId, forceRefresh = false) => {
   }
 };
 
-export const getStoreByUserId = async (userId) => {
+export const getStoreByUserId = async (userId, userEmail = null) => {
+  if (!userId && !userEmail) return null;
   try {
     const storesRef = collection(db, 'stores');
-    const q = query(storesRef, where('userId', '==', userId));
-    const snapshot = await getDocs(q);
+    if (userId) {
+      const q = query(storesRef, where('userId', '==', userId));
+      const snapshot = await getDocs(q);
 
-    if (snapshot.empty) {
-      return null;
+      if (!snapshot.empty) {
+        const storeDoc = snapshot.docs[0];
+        return {
+          id: storeDoc.id,
+          ...storeDoc.data()
+        };
+      }
     }
 
-    // Return the first store found (assuming one store per user)
-    const storeDoc = snapshot.docs[0];
-    return {
-      id: storeDoc.id,
-      ...storeDoc.data()
-    };
+    if (userEmail) {
+      const qEmail = query(storesRef, where('email', '==', userEmail));
+      const snapshotEmail = await getDocs(qEmail);
+
+      if (!snapshotEmail.empty) {
+        const storeDoc = snapshotEmail.docs[0];
+        return {
+          id: storeDoc.id,
+          ...storeDoc.data()
+        };
+      }
+    }
+
+    return null;
   } catch (error) {
-    console.error('Error fetching store by userId:', error);
+    console.error('Error fetching store by userId/email:', error);
     return null;
   }
 };

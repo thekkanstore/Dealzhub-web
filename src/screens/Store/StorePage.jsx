@@ -15,6 +15,10 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getSubCategories } from '../../services/subcategoryService';
 import { getImageBlobFromStorage } from '../../services/firebaseStorageService';
 import SEO from '../../components/common/SEO';
+import SubscriptionPlanModal from '../../components/vendor/SubscriptionPlanModal';
+import { createCashfreeOrder, initiateCashfreeWebCheckout } from '../../services/cashfreeService';
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 const StorePage = () => {
   const { id: storeId } = useParams();
@@ -44,6 +48,83 @@ const StorePage = () => {
   const categoryRef = useRef(selectedCategory);
   const storeIdRef = useRef(storeId);
 
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
+  const isPendingStatus = store?.vendorStatus?.toLowerCase() === 'pending';
+  const isPaymentPending = store?.paymentStatus === 'pending' || store?.paymentStatus === 'FAILED' || (isPendingStatus && store?.paymentStatus !== 'PAID');
+  const subscriptionEndDate = store?.subscriptionEndDate
+    ? store.subscriptionEndDate.toDate
+      ? store.subscriptionEndDate.toDate()
+      : new Date(store.subscriptionEndDate)
+    : null;
+  const isSubscriptionExpired = subscriptionEndDate ? new Date() > subscriptionEndDate : false;
+
+  const handleLaunchPayment = async (planId = '12_months', amount = 2999) => {
+    if (!store || !user) return;
+    try {
+      setPaymentLoading(true);
+      const timestamp = Date.now();
+      let targetStoreRef = null;
+      const storeDocId = store.id || storeId;
+
+      if (storeDocId) {
+        const candidateRef = doc(db, 'stores', storeDocId);
+        const snap = await getDoc(candidateRef);
+        if (snap.exists()) {
+          targetStoreRef = candidateRef;
+        }
+      }
+
+      const currentUserId = user?.uid || user?.providerData?.[0]?.uid || '';
+
+      if (!targetStoreRef && currentUserId) {
+        const q = query(collection(db, 'stores'), where('userId', '==', currentUserId));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          targetStoreRef = snap.docs[0].ref;
+        }
+      }
+
+      const activeStoreId = targetStoreRef ? targetStoreRef.id : (storeDocId || currentUserId);
+      const orderId = `order_${activeStoreId}_${timestamp}`;
+      const returnUrl = `${window.location.origin}/payment-status?order_id=${orderId}`;
+
+      if (targetStoreRef) {
+        await setDoc(targetStoreRef, {
+          paymentStatus: 'pending',
+          subscriptionPlan: planId,
+          subscriptionAmount: amount,
+          paymentOrderId: orderId,
+          updatedAt: new Date(),
+        }, { merge: true });
+      }
+
+      const cashfreeOrder = await createCashfreeOrder({
+        orderId,
+        orderAmount: amount,
+        customerName: store.storeName,
+        customerEmail: store.email,
+        customerPhone: store.phoneNumber,
+        returnUrl,
+      });
+
+      if (cashfreeOrder && cashfreeOrder.payment_session_id) {
+        await initiateCashfreeWebCheckout(cashfreeOrder.payment_session_id);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Error launching payment: ' + (error.message || 'Please try again.'));
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleSelectRenewalPlan = (plan) => {
+    setIsPlanModalOpen(false);
+    handleLaunchPayment(plan.id, plan.price);
+  };
+
   useEffect(() => {
     categoryRef.current = selectedCategory;
     storeIdRef.current = storeId;
@@ -52,7 +133,8 @@ const StorePage = () => {
   // Check if current user owns this store
   const isStoreOwner = useMemo(() => {
     if (!user || !store) return false;
-    return store.userId === user.providerData[0].uid;
+    const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+    return store.userId === currentUserId || (user.uid && store.userId === user.uid) || (user.providerData?.[0]?.uid && store.userId === user.providerData[0].uid);
   }, [user, store]);
 
   // --- Data Fetching ---
@@ -586,7 +668,27 @@ const StorePage = () => {
                 >
                   Edit
                 </button>
-                {(currentStatus === "approved" || currentStatus === "private") ? (
+                {isPaymentPending ? (
+                  <button
+                    onClick={() => {
+                      if (store.subscriptionPlan) {
+                        handleLaunchPayment(store.subscriptionPlan, store.subscriptionAmount || 2999);
+                      } else {
+                        setIsPlanModalOpen(true);
+                      }
+                    }}
+                    className="px-6 py-2 bg-primaryButtonBackgroundColor text-white font-semibold gap-2 rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Complete Payment {store.subscriptionAmount ? `(₹${store.subscriptionAmount})` : ''}
+                  </button>
+                ) : isSubscriptionExpired ? (
+                  <button
+                    onClick={() => setIsPlanModalOpen(true)}
+                    className="px-6 py-2 bg-primaryButtonBackgroundColor text-white font-semibold gap-2 rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Renew Subscription
+                  </button>
+                ) : (currentStatus === "approved" || currentStatus === "private") ? (
                   <>
                     <button
                       onClick={() => navigate('/add-product')}
@@ -739,6 +841,13 @@ const StorePage = () => {
       )}
 
       <canvas ref={qrCanvasRef} style={{ display: 'none' }} />
+
+      <SubscriptionPlanModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        onSelectPlan={handleSelectRenewalPlan}
+        initialPlanId={store?.subscriptionPlan || '12_months'}
+      />
     </main>
   );
 };

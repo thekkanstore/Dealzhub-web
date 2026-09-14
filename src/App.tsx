@@ -25,6 +25,8 @@ import RefundPolicyPage from './screens/Info/RefundPolicyPage';
 import TermsAndConditionsPage from './screens/Info/TermsAndConditionsPage';
 
 
+import PaymentStatusPage from './screens/Store/PaymentStatusPage';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -37,6 +39,10 @@ const router = createBrowserRouter([
   {
     path: '/shop/:slug',
     element: <StoreRedirectPage />,
+  },
+  {
+    path: '/payment-status',
+    element: <PaymentStatusPage />,
   },
   {
     path: '/login',
