@@ -19,7 +19,10 @@ const ProductPage = () => {
   // Check if current user owns this product
   const isProductOwner = useMemo(() => {
     if (!user || !selectedProduct) return false;
-    return selectedProduct.userId === user.providerData[0].uid;
+    const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+    return selectedProduct.userId === currentUserId || 
+           (user.uid && selectedProduct.userId === user.uid) || 
+           (user.providerData?.[0]?.uid && selectedProduct.userId === user.providerData[0].uid);
   }, [user, selectedProduct]);
 
   const handleDeleteProduct = async () => {

@@ -21,15 +21,17 @@ const EditProfilePage = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (user && user.providerData[0]?.uid) {
+      const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+      const userEmail = user?.email || user?.providerData?.[0]?.email;
+      if (currentUserId || userEmail) {
         setLoading(true);
         try {
-          const data = await getUserData(user.providerData[0].uid);
+          const data = await getUserData(currentUserId, userEmail);
           if (data) {
             setUserData(data);
             setInitialProfileData({
-              fullName: data.name || user.displayName || '',
-              email: data.email || user.email || '',
+              fullName: data.name || user?.displayName || '',
+              email: data.email || user?.email || '',
               phone: data.phoneNumber || '',
               address: data.address || '',
               city: data.city || '',
@@ -48,7 +50,9 @@ const EditProfilePage = () => {
   }, [user]);
 
   const handleSubmit = async (formData) => {
-    if (user && userData) {
+    const currentUserId = user?.uid || user?.providerData?.[0]?.uid;
+    const userEmail = user?.email || user?.providerData?.[0]?.email;
+    if (user && (currentUserId || userEmail)) {
       const updatedData = {
         name: formData.fullName,
         email: formData.email,
@@ -58,14 +62,14 @@ const EditProfilePage = () => {
         state: formData.state,
         updatedAt: new Date(),
         // Keep existing data
-        role: userData.role || [],
-        favorites: userData.favorites || [],
-        cart: userData.cart || [],
-        createdAt: userData.createdAt,
+        role: userData?.role || [],
+        favorites: userData?.favorites || [],
+        cart: userData?.cart || [],
+        createdAt: userData?.createdAt || new Date(),
       };
 
       try {
-        await updateUserProfile(user.providerData[0].uid, updatedData);
+        await updateUserProfile(currentUserId, updatedData, userEmail);
         navigate("/home");
         window.location.reload();
       } catch (error) {

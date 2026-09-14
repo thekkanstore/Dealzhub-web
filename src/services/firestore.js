@@ -22,22 +22,37 @@ export const getAppConfigBanners = async () => {
   }
 };
 
-export const getUserData = async (uid) => {
+export const getUserData = async (uid, email = null) => {
   try {
-    const userDocRef = doc(db, "users", uid);
-    const userDoc = await getDoc(userDocRef);
+    if (uid) {
+      const userDocRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userDocRef);
 
-    if (!userDoc.exists()) {
-      return null;
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        return {
+          id: userDoc.id,
+          cart: data.cart || [],
+          ...data,
+        };
+      }
     }
 
-    const data = userDoc.data();
+    if (email) {
+      const q = query(collection(db, "users"), where("email", "==", email), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const docSnap = snap.docs[0];
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          cart: data.cart || [],
+          ...data,
+        };
+      }
+    }
 
-    return {
-      id: userDoc.id,
-      cart: data.cart || [],
-      ...data,
-    };
+    return null;
   } catch (error) {
     console.error("Error fetching user data:", error);
     return null;
@@ -141,12 +156,27 @@ export const updateUserCart = async (userId, cart) => {
   }
 };
 
-export const updateUserRole = async (userId, role) => {
+export const updateUserRole = async (userId, role, userEmail = null) => {
   try {
-    const userDocRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userDocRef);
-    
-    if (userDoc.exists()) {
+    let userDocRef = null;
+    if (userId) {
+      const ref = doc(db, 'users', userId);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        userDocRef = ref;
+      }
+    }
+
+    if (!userDocRef && userEmail) {
+      const q = query(collection(db, 'users'), where('email', '==', userEmail), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        userDocRef = snap.docs[0].ref;
+      }
+    }
+
+    if (userDocRef) {
+      const userDoc = await getDoc(userDocRef);
       const userData = userDoc.data();
       const currentRoles = userData.role || [];
       
@@ -160,7 +190,6 @@ export const updateUserRole = async (userId, role) => {
     }
   } catch (error) {
     console.error('Error updating user role:', error);
-    throw error;
   }
 };
 
@@ -207,10 +236,32 @@ export const getAppConfigs = async () => {
   }
 };
 
-export const updateUserProfile = async (userId, userData) => {
+export const updateUserProfile = async (userId, userData, userEmail = null) => {
   try {
-    const userDocRef = doc(db, 'users', userId);
-    await updateDoc(userDocRef, userData);
+    let userDocRef = null;
+    if (userId) {
+      const ref = doc(db, 'users', userId);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        userDocRef = ref;
+      }
+    }
+
+    if (!userDocRef && userEmail) {
+      const q = query(collection(db, 'users'), where('email', '==', userEmail), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        userDocRef = snap.docs[0].ref;
+      }
+    }
+
+    if (!userDocRef && userId) {
+      userDocRef = doc(db, 'users', userId);
+    }
+
+    if (userDocRef) {
+      await setDoc(userDocRef, userData, { merge: true });
+    }
   } catch (error) {
     console.error('Error updating user profile:', error);
     throw error;

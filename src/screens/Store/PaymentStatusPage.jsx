@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { verifyCashfreeOrder } from '../../services/cashfreeService';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { updateUserRole } from '../../services/firestore';
 import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
 import appLogo from '../../assets/images/appLogo@2x.png';
 
@@ -66,6 +67,10 @@ const PaymentStatusPage = () => {
               subscriptionEndDate: endDate,
               updatedAt: new Date(),
             }, { merge: true });
+
+            if (storeData.userId || storeData.email) {
+              await updateUserRole(storeData.userId, 'vendor', storeData.email);
+            }
           }
 
           setStatus('success');
