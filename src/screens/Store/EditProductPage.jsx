@@ -218,11 +218,13 @@ const EditProductPage = () => {
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         <button
+          type="button"
           onClick={() => navigate(`/vendor/${storeId}`)}
-          className="px-4 py-1.5 mb-4 cursor-pointer text-sm text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit"
+          className="px-4 py-1.5 mb-4 text-sm cursor-pointer text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors w-fit flex items-center gap-2 font-medium"
           disabled={uploading}
         >
-          <ArrowLeft/>
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Store</span>
         </button>
         <div className="max-w-sm w-full mx-auto">
           <h2 className="text-2xl font-bold text-center mt-4 mb-6">Edit Product</h2>
