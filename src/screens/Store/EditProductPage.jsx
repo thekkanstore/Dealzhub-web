@@ -5,8 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { updateProductDetails, getProductById } from '../../services/productService';
 import { getStoreByUserId } from '../../services/storeFirestoreService';
 import { uploadMultipleImages, deleteMultipleImages } from '../../services/firebaseStorageService';
-import { getCategoryById } from '../../services/firestore';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Package, Loader2 } from 'lucide-react';
 
 // Utility function to convert to snake_case
 function toSnakeCase(str) {
@@ -182,23 +181,29 @@ const EditProductPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
       </div>
     );
   }
 
   if (!storeId || !productData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
-          <p className="text-gray-600 mb-4">Unable to load product data.</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center border border-gray-100 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primaryButtonBackgroundColor to-emerald-400" />
+          <div className="w-20 h-20 bg-[#E5EEE9]/60 border border-[#528E6B]/20 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-xs">
+            <Package className="w-10 h-10 text-[#528E6B]" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
+          <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+            Unable to load this product's data. It may have been removed or you may not have permission to edit it.
+          </p>
           <button
-            onClick={() => navigate(`/vendor/${storeId}`)}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            onClick={() => storeId ? navigate(`/vendor/${storeId}`) : navigate('/home')}
+            className="w-full bg-primaryButtonBackgroundColor text-white font-semibold py-3 px-6 rounded-full shadow-sm hover:shadow-md hover:bg-[#427256] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-sm cursor-pointer"
           >
-            Back
+            Back to My Store
           </button>
         </div>
       </div>

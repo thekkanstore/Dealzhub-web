@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Star, Heart, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Star, Heart, ChevronLeft, ChevronRight, ArrowLeft, Package } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { getProductById, deleteProduct } from '../../services/productService';
@@ -109,17 +109,29 @@ const ProductPage = () => {
   if (!selectedProduct) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center border border-gray-100">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center border border-gray-100 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primaryButtonBackgroundColor to-emerald-400" />
+          <div className="w-20 h-20 bg-[#E5EEE9]/60 border border-[#528E6B]/20 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-xs">
+            <Package className="w-10 h-10 text-[#528E6B]" />
+          </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
           <p className="text-gray-600 text-sm mb-6 leading-relaxed">
             The product you are looking for is no longer available or may have been removed by the store owner.
           </p>
-          <button
-            onClick={() => navigate('/home')}
-            className="w-full bg-primaryButtonBackgroundColor text-white font-semibold py-3.5 px-6 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-          >
-            Browse More Products
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => navigate('/home')}
+              className="flex-1 bg-primaryButtonBackgroundColor text-white font-semibold py-3 px-6 rounded-full shadow-sm hover:shadow-md hover:bg-[#427256] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-sm cursor-pointer"
+            >
+              Browse Products
+            </button>
+            <button
+              onClick={handleBack}
+              className="py-3 px-6 bg-secondaryButtonBackgroundColor hover:bg-gray-200 text-gray-800 font-semibold rounded-full border border-gray-200 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-sm cursor-pointer"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     );

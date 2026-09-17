@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import appLogo from '../../assets/images/appLogo@2x.png';
 import { getStoreById, getStoreBySlug } from '../../services/storeFirestoreService';
-import { Smartphone, Globe, MapPin, Store as StoreIcon, ArrowRight, Sparkles } from 'lucide-react';
+import { Smartphone, Globe, MapPin, Store as StoreIcon, ArrowRight } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import SEO from '../../components/common/SEO';
 
@@ -108,19 +108,27 @@ const StoreRedirectPage: React.FC = () => {
           </div>
         ) : !store && !rawId ? (
           <div className="py-6 space-y-4">
-            <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto text-gray-400 border border-gray-100">
-              <StoreIcon className="w-10 h-10 text-gray-400" />
+            <div className="w-20 h-20 bg-[#E5EEE9]/60 border border-[#528E6B]/20 rounded-2xl flex items-center justify-center mx-auto text-[#528E6B] shadow-xs">
+              <StoreIcon className="w-10 h-10 text-[#528E6B]" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">Store Not Found</h1>
             <p className="text-gray-600 text-sm leading-relaxed">
-              We couldn't find the store you are looking for. It may have been renamed or removed.
+              We couldn't find the store you are looking for. It may have been renamed, removed, or the link may be invalid.
             </p>
-            <button
-              onClick={() => navigate('/home')}
-              className="w-full bg-primaryButtonBackgroundColor text-white font-semibold py-3.5 px-6 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-            >
-              Browse DealzHub
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                onClick={() => navigate('/home')}
+                className="flex-1 bg-primaryButtonBackgroundColor hover:bg-[#427256] text-white font-semibold py-3 px-6 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer text-sm"
+              >
+                Browse DealzHub
+              </button>
+              <button
+                onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/home')}
+                className="py-3 px-6 bg-secondaryButtonBackgroundColor hover:bg-gray-200 text-gray-800 font-semibold rounded-full border border-gray-200 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-sm cursor-pointer"
+              >
+                Go Back
+              </button>
+            </div>
           </div>
         ) : (
           <>
