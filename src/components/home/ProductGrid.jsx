@@ -1,18 +1,13 @@
 import React from 'react';
-import type { IProduct } from '../../config/common';
 import ProductCard from './ProductCard';
 import { useAppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
-interface ProductGridProps {
-  products: IProduct[];
-}
-
-const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
+const ProductGrid = ({ products }) => {
   const { isFavorite, toggleFavorite, addToCart } = useAppContext();
   const navigate = useNavigate();
 
-  const viewProduct = (product: IProduct) => {
+  const viewProduct = (product) => {
     navigate(`/product/${product.id}`);
   };
 

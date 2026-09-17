@@ -1,17 +1,6 @@
 import React from 'react';
 
-interface Category {
-  id: string;
-  name: string;
-}
-
-interface CategoryFilterProps {
-  categories: Category[];
-  selectedCategory: string | null;
-  onSelectCategory: (categoryId: string | null) => void;
-}
-
-const CategoryFilter: React.FC<CategoryFilterProps> = ({
+const CategoryFilter = ({
   categories,
   selectedCategory,
   onSelectCategory,
