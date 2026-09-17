@@ -1,7 +1,7 @@
 import { collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, query, where, limit, startAfter } from 'firebase/firestore';
 import { db } from '../firebase';
 import { FireStoreCollections } from "../config/common";
-import { clearStoreCache } from './storeFirestoreService';
+import { clearStoreCache, generateUniqueStoreSlug } from './storeFirestoreService';
 
 export const getActiveCategories = async () => {
   try {
@@ -110,7 +110,14 @@ export const createNewStore = async (storeData) => {
       const userSnap = await getDocs(qUser);
       if (!userSnap.empty) {
         const existingDoc = userSnap.docs[0];
+        if (!storeData.slug && storeData.storeName) {
+          storeData.slug = await generateUniqueStoreSlug(storeData.storeName, existingDoc.id);
+        }
+        if (storeData.slug) {
+          storeData.storeUrl = `https://dealzhub.co.in/shop/${storeData.slug}`;
+        }
         await setDoc(existingDoc.ref, storeData, { merge: true });
+        clearStoreCache(existingDoc.id);
         return existingDoc.id;
       }
     }
@@ -120,12 +127,27 @@ export const createNewStore = async (storeData) => {
       const emailSnap = await getDocs(qEmail);
       if (!emailSnap.empty) {
         const existingDoc = emailSnap.docs[0];
+        if (!storeData.slug && storeData.storeName) {
+          storeData.slug = await generateUniqueStoreSlug(storeData.storeName, existingDoc.id);
+        }
+        if (storeData.slug) {
+          storeData.storeUrl = `https://dealzhub.co.in/shop/${storeData.slug}`;
+        }
         await setDoc(existingDoc.ref, storeData, { merge: true });
+        clearStoreCache(existingDoc.id);
         return existingDoc.id;
       }
     }
 
+    if (!storeData.slug && storeData.storeName) {
+      storeData.slug = await generateUniqueStoreSlug(storeData.storeName);
+    }
+    if (storeData.slug) {
+      storeData.storeUrl = `https://dealzhub.co.in/shop/${storeData.slug}`;
+    }
+
     const newStoreDocRef = await addDoc(storesCollectionRef, storeData);
+    clearStoreCache();
     return newStoreDocRef.id;
   } catch (error) {
     console.error('Error creating/updating store:', error);
@@ -317,7 +339,17 @@ export const updateStore = async (userId, storeData) => {
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
       const storeDocId = querySnapshot.docs[0].id;
+      const existingData = querySnapshot.docs[0].data();
       const storeDocRef = doc(db, 'stores', storeDocId);
+
+      // If storeName changed or slug is not present, generate unique slug
+      if (storeData.storeName && (!existingData.slug || existingData.storeName !== storeData.storeName)) {
+        storeData.slug = await generateUniqueStoreSlug(storeData.storeName, storeDocId);
+        storeData.storeUrl = `https://dealzhub.co.in/shop/${storeData.slug}`;
+      } else if (existingData.slug && !existingData.storeUrl) {
+        storeData.storeUrl = `https://dealzhub.co.in/shop/${existingData.slug}`;
+      }
+
       await updateDoc(storeDocRef, storeData);
       clearStoreCache(storeDocId);
       console.log('Store updated successfully!');

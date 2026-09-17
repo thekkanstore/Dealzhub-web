@@ -17,9 +17,9 @@ export const AppProvider = ({ children }) => {
   const [products, setProducts] = useState([]); // Kept for backwards compatibility
   const [selectedLocation, setSelectedLocation] = useState(() => {
     try {
-      return localStorage.getItem('selectedLocation') || null;
+      return localStorage.getItem('selectedLocation') || 'Ernakulam';
     } catch {
-      return null;
+      return 'Ernakulam';
     }
   });
   const [loginModalOpen, setLoginModalOpen] = useState(false);

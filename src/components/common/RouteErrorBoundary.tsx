@@ -111,7 +111,7 @@ const RouteErrorBoundary: React.FC = () => {
         </div>
 
         {/* Expandable Technical Details for Developers/Debugging in non-prod or on click */}
-        {process.env.NODE_ENV !== 'production' && errorMessage && (
+        {import.meta.env.DEV && errorMessage && (
           <details className="text-left bg-gray-50 rounded-xl p-3 border border-gray-200 text-xs text-gray-700">
             <summary className="cursor-pointer font-semibold text-gray-600 hover:text-gray-900 select-none">
               Developer Debug Information

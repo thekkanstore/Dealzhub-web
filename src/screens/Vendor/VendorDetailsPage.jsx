@@ -41,6 +41,7 @@ const VendorDetailsPage = () => {
       const storeData = {
         userId: currentUserId,
         storeName: formData.storeName,
+        bio: formData.bio || '',
         address: formData.address,
         city: formData.city,
         state: formData.state,
