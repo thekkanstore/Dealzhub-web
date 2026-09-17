@@ -31,6 +31,7 @@ const EditStorePage = () => {
             setStore(storeData);
             setInitialStoreData({
               storeName: storeData.storeName,
+              bio: storeData.bio || '',
               address: storeData.address,
               city: storeData.city,
               state: storeData.state,
@@ -78,6 +79,7 @@ const EditStorePage = () => {
 
         const updatedStoreData = {
           storeName: formData.storeName,
+          bio: formData.bio || '',
           address: formData.address,
           city: formData.city,
           state: formData.state,

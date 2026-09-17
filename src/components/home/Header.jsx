@@ -365,12 +365,20 @@ const Header = ({
                 </button>
               </>
             ) : (
-              <button
-                className="p-2 bg-primaryButtonBackgroundColor text-white rounded-full px-6 py-2"
-                onClick={() => navigateTo('/login')}
-              >
-                Login
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  className="p-2 px-5 bg-secondaryButtonBackgroundColor gap-2 rounded-full flex items-center justify-center text-gray-700 border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] text-sm font-medium"
+                  onClick={() => navigateTo('/login')}
+                >
+                  Create Store
+                </button>
+                <button
+                  className="p-2 bg-primaryButtonBackgroundColor text-white rounded-full px-6 py-2 text-sm font-medium shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={() => navigateTo('/login')}
+                >
+                  Login
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -547,15 +555,27 @@ const Header = ({
               </nav>
             </>
           ) : (
-            <button
-              className="w-full p-2 bg-primaryButtonBackgroundColor text-white rounded-full"
-              onClick={() => {
-                navigateTo('/login');
-                setIsMobileMenuOpen(false);
-              }}
-            >
-              Login
-            </button>
+            <div className="space-y-3">
+              <button
+                className="w-full p-2.5 bg-secondaryButtonBackgroundColor text-gray-800 border border-gray-200 rounded-full font-medium text-sm flex items-center justify-center gap-2 shadow-sm"
+                onClick={() => {
+                  navigateTo('/login');
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                <Store className="w-4 h-4 text-emerald-700" />
+                <span>Create Store</span>
+              </button>
+              <button
+                className="w-full p-2.5 bg-primaryButtonBackgroundColor text-white rounded-full font-medium text-sm shadow-sm"
+                onClick={() => {
+                  navigateTo('/login');
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                Login
+              </button>
+            </div>
           )}
         </div>
       </div>

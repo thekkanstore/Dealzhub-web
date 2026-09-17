@@ -9,6 +9,7 @@ const VendorDetailsForm = ({
   submitButtonText = 'Proceed to Subscription & Payment',
 }) => {
   const [storeName, setStoreName] = useState(initialData.storeName || '');
+  const [bio, setBio] = useState(initialData.bio || '');
   const [address, setAddress] = useState(initialData.address || '');
   const [city, setCity] = useState(initialData.city || '');
   const [state, setState] = useState(initialData.state || 'Kerala');
@@ -39,6 +40,7 @@ const VendorDetailsForm = ({
 
   useEffect(() => {
     setStoreName(initialData.storeName || '');
+    setBio(initialData.bio || '');
     setAddress(initialData.address || '');
     setCity(initialData.city || '');
     setState(initialData.state || 'Kerala');
@@ -141,6 +143,7 @@ const VendorDetailsForm = ({
     if (validate()) {
       onSubmit({
         storeName,
+        bio,
         address,
         city,
         state,
@@ -225,6 +228,22 @@ const VendorDetailsForm = ({
             required
           />
           {errors.storeName && <p className="text-red-500 text-xs italic">{errors.storeName}</p>}
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-[#150A33] text-sm font-bold mb-2" htmlFor="bio">
+            Store Bio / About <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+          </label>
+          <textarea
+            className="bg-gray-50/80 appearance-none border border-transparent rounded-lg w-full p-3 text-[#524B6B] leading-tight focus:outline-none focus:shadow-outline focus:border-gray-300 transition-colors"
+            id="bio"
+            placeholder="Tell customers about your store, specialty, deals, or what you offer..."
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            rows={3}
+            maxLength={500}
+          />
+          <p className="text-[11px] text-gray-400 text-right mt-1">{bio.length}/500</p>
         </div>
 
         <div className="mb-4">
