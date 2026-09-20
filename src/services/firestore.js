@@ -103,40 +103,45 @@ export const createNewUser = async (userData, isUpdate = false) => {
 export const createNewStore = async (storeData) => {
   try {
     const storesCollectionRef = collection(db, 'stores');
+    const rawEmail = storeData.email || '';
+    const normalizedEmail = rawEmail.trim().toLowerCase();
+    if (normalizedEmail) {
+      storeData.email = normalizedEmail;
+    }
 
     // Prevent duplicate stores for the same user or email
+    let existingDoc = null;
+
     if (storeData.userId) {
       const qUser = query(storesCollectionRef, where('userId', '==', storeData.userId), limit(1));
       const userSnap = await getDocs(qUser);
       if (!userSnap.empty) {
-        const existingDoc = userSnap.docs[0];
-        if (!storeData.slug && storeData.storeName) {
-          storeData.slug = await generateUniqueStoreSlug(storeData.storeName, existingDoc.id);
-        }
-        if (storeData.slug) {
-          storeData.storeUrl = `https://dealzhub.co.in/shop/${storeData.slug}`;
-        }
-        await setDoc(existingDoc.ref, storeData, { merge: true });
-        clearStoreCache(existingDoc.id);
-        return existingDoc.id;
+        existingDoc = userSnap.docs[0];
       }
     }
 
-    if (storeData.email) {
-      const qEmail = query(storesCollectionRef, where('email', '==', storeData.email), limit(1));
-      const emailSnap = await getDocs(qEmail);
-      if (!emailSnap.empty) {
-        const existingDoc = emailSnap.docs[0];
-        if (!storeData.slug && storeData.storeName) {
-          storeData.slug = await generateUniqueStoreSlug(storeData.storeName, existingDoc.id);
+    if (!existingDoc && (rawEmail || normalizedEmail)) {
+      const emailsToCheck = Array.from(new Set([rawEmail, normalizedEmail].filter(Boolean)));
+      for (const emailVal of emailsToCheck) {
+        const qEmail = query(storesCollectionRef, where('email', '==', emailVal), limit(1));
+        const emailSnap = await getDocs(qEmail);
+        if (!emailSnap.empty) {
+          existingDoc = emailSnap.docs[0];
+          break;
         }
-        if (storeData.slug) {
-          storeData.storeUrl = `https://dealzhub.co.in/shop/${storeData.slug}`;
-        }
-        await setDoc(existingDoc.ref, storeData, { merge: true });
-        clearStoreCache(existingDoc.id);
-        return existingDoc.id;
       }
+    }
+
+    if (existingDoc) {
+      if (!storeData.slug && storeData.storeName) {
+        storeData.slug = await generateUniqueStoreSlug(storeData.storeName, existingDoc.id);
+      }
+      if (storeData.slug) {
+        storeData.storeUrl = `https://dealzhub.co.in/shop/${storeData.slug}`;
+      }
+      await setDoc(existingDoc.ref, storeData, { merge: true });
+      clearStoreCache(existingDoc.id);
+      return existingDoc.id;
     }
 
     if (!storeData.slug && storeData.storeName) {
@@ -294,9 +299,11 @@ export const updateUserProfile = async (userId, userData, userEmail = null) => {
 export const getStoreByUserId = async (userId, userEmail = null) => {
   if (!userId && !userEmail) return null;
   try {
+    const storesCollectionRef = collection(db, "stores");
+
     if (userId) {
       const q = query(
-        collection(db, "stores"),
+        storesCollectionRef,
         where("userId", "==", userId),
         limit(1)
       );
@@ -311,18 +318,23 @@ export const getStoreByUserId = async (userId, userEmail = null) => {
     }
 
     if (userEmail) {
-      const qEmail = query(
-        collection(db, "stores"),
-        where("email", "==", userEmail),
-        limit(1)
-      );
-      const emailSnap = await getDocs(qEmail);
-      if (!emailSnap.empty) {
-        const docSnap = emailSnap.docs[0];
-        return {
-          id: docSnap.id,
-          ...docSnap.data(),
-        };
+      const rawEmail = userEmail;
+      const normalizedEmail = userEmail.trim().toLowerCase();
+      const emailsToCheck = Array.from(new Set([rawEmail, normalizedEmail].filter(Boolean)));
+      for (const emailVal of emailsToCheck) {
+        const qEmail = query(
+          storesCollectionRef,
+          where("email", "==", emailVal),
+          limit(1)
+        );
+        const emailSnap = await getDocs(qEmail);
+        if (!emailSnap.empty) {
+          const docSnap = emailSnap.docs[0];
+          return {
+            id: docSnap.id,
+            ...docSnap.data(),
+          };
+        }
       }
     }
 
@@ -333,26 +345,57 @@ export const getStoreByUserId = async (userId, userEmail = null) => {
   }
 };
 
-export const updateStore = async (userId, storeData) => {
+export const updateStore = async (userId, storeData, userEmail = null) => {
   try {
-    const q = query(collection(db, 'stores'), where('userId', '==', userId), limit(1));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      const storeDocId = querySnapshot.docs[0].id;
-      const existingData = querySnapshot.docs[0].data();
+    const storesCollectionRef = collection(db, 'stores');
+    let targetDoc = null;
+
+    if (userId) {
+      const q = query(storesCollectionRef, where('userId', '==', userId), limit(1));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        targetDoc = querySnapshot.docs[0];
+      }
+    }
+
+    const emailToLook = userEmail || storeData.email;
+    if (!targetDoc && emailToLook) {
+      const rawEmail = emailToLook;
+      const normalizedEmail = emailToLook.trim().toLowerCase();
+      const emailsToCheck = Array.from(new Set([rawEmail, normalizedEmail].filter(Boolean)));
+      for (const emailVal of emailsToCheck) {
+        const qEmail = query(storesCollectionRef, where('email', '==', emailVal), limit(1));
+        const emailSnap = await getDocs(qEmail);
+        if (!emailSnap.empty) {
+          targetDoc = emailSnap.docs[0];
+          break;
+        }
+      }
+    }
+
+    if (targetDoc) {
+      const storeDocId = targetDoc.id;
+      const existingData = targetDoc.data();
       const storeDocRef = doc(db, 'stores', storeDocId);
 
+      const normalizedEmail = storeData.email ? storeData.email.trim().toLowerCase() : existingData.email;
+      const updatedPayload = {
+        ...storeData,
+        ...(normalizedEmail ? { email: normalizedEmail } : {}),
+      };
+
       // If storeName changed or slug is not present, generate unique slug
-      if (storeData.storeName && (!existingData.slug || existingData.storeName !== storeData.storeName)) {
-        storeData.slug = await generateUniqueStoreSlug(storeData.storeName, storeDocId);
-        storeData.storeUrl = `https://dealzhub.co.in/shop/${storeData.slug}`;
+      if (updatedPayload.storeName && (!existingData.slug || existingData.storeName !== updatedPayload.storeName)) {
+        updatedPayload.slug = await generateUniqueStoreSlug(updatedPayload.storeName, storeDocId);
+        updatedPayload.storeUrl = `https://dealzhub.co.in/shop/${updatedPayload.slug}`;
       } else if (existingData.slug && !existingData.storeUrl) {
-        storeData.storeUrl = `https://dealzhub.co.in/shop/${existingData.slug}`;
+        updatedPayload.storeUrl = `https://dealzhub.co.in/shop/${existingData.slug}`;
       }
 
-      await updateDoc(storeDocRef, storeData);
+      await updateDoc(storeDocRef, updatedPayload);
       clearStoreCache(storeDocId);
       console.log('Store updated successfully!');
+      return storeDocId;
     } else {
       console.error('No store found for this user to update.');
       throw new Error('No store found for this user to update.');

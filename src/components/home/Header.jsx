@@ -51,9 +51,9 @@ const Header = ({
 
   useEffect(() => {
     const fetchStore = async () => {
-      if (currentUserId) {
+      if (currentUserId || currentUserEmail) {
         try {
-          const store = await getStoreByUserId(currentUserId);
+          const store = await getStoreByUserId(currentUserId, currentUserEmail);
           if (store) {
             setStoreId(store.id);
           }
@@ -63,7 +63,7 @@ const Header = ({
       }
     };
     fetchStore();
-  }, [currentUserId]);
+  }, [currentUserId, currentUserEmail]);
 
   const handleLocationSelect = (district) => {
     updateLocation(district);
