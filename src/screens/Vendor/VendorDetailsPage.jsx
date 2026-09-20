@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import appLogo from '../../assets/images/appLogo@2x.png';
 import VendorDetailsForm from '../../components/vendor/VendorDetailsForm';
 import { useAppContext } from '../../context/AppContext';
-import { createNewStore, updateUserRole } from '../../services/firestore';
+import { createNewStore, updateUserRole, getStoreByUserId } from '../../services/firestore';
 import { uploadImageToStorage } from '../../services/firebaseStorageService';
 import { createCashfreeOrder, initiateCashfreeWebCheckout } from '../../services/cashfreeService';
 import { Loader2 } from 'lucide-react';
@@ -13,6 +13,35 @@ const VendorDetailsPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Creating store and redirecting to payment gateway...');
+  const [checkingExistingStore, setCheckingExistingStore] = useState(true);
+
+  useEffect(() => {
+    const checkStore = async () => {
+      if (user) {
+        try {
+          const currentUserId = user?.uid || user?.providerData?.[0]?.uid || '';
+          const userEmail = user?.email || user?.providerData?.[0]?.email || '';
+          const existingStore = await getStoreByUserId(currentUserId, userEmail);
+          if (existingStore) {
+            if (existingStore.vendorStatus?.toUpperCase() === 'APPROVED') {
+              navigate(`/vendor/${existingStore.id}`, { replace: true });
+              return;
+            } else {
+              navigate(`/editstore`, { replace: true });
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error checking existing store on VendorDetailsPage:', error);
+        } finally {
+          setCheckingExistingStore(false);
+        }
+      } else {
+        setCheckingExistingStore(false);
+      }
+    };
+    checkStore();
+  }, [user, navigate]);
 
   const handleSubmit = async (formData) => {
     if (!user) {
@@ -26,6 +55,7 @@ const VendorDetailsPage = () => {
       setLoadingText('Saving store details...');
 
       const currentUserId = user?.uid || user?.providerData?.[0]?.uid || '';
+      const normalizedEmail = formData.email ? formData.email.trim().toLowerCase() : (user?.email?.trim().toLowerCase() || '');
 
       let finalLogoUrl = formData.logoUrl || '';
       if (formData.logoFile) {
@@ -46,7 +76,7 @@ const VendorDetailsPage = () => {
         city: formData.city,
         state: formData.state,
         phoneNumber: formData.phoneNumber,
-        email: formData.email,
+        email: normalizedEmail,
         logoUrl: finalLogoUrl,
         logo: finalLogoUrl,
         logoBase64: formData.logoBase64 || '',
@@ -102,17 +132,22 @@ const VendorDetailsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-white">
-      {loading && (
+      {(loading || checkingExistingStore) && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center space-y-4 shadow-2xl">
             <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mx-auto" />
-            <h3 className="text-xl font-bold text-gray-900">Processing Registration</h3>
-            <p className="text-sm text-gray-600 font-medium">{loadingText}</p>
+            <h3 className="text-xl font-bold text-gray-900">
+              {checkingExistingStore ? 'Checking Store Status...' : 'Processing Registration'}
+            </h3>
+            <p className="text-sm text-gray-600 font-medium">
+              {checkingExistingStore ? 'Please wait...' : loadingText}
+            </p>
           </div>
         </div>
       )}
 
-      <div className="flex flex-col w-full justify-center items-center p-8 bg-white">
+      {!checkingExistingStore && (
+        <div className="flex flex-col w-full justify-center items-center p-8 bg-white">
         <div className="max-w-md w-full">
           <div className="w-full justify-center flex">
             <img
@@ -131,6 +166,7 @@ const VendorDetailsPage = () => {
           />
         </div>
       </div>
+      )}
     </div>
   );
 };

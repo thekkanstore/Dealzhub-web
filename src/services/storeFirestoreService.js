@@ -169,15 +169,20 @@ export const getStoreByUserId = async (userId, userEmail = null) => {
     }
 
     if (userEmail) {
-      const qEmail = query(storesRef, where('email', '==', userEmail));
-      const snapshotEmail = await getDocs(qEmail);
+      const rawEmail = userEmail;
+      const normalizedEmail = userEmail.trim().toLowerCase();
+      const emailsToCheck = Array.from(new Set([rawEmail, normalizedEmail].filter(Boolean)));
+      for (const emailVal of emailsToCheck) {
+        const qEmail = query(storesRef, where('email', '==', emailVal));
+        const snapshotEmail = await getDocs(qEmail);
 
-      if (!snapshotEmail.empty) {
-        const storeDoc = snapshotEmail.docs[0];
-        return {
-          id: storeDoc.id,
-          ...storeDoc.data()
-        };
+        if (!snapshotEmail.empty) {
+          const storeDoc = snapshotEmail.docs[0];
+          return {
+            id: storeDoc.id,
+            ...storeDoc.data()
+          };
+        }
       }
     }
 
