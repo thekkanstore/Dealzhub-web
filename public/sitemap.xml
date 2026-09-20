@@ -146,7 +146,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/vendor/9pA1XAZFbPnwLHejiNHI</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -219,6 +219,12 @@
   <url>
     <loc>https://dealzhub.co.in/vendor/HyG1yswZ01aIAI8Oiqm4</loc>
     <lastmod>2026-08-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/vendor/IM9tugMvPRc3ht0qU4MA</loc>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -500,7 +506,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/vendor/jdCNreBCQWDpdKMMmKo6</loc>
-    <lastmod>2026-09-16</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -674,7 +680,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/vendor/wS9fqXssw7iAiFoNlMUk</loc>
-    <lastmod>2026-09-16</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -758,13 +764,19 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/09bxbLwpoA6FVbwN488Y</loc>
-    <lastmod>2026-09-04</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/0KB5I6t3ReOkWyZX11zQ</loc>
     <lastmod>2026-08-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/0KuT9PW8OuoHNBzNmhe5</loc>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -943,6 +955,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/2tpXsXcjAAY6y5q5Hdvw</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/2zYTgsG36WboVCuUFscT</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>daily</changefreq>
@@ -1100,7 +1118,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/5YwN7VK5LLjaF8NnlK2D</loc>
-    <lastmod>2026-09-03</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2191,6 +2209,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/Msve77DrMr8hw0KKF7do</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/N1ClyKshbrJLdyvPbi2i</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>daily</changefreq>
@@ -2475,12 +2499,6 @@
   <url>
     <loc>https://dealzhub.co.in/product/S50rD87pnIKoUPdfzNET</loc>
     <lastmod>2026-08-03</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://dealzhub.co.in/product/SCzmmood57erGgi1FQmC</loc>
-    <lastmod>2026-09-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3722,7 +3740,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/pmJjdWC7Zpg4s3zdsTv7</loc>
-    <lastmod>2026-09-04</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4022,7 +4040,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/trhELU5jVWn0L3LIXc4R</loc>
-    <lastmod>2026-09-03</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4185,6 +4203,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/wd75ztqOuEDYS9XLVhw4</loc>
     <lastmod>2026-07-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/wdmcvy3SP4sPU2Jxrq4w</loc>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
