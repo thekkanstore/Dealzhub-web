@@ -29,6 +29,7 @@ const PrivacyPolicyPage = lazy(() => import('./screens/Info/PrivacyPolicyPage'))
 const RefundPolicyPage = lazy(() => import('./screens/Info/RefundPolicyPage'));
 const TermsAndConditionsPage = lazy(() => import('./screens/Info/TermsAndConditionsPage'));
 const PaymentStatusPage = lazy(() => import('./screens/Store/PaymentStatusPage'));
+const CheckoutPage = lazy(() => import('./screens/Checkout/CheckoutPage'));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50/60">
@@ -46,6 +47,11 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Navigate to="/home" replace />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: '/checkout',
+    element: withSuspense(CheckoutPage),
     errorElement: <RouteErrorBoundary />,
   },
   {

@@ -11,8 +11,9 @@ const PersonalDetailsPage = () =>  {
 
   const handleSubmit = async (formData) => {
     if (user) {
+      const canonicalUid = user.uid || user.providerData?.[0]?.uid;
       const userData = {
-        id: user.providerData[0].uid,
+        id: canonicalUid,
         photo: user.photoURL || '',
         name: formData.fullName || '',
         email: formData.email || '',

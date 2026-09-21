@@ -4,19 +4,10 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { getFirebaseConfig } from './load-env.mjs';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Firebase config
-const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY || "AIzaSyDKa7RU7vue1gMvp6zNeNhzSh_e8CR4i28",
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || "thekkan-app.firebaseapp.com",
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID || "thekkan-app",
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || "thekkan-app.firebasestorage.app",
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "298300377700",
-  appId: process.env.VITE_FIREBASE_APP_ID || "1:298300377700:android:d6a2e60667b1d6db3b2d71",
-  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID || "G-PC24YJYQBC"
-};
 
 const BASE_URL = 'https://dealzhub.co.in';
 
@@ -35,6 +26,7 @@ async function generateSitemap() {
   const today = new Date().toISOString().split('T')[0];
 
   try {
+    const firebaseConfig = getFirebaseConfig();
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -47,8 +39,9 @@ async function generateSitemap() {
         const status = (store.vendorStatus || '').toLowerCase();
         if (status !== 'inactive' && status !== 'rejected') {
           const updatedAt = store.updatedAt?.toDate?.() ? store.updatedAt.toDate().toISOString().split('T')[0] : today;
+          const storePath = store.slug ? `/shop/${store.slug}` : `/vendor/${docSnap.id}`;
           dynamicUrls.push({
-            loc: `${BASE_URL}/vendor/${docSnap.id}`,
+            loc: `${BASE_URL}${storePath}`,
             lastmod: updatedAt,
             priority: '0.85',
             changefreq: 'weekly',

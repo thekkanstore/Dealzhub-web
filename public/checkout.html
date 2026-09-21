@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DealzHub - Secure Payment Checkout</title>
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #064E3B 0%, #047857 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 36px 28px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #064E3B;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .badge {
+      display: inline-block;
+      background: #ECFDF5;
+      color: #059669;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .spinner-box {
+      margin: 20px auto;
+      width: 52px;
+      height: 52px;
+      position: relative;
+    }
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 4px solid #E5E7EB;
+      border-top-color: #059669;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .status-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 8px;
+    }
+    .sub-text {
+      font-size: 13px;
+      color: #6B7280;
+      line-height: 1.5;
+    }
+    .error-box {
+      display: none;
+      background: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      color: #991B1B;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-top: 16px;
+      text-align: left;
+    }
+    .manual-btn {
+      display: none;
+      margin-top: 20px;
+      background: #059669;
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      text-decoration: none;
+    }
+    .manual-btn:hover {
+      background: #047857;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand-title">DealzHub</div>
+    <div class="badge">Cashfree Payment Gateway</div>
+
+    <div class="spinner-box" id="spinner-box">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="status-text" id="status-title">Connecting to Cashfree...</div>
+    <div class="sub-text" id="status-desc">
+      Please wait while we redirect you to the secure payment checkout. Do not close or refresh this page.
+    </div>
+
+    <div class="error-box" id="error-box"></div>
+    <button class="manual-btn" id="manual-btn" onclick="launchCheckout()">Proceed to Payment</button>
+  </div>
+
+  <form id="cf-post-fallback" method="POST" action="https://api.cashfree.com/pg/view/sessions/checkout" style="display:none;">
+    <input type="hidden" name="payment_session_id" id="post-session-id" />
+  </form>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id') || urlParams.get('payment_session_id');
+    const env = (urlParams.get('env') || 'production').toLowerCase();
+
+    const statusTitle = document.getElementById('status-title');
+    const statusDesc = document.getElementById('status-desc');
+    const errorBox = document.getElementById('error-box');
+    const manualBtn = document.getElementById('manual-btn');
+    const spinnerBox = document.getElementById('spinner-box');
+
+    function showError(msg) {
+      spinnerBox.style.display = 'none';
+      statusTitle.textContent = 'Payment Error';
+      statusDesc.textContent = 'We could not initiate the payment session.';
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    async function launchCheckout() {
+      if (!sessionId) {
+        showError('No payment session ID provided. Please return to the DealzHub app and try again.');
+        return;
+      }
+
+      try {
+        if (typeof Cashfree !== 'undefined') {
+          const mode = env === 'sandbox' ? 'sandbox' : 'production';
+          const cashfree = Cashfree({ mode: mode });
+          cashfree.checkout({
+            paymentSessionId: sessionId,
+            redirectTarget: '_self'
+          });
+        } else {
+          // Fallback to direct POST form submission
+          const fallbackAction = env === 'sandbox' 
+            ? 'https://sandbox.cashfree.com/pg/view/sessions/checkout' 
+            : 'https://api.cashfree.com/pg/view/sessions/checkout';
+          const form = document.getElementById('cf-post-fallback');
+          form.action = fallbackAction;
+          document.getElementById('post-session-id').value = sessionId;
+          form.submit();
+        }
+      } catch (err) {
+        console.error('Launch checkout error:', err);
+        // Fallback to direct POST form
+        try {
+          const fallbackAction = env === 'sandbox' 
+            ? 'https://sandbox.cashfree.com/pg/view/sessions/checkout' 
+            : 'https://api.cashfree.com/pg/view/sessions/checkout';
+          const form = document.getElementById('cf-post-fallback');
+          form.action = fallbackAction;
+          document.getElementById('post-session-id').value = sessionId;
+          form.submit();
+        } catch (postErr) {
+          showError(err.message || 'Failed to open Cashfree payment checkout.');
+        }
+      }
+    }
+
+    // Auto-launch immediately on page load
+    if (!sessionId) {
+      showError('No payment session ID provided. Please return to the DealzHub app.');
+    } else {
+      setTimeout(launchCheckout, 150);
+    }
+  </script>
+</body>
+</html>
