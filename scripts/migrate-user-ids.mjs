@@ -22,14 +22,7 @@ import {
   limit,
 } from 'firebase/firestore';
 
-const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY || "AIzaSyDKa7RU7vue1gMvp6zNeNhzSh_e8CR4i28",
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || "thekkan-app.firebaseapp.com",
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID || "thekkan-app",
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || "thekkan-app.firebasestorage.app",
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "298300377700",
-  appId: process.env.VITE_FIREBASE_APP_ID || "1:298300377700:android:d6a2e60667b1d6db3b2d71",
-};
+import { getFirebaseConfig, loadEnv } from './load-env.mjs';
 
 const isApplyMode = process.argv.includes('--apply');
 
@@ -43,6 +36,8 @@ async function runMigration() {
   console.log(`Mode: ${isApplyMode ? '⚠️  APPLY (Writes will be committed)' : '🔍 DRY-RUN (Read-only inspection)'}`);
   console.log('===========================================================\n');
 
+  loadEnv();
+  const firebaseConfig = getFirebaseConfig();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 

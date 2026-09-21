@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "sitemap": "node scripts/generate-sitemap.mjs",
+    "check:slugs": "node scripts/check-store-slugs.mjs",
+    "migrate:slugs:dry": "node scripts/migrate-store-slugs.mjs",
+    "migrate:slugs": "node scripts/migrate-store-slugs.mjs --apply",
     "build": "npm run sitemap && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
