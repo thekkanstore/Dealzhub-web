@@ -46,8 +46,9 @@ const LoginPage = () => {
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
             // Store user details in local storage
+            const canonicalUid = user.uid || user.providerData?.[0]?.uid;
             localStorage.setItem('user', JSON.stringify({
-                uid: user.providerData[0].uid,
+                uid: canonicalUid,
                 email: user.email,
                 displayName: user.displayName,
                 // Add any other relevant user data you want to store
@@ -56,7 +57,10 @@ const LoginPage = () => {
             // For production, consider more secure alternatives like HttpOnly cookies.
             updateUser(user);
 
-            const userDoc = await getUserData(user.providerData[0].uid);
+            let userDoc = await getUserData(canonicalUid, user.email);
+            if (!userDoc && user.providerData?.[0]?.uid) {
+                userDoc = await getUserData(user.providerData[0].uid, user.email);
+            }
 
             if (userDoc) {
                 if (userDoc.role && userDoc.role.length > 0) {
