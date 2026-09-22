@@ -895,7 +895,7 @@ const StorePage = () => {
           </div>
           
           {/* QR Code Section - Positioned on right side for desktop, stacked for mobile/tablet */}
-          {(currentStatus === "approved" || currentStatus === "private") && isStoreOwner && (
+          {(currentStatus === "approved" || currentStatus === "private") && isStoreOwner && !isPaymentPending && !isSubscriptionExpired && (
             <div className="w-full lg:w-auto shrink-0 flex flex-col bg-gray-50 p-5 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
               <div className="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-start w-full gap-5 sm:gap-6">
 
