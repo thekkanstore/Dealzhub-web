@@ -116,6 +116,10 @@ exports.processBulkUpload = onObjectFinalized(
         const categoryId = row.categoryId || "";
         const description = row.description || "";
         const isSecondHand = String(row.isSecondHand).toLowerCase() === "true";
+        const unit = (row.unit || "pcs").toString().trim().toLowerCase();
+        const unitValue = parseFloat(row.unitValue) || 1;
+        const rawSizes = row.sizes ? String(row.sizes).split(/[|,]/).map(s => s.trim()).filter(Boolean) : [];
+        const rawWeightOptions = row.weightOptions ? String(row.weightOptions).split(/[|,]/).map(w => w.trim()).filter(Boolean) : [];
 
         const categoryData = categoriesMap[categoryId] || null;
         
@@ -141,6 +145,10 @@ exports.processBulkUpload = onObjectFinalized(
           isOutOfStock: false,
           isSoldOut: false,
           status: "instock",
+          unit: unit,
+          unitValue: unitValue,
+          sizes: rawSizes,
+          weightOptions: rawWeightOptions,
           nameLower: name.toLowerCase(),
           searchTokens: generateSearchTokens(name),
           createdAt: new Date(),

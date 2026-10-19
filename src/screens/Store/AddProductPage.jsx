@@ -5,8 +5,9 @@ import { useAppContext } from '../../context/AppContext';
 import { createNewProduct } from '../../services/productService';
 import { getStoreByUserId } from '../../services/storeFirestoreService';
 import { uploadMultipleImages } from '../../services/firebaseStorageService';
-import { getCategoryById } from '../../services/firestore'; // Add this import
+import { getCategoryById } from '../../services/firestore';
 import { ArrowLeft } from 'lucide-react';
+import { toast } from '../../utils/toast';
 
 // Utility function to convert to snake_case
 function toSnakeCase(str) {
@@ -36,7 +37,7 @@ const AddProductPage = () => {
             setStoreData(store);
           } else {
             console.error('No store found for this user.');
-            alert('You need to create a store first!');
+            toast.warning('You need to create a store first!');
             navigate('/vendordetails');
           }
         } catch (error) {
@@ -55,7 +56,7 @@ const AddProductPage = () => {
   const handleSubmit = async (formData) => {
     if (!user || !storeId || !storeData) {
       console.error('User not logged in or store not found.');
-      alert('User not logged in or store not found.');
+      toast.error('User not logged in or store not found.');
       return;
     }
 
@@ -79,25 +80,24 @@ const AddProductPage = () => {
           // If some images failed, show a warning
           if (uploadResult.errors && uploadResult.errors.length > 0) {
             console.warn('Some images failed to upload:', uploadResult.errors);
-            alert(`Warning: ${uploadResult.errors.length} image(s) failed to upload, but continuing with ${imageUrls.length} successful upload(s).`);
+            toast.warning(`${uploadResult.errors.length} image(s) failed to upload, continuing with ${imageUrls.length} successful upload(s).`);
           }
         } else {
           throw new Error('Failed to upload images: ' + (uploadResult.errors?.join(', ') || 'Unknown error'));
         }
       } else {
-        alert('Please select at least one image.');
+        toast.warning('Please select at least one image.');
         setUploading(false);
         return;
       }
 
-      // Fetch category data using categoryId
-      let categoryData = null;
-      if (formData.categoryId) {
+      // Fetch category data using categoryId or passed category
+      let categoryData = formData.category || null;
+      if (formData.categoryId && !categoryData) {
         try {
           categoryData = await getCategoryById(formData.categoryId);
         } catch (error) {
-          console.error('Error fetching category:', error);
-          alert('Warning: Could not fetch category data. Continuing without it.');
+          console.warn('Could not fetch category:', error);
         }
       }
 
@@ -119,19 +119,23 @@ const AddProductPage = () => {
         isOutOfStock: formData.isOutOfStock || false,
         isSoldOut: formData.isSoldOut || false,
         status: formData.status || 'instock',
+        unit: formData.unit || 'pcs',
+        unitValue: parseFloat(formData.unitValue) || 1,
+        sizes: Array.isArray(formData.sizes) ? formData.sizes : [],
+        weightOptions: Array.isArray(formData.weightOptions) ? formData.weightOptions : [],
       };
 
       const result = await createNewProduct(productData);
       
       if (result.success) {
-        alert(result.message || 'Product added successfully!');
+        toast.success(result.message || 'Product added successfully!');
         navigate(`/vendor/${storeId}`);
       } else {
-        alert(result.message || 'Failed to add product.');
+        toast.error(result.message || 'Failed to add product.');
       }
     } catch (error) {
       console.error('Error adding product:', error);
-      alert('Failed to add product: ' + (error.message || 'Please try again.'));
+      toast.error('Failed to add product: ' + (error.message || 'Please try again.'));
     } finally {
       setUploading(false);
     }

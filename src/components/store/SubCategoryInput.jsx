@@ -3,6 +3,7 @@ import { Pencil, Trash2, Check, X, Plus } from 'lucide-react';
 import { getSubCategories, createSubCategory, renameSubCategory, deleteSubCategory } from '../../services/subcategoryService';
 import { db } from '../../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { toast } from '../../utils/toast';
 
 const SubCategoryInput = ({ storeId, categoryId, selectedIds = [], onChange }) => {
   const [fetchedSubCategories, setFetchedSubCategories] = useState([]);
@@ -86,7 +87,7 @@ const SubCategoryInput = ({ storeId, categoryId, selectedIds = [], onChange }) =
           console.error(queryErr);
         }
       } else {
-        alert('Failed to create sub-category: ' + err.message);
+        toast.error('Failed to create sub-category: ' + err.message);
       }
     }
   };
@@ -105,7 +106,7 @@ const SubCategoryInput = ({ storeId, categoryId, selectedIds = [], onChange }) =
         }
         await loadSubCategories();
       } catch (err) {
-        alert('Failed to delete: ' + err.message);
+        toast.error('Failed to delete: ' + err.message);
       }
     }
   };
@@ -135,7 +136,7 @@ const SubCategoryInput = ({ storeId, categoryId, selectedIds = [], onChange }) =
       x => x.id !== sub.id && x.name.toLowerCase() === trimmed.toLowerCase()
     );
     if (duplicate) {
-      alert('A sub-category with this name already exists.');
+      toast.warning('A sub-category with this name already exists.');
       return;
     }
 
@@ -145,7 +146,7 @@ const SubCategoryInput = ({ storeId, categoryId, selectedIds = [], onChange }) =
       setEditingName('');
       await loadSubCategories();
     } catch (err) {
-      alert('Failed to rename: ' + err.message);
+      toast.error('Failed to rename: ' + err.message);
     }
   };
 
