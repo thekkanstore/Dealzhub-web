@@ -4,8 +4,10 @@ import ProductForm from '../../components/store/ProductForm';
 import { useAppContext } from '../../context/AppContext';
 import { updateProductDetails, getProductById } from '../../services/productService';
 import { getStoreByUserId } from '../../services/storeFirestoreService';
+import { getCategoryById } from '../../services/firestore';
 import { uploadMultipleImages, deleteMultipleImages } from '../../services/firebaseStorageService';
 import { ArrowLeft, Package, Loader2 } from 'lucide-react';
+import { toast } from '../../utils/toast';
 
 // Utility function to convert to snake_case
 function toSnakeCase(str) {
@@ -35,7 +37,7 @@ const EditProductPage = () => {
           const store = await getStoreByUserId(currentUserId, userEmail);
           if (!store) {
             console.error('No store found for this user.');
-            alert('You need to create a store first!');
+            toast.error('You need to create a store first!');
             navigate('/vendordetails');
             return;
           }
@@ -45,14 +47,14 @@ const EditProductPage = () => {
           // Fetch product data
           const product = await getProductById(productId);
           if (!product) {
-            alert('Product not found!');
+            toast.error('Product not found!');
             navigate(`/vendor/${store.id}`);
             return;
           }
 
           // Verify user owns this product
           if (product.storeId !== store.id) {
-            alert('You do not have permission to edit this product.');
+            toast.error('You do not have permission to edit this product.');
             navigate(`/vendor/${store.id}`);
             return;
           }
@@ -60,7 +62,7 @@ const EditProductPage = () => {
           setProductData(product);
         } catch (error) {
           console.error('Error fetching data:', error);
-          alert('Failed to load product data.');
+          toast.error('Failed to load product data.');
         } finally {
           setLoading(false);
         }
@@ -75,7 +77,7 @@ const EditProductPage = () => {
   const handleSubmit = async (formData) => {
     if (!user || !storeId || !storeData || !productData) {
       console.error('Missing required data.');
-      alert('Missing required data.');
+      toast.error('Missing required data.');
       return;
     }
 
@@ -111,10 +113,10 @@ const EditProductPage = () => {
           // Add newly uploaded images to the existing ones
           finalImageUrls = [...finalImageUrls, ...uploadResult.urls];
           
-          // If some images failed, show a warning
+          // If some images failed, show a warning toast
           if (uploadResult.errors && uploadResult.errors.length > 0) {
             console.warn('Some images failed to upload:', uploadResult.errors);
-            alert(`Warning: ${uploadResult.errors.length} image(s) failed to upload, but continuing with ${uploadResult.urls.length} successful upload(s).`);
+            toast.warning(`${uploadResult.errors.length} image(s) failed to upload, continuing with successful uploads.`);
           }
         } else {
           throw new Error('Failed to upload images: ' + (uploadResult.errors?.join(', ') || 'Unknown error'));
@@ -123,19 +125,19 @@ const EditProductPage = () => {
 
       // Ensure at least one image exists
       if (finalImageUrls.length === 0) {
-        alert('Please select at least one image.');
+        toast.warning('Please select at least one image.');
         setUploading(false);
         return;
       }
 
       // Fetch category data using categoryId
-      let categoryData = null;
-      if (formData.categoryId) {
+      let categoryData = formData.category || productData.category || null;
+      if (formData.categoryId && (!categoryData || categoryData.id !== formData.categoryId)) {
         try {
-          categoryData = await getCategoryById(formData.categoryId);
+          const fetched = await getCategoryById(formData.categoryId);
+          if (fetched) categoryData = fetched;
         } catch (error) {
-          console.error('Error fetching category:', error);
-          alert('Warning: Could not fetch category data. Continuing without it.');
+          console.warn('Could not fetch category by ID:', error);
         }
       }
 
@@ -157,6 +159,10 @@ const EditProductPage = () => {
         isOutOfStock: formData.isOutOfStock || false,
         isSoldOut: formData.isSoldOut || false,
         status: formData.status || 'instock',
+        unit: formData.unit || 'pcs',
+        unitValue: parseFloat(formData.unitValue) || 1,
+        sizes: Array.isArray(formData.sizes) ? formData.sizes : [],
+        weightOptions: Array.isArray(formData.weightOptions) ? formData.weightOptions : [],
       };
 
       const result = await updateProductDetails(productId, updatedProductData);
@@ -167,13 +173,14 @@ const EditProductPage = () => {
           await deleteMultipleImages(imagesToDelete);
         }
         
+        toast.success('Product updated successfully!');
         navigate(`/vendor/${storeId}`);
       } else {
-        alert(result.message || 'Failed to update product.');
+        toast.error(result.message || 'Failed to update product.');
       }
     } catch (error) {
       console.error('Error updating product:', error);
-      alert('Failed to update product: ' + (error.message || 'Please try again.'));
+      toast.error('Failed to update product: ' + (error.message || 'Please try again.'));
     } finally {
       setUploading(false);
     }

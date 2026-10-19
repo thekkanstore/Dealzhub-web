@@ -8,6 +8,7 @@ import { uploadImageToStorage } from '../../services/firebaseStorageService';
 import { createCashfreeOrder, initiateCashfreeWebCheckout } from '../../services/cashfreeService';
 import { ArrowLeft, Sparkles, AlertTriangle, CreditCard, ShieldCheck, Loader2 } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { toast } from '../../utils/toast';
 
 const EditStorePage = () => {
   const { user } = useAppContext();
@@ -71,7 +72,7 @@ const EditStorePage = () => {
             finalLogoUrl = uploadRes.url;
           } else {
             console.error('Failed to upload store logo:', uploadRes.error);
-            alert(`Failed to upload store logo: ${uploadRes.error || 'Storage error'}`);
+            toast.error(`Failed to upload store logo: ${uploadRes.error || 'Storage error'}`);
             setIsSaving(false);
             return;
           }
@@ -92,7 +93,7 @@ const EditStorePage = () => {
         };
 
         await updateStore(currentUserId, updatedStoreData);
-        alert('Store details updated successfully!');
+        toast.success('Store details updated successfully!');
         if (store?.id) {
           navigate(`/vendor/${store.id}`);
         } else {
@@ -100,7 +101,7 @@ const EditStorePage = () => {
         }
       } catch (error) {
         console.error('Error updating store:', error);
-        alert('Failed to update store. Please try again.');
+        toast.error('Failed to update store. Please try again.');
       } finally {
         setIsSaving(false);
       }

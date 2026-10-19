@@ -48,14 +48,14 @@ const FavoritesPage = () => {
         {loading ? (
           <ProductGridSkeleton count={6} />
         ) : favoriteProducts.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center">
-            <img src={noDataFound} alt="No Favorites" className="w-48 h-48 mx-auto mb-6" loading="lazy" />
-            <h2 className="text-2xl font-medium mb-2">No favorites yet</h2>
-            <p className="text-gray-600 mb-6">Add items you love to see them here</p>
-            <div className='w-full flex items-center justify-center'>
+          <div className="bg-white rounded-2xl p-6 sm:p-12 text-center shadow-xs border border-gray-100">
+            <img src={noDataFound} alt="No Favorites" className="w-40 h-40 sm:w-48 sm:h-48 mx-auto mb-6" loading="lazy" />
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-800">No favorites yet</h2>
+            <p className="text-gray-600 mb-6 text-sm sm:text-base">Add items you love to see them here</p>
+            <div className='w-full flex items-center justify-center px-4'>
               <button
                 onClick={() => navigate('/home')}
-                className="p-2 bg-primaryButtonBackgroundColor gap-2 rounded-full w-4/12 flex items-center justify-center text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full max-w-xs sm:w-auto px-8 py-3.5 bg-primaryButtonBackgroundColor text-white font-semibold text-sm sm:text-base rounded-full border border-transparent shadow-sm hover:shadow-md hover:bg-[#427256] transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
                 Start Shopping
               </button>

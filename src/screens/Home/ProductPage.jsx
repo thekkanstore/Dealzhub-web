@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Star, Heart, ChevronLeft, ChevronRight, ArrowLeft, Package } from 'lucide-react';
+import { Star, Heart, ChevronLeft, ChevronRight, ArrowLeft, Package, Minus, Plus, Shirt, ShoppingCart, ArrowRight } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { getProductById, deleteProduct } from '../../services/productService';
@@ -8,16 +8,36 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ProductPageSkeleton } from '../../components/common/SkeletonLoader';
 import { getSubCategories } from '../../services/subcategoryService';
 import SEO from '../../components/common/SEO';
+import { calculateScaledPrice, getProductWeightOptions } from '../../utils/measurementUtils';
+import { toast } from '../../utils/toast';
+import StoreCartDrawer from '../../components/cart/StoreCartDrawer';
 
 const ProductPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { isInCart, toggleFavorite, isFavorite, user, addToCart, setLoginModalOpen, setOnLoginModalContinue } = useAppContext();
+  const { 
+    isInCart, 
+    toggleFavorite, 
+    isFavorite, 
+    user, 
+    addToStoreCart,
+    getStoreCartCount,
+    getStoreCartTotals,
+    isItemInStoreCart,
+    setLoginModalOpen, 
+    setOnLoginModalContinue 
+  } = useAppContext();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [resolvedSubCategoryNames, setResolvedSubCategoryNames] = useState([]);
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
+
+  // Sizing & Measurement states
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedWeight, setSelectedWeight] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   // Check if current user owns this product
   const isProductOwner = useMemo(() => {
@@ -40,6 +60,22 @@ const ProductPage = () => {
 
           setSelectedProduct(product);
           setCurrentImageIndex(0);
+          setQuantity(1);
+
+          if (product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0) {
+            setSelectedSize(product.sizes[0]);
+          } else {
+            setSelectedSize('');
+          }
+
+          const isWeight = ['kg', 'g', 'ltr', 'ml'].includes((product.unit || '').toLowerCase()) || 
+                           (product.weightOptions && product.weightOptions.length > 0);
+          if (isWeight) {
+            const options = getProductWeightOptions(product);
+            setSelectedWeight(options[0] || null);
+          } else {
+            setSelectedWeight(null);
+          }
           
           if (product && product.storeId && product.categoryId) {
             try {
@@ -80,14 +116,14 @@ const ProductPage = () => {
       try {
         const result = await deleteProduct(selectedProduct);
         if (result.success) {
-          alert('Product deleted successfully!');
+          toast.success('Product deleted successfully!');
           navigate(selectedProduct.storeId ? `/vendor/${selectedProduct.storeId}` : '/home');
         } else {
-          alert(result.message || 'Failed to delete product.');
+          toast.error(result.message || 'Failed to delete product.');
         }
       } catch (error) {
         console.error('Error in handleDeleteProduct:', error);
-        alert('Failed to delete product.');
+        toast.error('Failed to delete product.');
       }
     }
   };
@@ -101,6 +137,52 @@ const ProductPage = () => {
       navigate('/home');
     }
   };
+
+  const isWeightOrVolume = useMemo(() => {
+    return ['kg', 'g', 'ltr', 'ml'].includes((selectedProduct?.unit || '').toLowerCase()) ||
+           (selectedProduct?.weightOptions && selectedProduct.weightOptions.length > 0);
+  }, [selectedProduct]);
+
+  const weightPresets = useMemo(() => {
+    if (!selectedProduct || !isWeightOrVolume) return [];
+    return getProductWeightOptions(selectedProduct);
+  }, [selectedProduct, isWeightOrVolume]);
+
+  const currentDiscountPrice = useMemo(() => {
+    if (!selectedProduct) return 0;
+    if (isWeightOrVolume && selectedWeight) {
+      const firstOpt = weightPresets[0];
+      const effectiveBaseValue = firstOpt ? firstOpt.value : (parseFloat(selectedProduct.unitValue) || 1);
+      const effectiveBaseUnit = firstOpt ? firstOpt.unit : (selectedProduct.unit || 'pcs');
+
+      return calculateScaledPrice(
+        selectedProduct.discountPrice,
+        effectiveBaseUnit,
+        effectiveBaseValue,
+        selectedWeight.value,
+        selectedWeight.unit
+      ) * quantity;
+    }
+    return (parseFloat(selectedProduct.discountPrice) || 0) * quantity;
+  }, [selectedProduct, isWeightOrVolume, selectedWeight, quantity, weightPresets]);
+
+  const currentActualPrice = useMemo(() => {
+    if (!selectedProduct) return 0;
+    if (isWeightOrVolume && selectedWeight) {
+      const firstOpt = weightPresets[0];
+      const effectiveBaseValue = firstOpt ? firstOpt.value : (parseFloat(selectedProduct.unitValue) || 1);
+      const effectiveBaseUnit = firstOpt ? firstOpt.unit : (selectedProduct.unit || 'pcs');
+
+      return calculateScaledPrice(
+        selectedProduct.actualPrice,
+        effectiveBaseUnit,
+        effectiveBaseValue,
+        selectedWeight.value,
+        selectedWeight.unit
+      ) * quantity;
+    }
+    return (parseFloat(selectedProduct.actualPrice) || 0) * quantity;
+  }, [selectedProduct, isWeightOrVolume, selectedWeight, quantity, weightPresets]);
 
   if (loading) {
     return <ProductPageSkeleton />;
@@ -170,19 +252,53 @@ const ProductPage = () => {
   };
 
   const handleBuyNow = () => {
+    if (selectedProduct.sizes && selectedProduct.sizes.length > 0 && !selectedSize) {
+      toast.warning('Please select a size first.');
+      return;
+    }
+
     const storePhoneNumber = selectedProduct.store?.phoneNumber;
     if (storePhoneNumber) {
       let cleanedPhoneNumber = storePhoneNumber.replace(/\D/g, '');
       if (cleanedPhoneNumber.length === 10) {
         cleanedPhoneNumber = '91' + cleanedPhoneNumber;
       }
-      const message = `Hi, I'm interested in this product:\n\nName: ${selectedProduct.name}\nDescription: ${selectedProduct.description || ''}\n\nCan you tell me more?`;
+
+      const itemDetails = [
+        `• Product: ${selectedProduct.name}`,
+        selectedSize ? `• Selected Size: ${selectedSize}` : null,
+        isWeightOrVolume && selectedWeight ? `• Selected Weight: ${selectedWeight.label}` : null,
+        `• Quantity: ${quantity}${!isWeightOrVolume && selectedProduct.unit && selectedProduct.unit.toLowerCase() !== 'pcs' ? ' ' + selectedProduct.unit : ''}`,
+        `• Total Price: ₹${currentDiscountPrice}`,
+      ].filter(Boolean).join('\n');
+
+      const message = `Hi, I would like to order this item from your store on DealzHub:\n\n${itemDetails}\n\nProduct Link: https://dealzhub.co.in/product/${selectedProduct.id}\n\nPlease confirm availability and payment details!`;
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${cleanedPhoneNumber}?text=${encodedMessage}`;
       window.open(whatsappUrl, '_blank');
     } else {
-      alert("This store's contact information is not available.");
+      toast.warning("This store's contact information is not available.");
     }
+  };
+
+  const currentStoreId = selectedProduct?.storeId || selectedProduct?.store?.id || '';
+  const storeCartCount = currentStoreId ? getStoreCartCount(currentStoreId) : 0;
+  const { totalPrice: storeCartTotal } = currentStoreId ? getStoreCartTotals(currentStoreId) : { totalPrice: 0 };
+  const isThisItemInCart = currentStoreId ? isItemInStoreCart(currentStoreId, selectedProduct?.id, selectedSize || null) : false;
+
+  const handleAddToCartClick = () => {
+    if (selectedProduct.sizes && selectedProduct.sizes.length > 0 && !selectedSize) {
+      toast.warning('Please select a size before adding to cart.');
+      return;
+    }
+    addToStoreCart(currentStoreId, selectedProduct, {
+      quantity,
+      selectedSize: selectedSize || null,
+      selectedWeight: isWeightOrVolume ? selectedWeight?.label : null,
+      unitPrice: currentDiscountPrice / quantity,
+      storeInfo: selectedProduct.store,
+    });
+    toast.success(`Added to ${selectedProduct.store?.storeName || 'store'} cart!`);
   };
 
   const primaryImg = images[0] || 'https://dealzhub.co.in/appLogo@2x.png';
@@ -251,7 +367,7 @@ const ProductPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50/70">
+    <main className="min-h-screen bg-gray-50/70 overflow-x-hidden">
       <SEO
         title={`${selectedProduct.name} - ₹${selectedProduct.discountPrice}`}
         description={selectedProduct.description ? `${selectedProduct.description.slice(0, 155)}... Buy online at ₹${selectedProduct.discountPrice}` : `Buy ${selectedProduct.name} for ₹${selectedProduct.discountPrice} on DealzHub.`}
@@ -260,7 +376,7 @@ const ProductPage = () => {
         type="product"
         schema={productSchema}
       />
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <button
           onClick={handleBack}
           className="px-4 py-1.5 mb-4 text-sm cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-secondaryButtonBackgroundColor rounded-full transition-colors w-fit flex items-center gap-1.5"
@@ -269,9 +385,9 @@ const ProductPage = () => {
           <ArrowLeft className="w-4 h-4" />
           <span className="font-medium text-xs">Back</span>
         </button>
-        <div className="bg-white rounded-3xl p-6 sm:p-8 grid md:grid-cols-2 gap-8 border border-gray-100 shadow-sm">
-          <div>
-            <div className="relative bg-gray-50 rounded-2xl flex items-center justify-center min-h-[20rem] sm:min-h-[24rem] overflow-hidden">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 border border-gray-100 shadow-sm">
+          <div className="w-full min-w-0">
+            <div className="relative bg-gray-50 rounded-2xl flex items-center justify-center min-h-[18rem] sm:min-h-[24rem] overflow-hidden">
               {/* Image Loading Skeleton */}
               {isImageLoading && (
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse flex items-center justify-center">
@@ -285,7 +401,7 @@ const ProductPage = () => {
                 alt={`${selectedProduct.name} - Image ${currentImageIndex + 1}`} 
                 onLoad={() => setIsImageLoading(false)}
                 onError={() => setIsImageLoading(false)}
-                className={`w-full h-80 sm:h-96 object-contain rounded-2xl transition-all duration-300 ${isImageLoading ? 'opacity-0 scale-98' : 'opacity-100 scale-100'} ${isUnavailable ? 'opacity-50' : ''}`} 
+                className={`w-full h-72 sm:h-96 object-contain rounded-2xl transition-all duration-300 ${isImageLoading ? 'opacity-0 scale-98' : 'opacity-100 scale-100'} ${isUnavailable ? 'opacity-50' : ''}`} 
                 loading="eager"
               />
               
@@ -326,12 +442,12 @@ const ProductPage = () => {
 
             {/* Thumbnail Navigation - Only show if multiple images */}
             {hasMultipleImages && (
-              <div className="flex gap-2.5 mt-4 overflow-x-auto pb-2">
+              <div className="flex gap-2.5 mt-4 overflow-x-auto pb-2 max-w-full">
                 {images.map((img, index) => (
                   <button
                     key={index}
                     onClick={() => handleThumbnailClick(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 cursor-pointer bg-gray-50 ${
+                    className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 cursor-pointer bg-gray-50 ${
                       currentImageIndex === index 
                         ? 'border-emerald-600 shadow-sm scale-102 ring-2 ring-emerald-600/20' 
                         : 'border-gray-200 hover:border-gray-400 opacity-70 hover:opacity-100'
@@ -349,19 +465,119 @@ const ProductPage = () => {
             )}
           </div>
 
-          <div>
-            <h1 className="text-3xl font-bold mb-4">{selectedProduct.name}</h1>
-            <div className="mb-6">
-              <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-bold">
-                  ₹{selectedProduct.discountPrice}
+          <div className="w-full min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-3 break-words text-gray-900">{selectedProduct.name}</h1>
+            
+            {/* Dynamic Price Display */}
+            <div className="mb-5">
+              <div className="flex items-baseline gap-3 mb-1 flex-wrap">
+                <span className="text-4xl font-extrabold text-gray-900">
+                  ₹{currentDiscountPrice}
                 </span>
-                <span className="text-xl text-gray-400 line-through">
-                  ₹{selectedProduct.actualPrice}
-                </span>
+                {currentActualPrice > currentDiscountPrice && (
+                  <span className="text-xl text-gray-400 line-through">
+                    ₹{currentActualPrice}
+                  </span>
+                )}
+                {isWeightOrVolume ? (
+                  <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                    {selectedWeight?.label || `${selectedProduct.unitValue || 1} ${selectedProduct.unit}`}
+                  </span>
+                ) : (selectedProduct.unit && selectedProduct.unit.toLowerCase() !== 'pcs') ? (
+                  <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                    {selectedProduct.unitValue && parseFloat(selectedProduct.unitValue) !== 1 ? selectedProduct.unitValue + ' ' : ''}{selectedProduct.unit}
+                  </span>
+                ) : null}
+              </div>
+              {quantity > 1 && (
+                <p className="text-xs text-gray-500 font-medium">
+                  ₹{(currentDiscountPrice / quantity).toFixed(2)} each × {quantity}
+                </p>
+              )}
+            </div>
+
+            <p className="text-gray-600 mb-5 leading-relaxed">{selectedProduct.description}</p>
+
+            {/* Sizing Selector (Rendered if product has sizes) */}
+            {selectedProduct.sizes && Array.isArray(selectedProduct.sizes) && selectedProduct.sizes.length > 0 && (
+              <div className="mb-5 p-4 bg-white rounded-2xl border border-gray-100 shadow-xs">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <Shirt className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-700">Select Size</span>
+                  {selectedSize && (
+                    <span className="text-xs text-emerald-700 font-semibold ml-auto">Selected: {selectedSize}</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedProduct.sizes.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setSelectedSize(s)}
+                      className={`px-4 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                        selectedSize === s
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs scale-102 ring-2 ring-emerald-600/20'
+                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Weight / Volume Increment Presets */}
+            {isWeightOrVolume && weightPresets.length > 0 && (
+              <div className="mb-5 p-4 bg-white rounded-2xl border border-gray-100 shadow-xs">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-700">Select Weight / Package</span>
+                  <span className="text-xs text-emerald-700 font-semibold ml-auto">
+                    {selectedWeight?.label}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {weightPresets.map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => setSelectedWeight(preset)}
+                      className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                        selectedWeight?.label === preset.label
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs scale-102 ring-2 ring-emerald-600/20'
+                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity Counter */}
+            <div className="mb-5 flex items-center justify-between p-3.5 bg-white rounded-2xl border border-gray-100 shadow-xs">
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-700">Quantity</span>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  disabled={quantity <= 1}
+                  className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
+                  <Minus className="w-3.5 h-3.5 text-gray-700" />
+                </button>
+                <span className="text-base font-bold text-gray-900 w-6 text-center">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(q => q + 1)}
+                  className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 text-gray-700" />
+                </button>
               </div>
             </div>
-            <p className="text-gray-600 mb-6">{selectedProduct.description}</p>
+
             {selectedProduct.category?.name && (
               <div className="mb-6 text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-100">
                 <span className="font-semibold text-gray-700">Category: </span>
@@ -372,31 +588,31 @@ const ProductPage = () => {
             {selectedProduct.store && selectedProduct.store.storeName && (
               <div 
                 onClick={() => navigate(`/vendor/${selectedProduct.store.id}`)}
-                className='py-5 px-6 bg-white shadow rounded-4xl flex flex-col mb-6 cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01]'
+                className='py-4 px-4 sm:px-6 bg-white shadow-xs rounded-2xl sm:rounded-3xl flex flex-col mb-6 cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01] border border-gray-100'
               >
-                <div className='flex justify-between items-center w-full'>
-                  <p className="text-base text-gray-900 font-bold mb-2">{selectedProduct.store.storeName}</p>
+                <div className='flex justify-between items-center w-full gap-2'>
+                  <p className="text-base text-gray-900 font-bold mb-1.5 truncate">{selectedProduct.store.storeName}</p>
                   <TKArrowIcon />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">{selectedProduct.store.address}</p>
-                  <p className="text-sm text-gray-600">{selectedProduct.store.phoneNumber}/{selectedProduct.store.email}</p>
+                  <p className="text-sm text-gray-600 mb-1.5 break-words">{selectedProduct.store.address}</p>
+                  <p className="text-sm text-gray-600 break-all">{selectedProduct.store.phoneNumber}/{selectedProduct.store.email}</p>
                 </div>
               </div>
             )}
 
             {/* Conditional Button Rendering */}
             {isProductOwner ? (
-              <div className='w-full flex items-center gap-4'>
+              <div className='w-full flex flex-col sm:flex-row items-center gap-3 mb-6'>
                 <button
                   onClick={() => navigate(`/edit-product/${selectedProduct.id}`)}
-                  className="p-2 gap-2 rounded-full w-1/2 flex items-center justify-center text-xl bg-primaryButtonBackgroundColor text-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  className="p-3 gap-2 rounded-full w-full sm:w-1/2 flex items-center justify-center text-sm sm:text-base font-semibold bg-primaryButtonBackgroundColor text-white border border-transparent shadow-sm hover:shadow-md hover:bg-[#427256] transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   Edit Product
                 </button>
                 <button
                   onClick={handleDeleteProduct}
-                  className="p-2 gap-2 rounded-full w-1/2 flex items-center justify-center text-xl bg-red-600 text-white border border-transparent shadow-sm hover:shadow-md hover:bg-red-700 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]"
+                  className="p-3 gap-2 rounded-full w-full sm:w-1/2 flex items-center justify-center text-sm sm:text-base font-semibold bg-red-600 text-white border border-transparent shadow-sm hover:shadow-md hover:bg-red-700 transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   Delete Product
                 </button>
@@ -404,17 +620,17 @@ const ProductPage = () => {
             ) : (
               // Show Add to Cart, Buy Now, and Favorites for non-owners
               <>
-                <div className="flex gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row gap-3 mb-4 sm:mb-6">
                   <button
-                    onClick={() => addToCart(selectedProduct)}
+                    onClick={handleAddToCartClick}
                     disabled={isUnavailable}
-                    className={`p-2 gap-2 rounded-full w-full flex items-center justify-center text-xl border border-gray-200 shadow-sm transition-all duration-300 ease-in-out ${
+                    className={`p-3 sm:py-3.5 px-4 gap-2 rounded-full w-full sm:flex-1 flex items-center justify-center text-sm sm:text-base font-semibold border border-gray-200 shadow-sm transition-all duration-300 ease-in-out cursor-pointer ${
                       isUnavailable
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-secondaryButtonBackgroundColor text-gray-700 hover:shadow-md hover:border-gray-300 hover:scale-[1.02] active:scale-[0.98]'
                     }`}
                   >
-                    {isInCart(selectedProduct.id) ? 'Added to Cart' : 'Add to Cart'}
+                    {isThisItemInCart ? 'Added to Cart (+)' : 'Add to Cart'}
                   </button>
                   <button
                     onClick={() => {
@@ -426,10 +642,10 @@ const ProductPage = () => {
                       }
                     }}
                     disabled={isUnavailable}
-                    className={`p-2 gap-2 rounded-full w-full flex items-center justify-center text-xl border border-gray-200 shadow-sm transition-all duration-300 ease-in-out ${
+                    className={`p-3 sm:py-3.5 px-4 gap-2 rounded-full w-full sm:flex-1 flex items-center justify-center text-sm sm:text-base font-semibold border border-transparent shadow-sm transition-all duration-300 ease-in-out cursor-pointer ${
                       isUnavailable
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-primaryButtonBackgroundColor text-white hover:shadow-md hover:border-gray-300 hover:scale-[1.02] active:scale-[0.98]'
+                        : 'bg-primaryButtonBackgroundColor text-white hover:shadow-md hover:bg-[#427256] hover:scale-[1.02] active:scale-[0.98]'
                     }`}
                   >
                     Buy Now
@@ -438,7 +654,7 @@ const ProductPage = () => {
                 <button
                   onClick={() => toggleFavorite(selectedProduct)}
                   disabled={isUnavailable}
-                  className={`p-2 bg-secondaryButtonBackgroundColor gap-2 rounded-full w-full flex items-center justify-center text-gray-700 text-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out ${
+                  className={`p-3 sm:py-3.5 px-4 bg-secondaryButtonBackgroundColor gap-2 rounded-full w-full flex items-center justify-center text-gray-700 text-sm sm:text-base font-semibold border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 ease-in-out cursor-pointer ${
                     isUnavailable ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
@@ -456,6 +672,40 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Store Cart Bar */}
+      {storeCartCount > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-lg bg-gray-900/95 backdrop-blur-md text-white rounded-2xl p-3.5 shadow-2xl border border-gray-800 flex items-center justify-between animate-in slide-in-from-bottom-5">
+          <div className="flex items-center gap-3 pl-2">
+            <div className="relative">
+              <ShoppingCart className="w-6 h-6 text-emerald-400" />
+              <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {storeCartCount}
+              </span>
+            </div>
+            <div>
+              <div className="text-sm font-bold">₹{storeCartTotal.toLocaleString()}</div>
+              <div className="text-[11px] text-gray-300">
+                {storeCartCount} item{storeCartCount > 1 ? 's' : ''} in {selectedProduct?.store?.storeName || 'store'} cart
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCartDrawerOpen(true)}
+            className="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md cursor-pointer"
+          >
+            View Cart & Order <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Store Cart Drawer */}
+      <StoreCartDrawer
+        store={selectedProduct?.store}
+        isOpen={isCartDrawerOpen}
+        onClose={() => setIsCartDrawerOpen(false)}
+      />
     </main>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { KERALA_DISTRICTS } from '../../config/common';
 import SubscriptionPlanModal from './SubscriptionPlanModal';
 import { Camera, Image as ImageIcon, X, Sparkles } from 'lucide-react';
+import { toast } from '../../utils/toast';
 
 const VendorDetailsForm = ({
   initialData = {},
@@ -55,7 +56,7 @@ const VendorDetailsForm = ({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('Logo image size should be less than 5MB');
+        toast.warning('Logo image size should be less than 5MB');
         return;
       }
       setLogoFile(file);

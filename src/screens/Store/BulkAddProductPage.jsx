@@ -7,6 +7,7 @@ import { ArrowLeft, Download, Upload, AlertCircle, CheckCircle2 } from 'lucide-r
 import Papa from 'papaparse';
 import { ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../firebase';
+import { toast } from '../../utils/toast';
 
 const BulkAddProductPage = () => {
   const { user } = useAppContext();
@@ -38,7 +39,7 @@ const BulkAddProductPage = () => {
             const allCategories = await getActiveCategories();
             setValidCategories(allCategories);
           } else {
-            alert('You need to create a store first!');
+            toast.warning('You need to create a store first!');
             navigate('/vendordetails');
           }
         } catch (error) {
@@ -55,13 +56,17 @@ const BulkAddProductPage = () => {
   }, [user, navigate]);
 
   const downloadTemplate = () => {
-    const headers = ['name', 'description', 'actualPrice', 'discountPrice', 'categoryName', 'isSecondHand'];
+    const headers = ['name', 'description', 'actualPrice', 'discountPrice', 'categoryName', 'isSecondHand', 'unit', 'unitValue', 'sizes', 'weightOptions'];
     const csvContent = headers.join(',') + '\n';
     
-    // Add a sample row
-    const sampleRow = 'Sample Product,A great description,100,80,Electronics,false\n';
+    // Add sample rows covering different category types
+    const sampleRows = [
+      'Sample Electronic Item,Bluetooth speaker,1499,999,Electronics,false,pcs,1,"",""',
+      'Sample Cotton Shirt,100% pure cotton,799,499,Fashion,false,pcs,1,"S|M|L|XL",""',
+      'Sample Fresh Tomatoes,Farm fresh,40,30,Grocery,false,kg,1,"","250g|500g|1kg|2kg"',
+    ].join('\n') + '\n';
     
-    const blob = new Blob([csvContent + sampleRow], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent + sampleRows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -185,7 +190,7 @@ const BulkAddProductPage = () => {
       
     } catch (error) {
       console.error("Upload failed", error);
-      alert("Failed to upload file. Please try again.");
+      toast.error("Failed to upload file. Please try again.");
     } finally {
       setUploading(false);
     }

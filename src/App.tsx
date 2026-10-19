@@ -2,6 +2,8 @@ import React, { lazy, Suspense } from 'react';
 import './App.css';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import MainLayout from './components/layouts/MainLayout';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import RouteErrorBoundary from './components/common/RouteErrorBoundary';
@@ -175,6 +177,18 @@ function App() {
   return (
     <AppProvider>
       <RouterProvider router={router} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </AppProvider>
   );
 }

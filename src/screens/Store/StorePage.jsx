@@ -8,7 +8,7 @@ import noDataFound from '../../assets/images/noDataFound@3x.png';
 import VirtualizedProductGrid from '../../components/common/VirtualizedProductGrid';
 import { fetchAllProducts, fetchProductsByStoreAndCategory } from '../../services/productService';
 import QRCode from 'qrcode';
-import { Download, Store as StoreIcon, Phone, MapPin, Copy, Check } from 'lucide-react';
+import { Download, Store as StoreIcon, Phone, MapPin, Copy, Check, ShoppingCart, ArrowRight } from 'lucide-react';
 import appLogo from '../../assets/images/appLogo@2x.png';
 import { getCategoryById, getActiveCategories } from '../../services/firestore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -19,18 +19,22 @@ import SubscriptionPlanModal from '../../components/vendor/SubscriptionPlanModal
 import { createCashfreeOrder, initiateCashfreeWebCheckout } from '../../services/cashfreeService';
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
+import StoreCartDrawer from '../../components/cart/StoreCartDrawer';
 
 const StorePage = () => {
   const { id: storeIdParam, slug: storeSlugParam } = useParams();
   const navigate = useNavigate();
-  const { user, setActiveStore } = useAppContext();
+  const { user, setActiveStore, getStoreCartCount, getStoreCartTotals } = useAppContext();
   const qrCanvasRef = useRef(null);
 
   // State for store data
   const [store, setStore] = useState(null);
   const [isStoreLoading, setIsStoreLoading] = useState(true);
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
 
   const storeId = store?.id || storeIdParam || '';
+  const storeCartCount = getStoreCartCount(storeId);
+  const { totalPrice: storeCartTotal } = getStoreCartTotals(storeId);
 
   // State for category filtering
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -792,7 +796,7 @@ const StorePage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white overflow-x-hidden">
       <SEO
         title={`${store.storeName} - Local Store in ${store.city || 'Kerala'}`}
         description={`Explore products, exclusive deals and store updates from ${store.storeName}, located at ${store.address || store.city || 'Kerala'} on DealzHub.`}
@@ -801,7 +805,7 @@ const StorePage = () => {
         type="profile"
         schema={storeSchema}
       />
-      <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8 flex flex-col">
         <div className='flex flex-col lg:flex-row justify-between items-start gap-8'>
           <div className='flex-1 min-w-0 w-full mb-2 lg:mb-0'>
             {/* Store Logo placed to the left of Store Name (Desktop & Mobile) */}
@@ -839,6 +843,22 @@ const StorePage = () => {
                     {store.bio}
                   </p>
                 )}
+
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsCartDrawerOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-full text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow-md cursor-pointer"
+                  >
+                    <ShoppingCart className="w-4 h-4" />
+                    <span>Shop Cart</span>
+                    {storeCartCount > 0 && (
+                      <span className="bg-white text-emerald-800 text-[11px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[18px] text-center">
+                        {storeCartCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
             
@@ -895,7 +915,7 @@ const StorePage = () => {
           </div>
           
           {/* QR Code Section - Positioned on right side for desktop, stacked for mobile/tablet */}
-          {(currentStatus === "approved" || currentStatus === "private") && isStoreOwner && (
+          {(currentStatus === "approved" || currentStatus === "private") && isStoreOwner && !isPaymentPending && !isSubscriptionExpired && (
             <div className="w-full lg:w-auto shrink-0 flex flex-col bg-gray-50 p-5 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
               <div className="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-start w-full gap-5 sm:gap-6">
 
@@ -1007,6 +1027,7 @@ const StorePage = () => {
                 <VirtualizedProductGrid
                   products={filteredProducts}
                   isLoading={isLoadingProducts}
+                  showCart={true}
                 />
                 {hasMore && (
                   <div ref={observerTarget} className="flex justify-center mt-8 min-h-[50px]">
@@ -1059,6 +1080,40 @@ const StorePage = () => {
         onClose={() => setIsPlanModalOpen(false)}
         onSelectPlan={handleSelectRenewalPlan}
         initialPlanId={store?.subscriptionPlan || '12_months'}
+      />
+
+      {/* Floating Store Cart Bar */}
+      {storeCartCount > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-lg bg-gray-900/95 backdrop-blur-md text-white rounded-2xl p-3.5 shadow-2xl border border-gray-800 flex items-center justify-between animate-in slide-in-from-bottom-5">
+          <div className="flex items-center gap-3 pl-2">
+            <div className="relative">
+              <ShoppingCart className="w-6 h-6 text-emerald-400" />
+              <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {storeCartCount}
+              </span>
+            </div>
+            <div>
+              <div className="text-sm font-bold">₹{storeCartTotal.toLocaleString()}</div>
+              <div className="text-[11px] text-gray-300">
+                {storeCartCount} {storeCartCount === 1 ? 'item' : 'items'} in cart
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCartDrawerOpen(true)}
+            className="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md cursor-pointer"
+          >
+            View Cart & Order <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Store Cart Drawer */}
+      <StoreCartDrawer
+        store={store}
+        isOpen={isCartDrawerOpen}
+        onClose={() => setIsCartDrawerOpen(false)}
       />
     </main>
   );

@@ -9,6 +9,7 @@ import { ProductGridSkeleton } from './SkeletonLoader';
 const VirtualizedProductGrid = React.memo(({
   products,
   isLoading,
+  showCart = false,
 }) => {
   const { toggleFavorite, isFavorite, addToCart } = useAppContext();
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ const VirtualizedProductGrid = React.memo(({
             toggleFavorite={toggleFavorite}
             viewProduct={viewProduct}
             addToCart={addToCart}
+            showCart={showCart}
           />
         ))}
       </div>
