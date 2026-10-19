@@ -2,31 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://dealzhub.co.in/home</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://dealzhub.co.in/about</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dealzhub.co.in/privacy</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://dealzhub.co.in/cancellation-refund</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://dealzhub.co.in/terms</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -44,7 +44,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/shop/amvi</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -63,6 +63,12 @@
   <url>
     <loc>https://dealzhub.co.in/shop/m-s-fishlovers</loc>
     <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/shop/dealzhub-5760</loc>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -91,8 +97,20 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/shop/classic-trading</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/shop/aash-aamm</loc>
     <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/shop/hecks</loc>
+    <lastmod>2026-09-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -134,7 +152,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/shop/tiny-treasures-by-nazreen</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-09-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -170,7 +188,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/shop/panchendriyam-spices</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -230,19 +248,13 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/shop/harvin-s-natural-s</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://dealzhub.co.in/shop/new-moon-4638</loc>
-    <lastmod>2026-09-20</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://dealzhub.co.in/shop/thahiyya-traders-onli-ne-marketi-ng</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -343,12 +355,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://dealzhub.co.in/shop/test-store</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://dealzhub.co.in/shop/tool-hub-solution</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -387,6 +393,12 @@
   <url>
     <loc>https://dealzhub.co.in/shop/henza</loc>
     <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/shop/testing-store-test</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -541,12 +553,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://dealzhub.co.in/shop/testing-store-test</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://dealzhub.co.in/shop/ila-by-anjali</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -560,13 +566,13 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/shop/veloura-clothing-store</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://dealzhub.co.in/shop/k-r-mart</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -578,7 +584,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/shop/rosy-creative-hub</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -596,7 +602,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/shop/freshly-supermarket</loc>
-    <lastmod>2026-09-21</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -615,6 +621,12 @@
   <url>
     <loc>https://dealzhub.co.in/shop/aura-ore-by-sam</loc>
     <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/vendor/q2yn4AhpYGHEGotVAtqB</loc>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -685,12 +697,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://dealzhub.co.in/shop/new-moon</loc>
-    <lastmod>2026-09-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://dealzhub.co.in/shop/test-store-1301</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -757,8 +763,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/06I0GIRz6cENdOF1cEyn</loc>
+    <lastmod>2026-09-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/06ypYkHGDzziWNzNzvkH</loc>
     <lastmod>2026-08-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/07AmdDRlG0jKgrovAYxW</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -775,6 +793,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/0I6Uck2SAeNowmTKqCYw</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/0KB5I6t3ReOkWyZX11zQ</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>daily</changefreq>
@@ -783,6 +807,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/0KuT9PW8OuoHNBzNmhe5</loc>
     <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/0Lp9bPb8m6bjTsTooMeb</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -805,8 +835,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/0jOu7ZoCDvWhPCQ016Ti</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/0sdyDeaLL3wDelFy8Ie1</loc>
     <lastmod>2026-09-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/0uuKHHwYGicfLLWOuCun</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -835,6 +877,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/1TlcVShn36oqs18V5Imk</loc>
+    <lastmod>2026-09-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/1UFtOvF4smecBUJCkSNz</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
@@ -859,8 +907,26 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/1e1Wgd5Hmfa1EpHUIU6F</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/1gEhxoHJwYmvcgayC7OA</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/1t3gru3F1drRdbFm11Ef</loc>
     <lastmod>2026-08-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/1tVXT2YggDM6cYNjbDWm</loc>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -967,6 +1033,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/2zF7GR5J06QyQP5XE4Jx</loc>
+    <lastmod>2026-10-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/2zYTgsG36WboVCuUFscT</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>daily</changefreq>
@@ -975,6 +1047,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/36E2u5QWrpsNkA5Lo21l</loc>
     <lastmod>2026-08-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/3Cl252tQgq4g2eYnXxvK</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -999,6 +1077,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/3k9bE25wJxfGYz3KkfAw</loc>
     <lastmod>2026-08-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/3qDAfvgyv4SLPFensSoI</loc>
+    <lastmod>2026-10-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1039,6 +1123,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/4JSCkG3Ncvzvof6QHPgm</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/4KL9inM5eqfsqBngQIha</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>daily</changefreq>
@@ -1053,6 +1143,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/4PDnUnZY5elGxEKPBmjC</loc>
     <lastmod>2026-07-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/4c65TSbDLPe8HBNFRx96</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1123,6 +1219,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/5TguuIvgCzbIFZ3kl645</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/5YwN7VK5LLjaF8NnlK2D</loc>
     <lastmod>2026-09-17</lastmod>
     <changefreq>daily</changefreq>
@@ -1159,6 +1261,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/68IyUuqo3pxVftJTu6Ja</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/68MXnqIW8xcZjMa0Dvn1</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
@@ -1173,6 +1281,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/6FgxX8g5CW8QVnbJJmJ3</loc>
     <lastmod>2026-08-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/6LSMTQYfRsd7n5UTKwtU</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1207,8 +1321,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/7GuF09h5XSLlF3MCJ8DY</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/7Jo7Jvm7i5ZK4XFZ4KUh</loc>
     <lastmod>2026-07-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/7Om6uUPmTFoUUUHyiS99</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1251,6 +1377,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/85VSKJbbKOk5GjoCscxj</loc>
     <lastmod>2026-08-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/88CJmZAkp8tgGb34HZ0H</loc>
+    <lastmod>2026-09-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1340,7 +1472,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/8plpLHVX7od6lM0yU7dN</loc>
-    <lastmod>2026-09-05</lastmod>
+    <lastmod>2026-10-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1371,6 +1503,18 @@
   <url>
     <loc>https://dealzhub.co.in/product/99gVLDJZsOxEWXoFjbRO</loc>
     <lastmod>2026-08-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/9Mcovbx5bZ0kvPkDCFAO</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/9XHDJAm6pY5M2y266dnu</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1411,8 +1555,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/AMWML9TdSHknZzN91HUm</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/AN1AjYqqPoNuCA21Eym8</loc>
     <lastmod>2026-08-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/AaYc1fW81ccXc9SJXmG2</loc>
+    <lastmod>2026-09-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1425,6 +1581,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/Af2QDGytjJ46d1S7ufZE</loc>
     <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/AhnE0kcYZJPfYmqlLkfz</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1477,6 +1639,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/BVzXho9PIG5Ox2vYPZIj</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/Bk3LjwMTTBl4O2guRRc5</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>daily</changefreq>
@@ -1509,6 +1677,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/C4ZXvd10Qt6ow3FkXIdJ</loc>
     <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/C5HXV1RaCnnnWYjrjrWs</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1591,8 +1765,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/CmxlLaEAtpebqeSWc3s5</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/Crvu5X6Ze2s9hZJzMrnL</loc>
     <lastmod>2026-09-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/CvH6Zhyw0BzKr5eQcX1n</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1627,8 +1813,32 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/DDuN5otTcFbcoxweA5cq</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/DHq1QtCKV7AP7A90bBzR</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/DMExmBahnM0mEyj61CFx</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/DN4U2OGjDk2IR9ooSfUq</loc>
     <lastmod>2026-08-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/DPsFyYQkQbBMa06soE09</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1651,6 +1861,18 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/DXeVOaqdPvyJGaAhBHqQ</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/DkDMHtaV7bj4VvsSQn4S</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/DnU1LIC22MZ2esUr0xBP</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>daily</changefreq>
@@ -1665,6 +1887,18 @@
   <url>
     <loc>https://dealzhub.co.in/product/DxYW7YBZiEVBoinHbyF4</loc>
     <lastmod>2026-08-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/DzGJDaglogZQJRkiIbhv</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/DzlYw0r51kUmStPrdX5J</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1693,8 +1927,8 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://dealzhub.co.in/product/EHOuTccHycgx6XSTI7GZ</loc>
-    <lastmod>2026-09-11</lastmod>
+    <loc>https://dealzhub.co.in/product/E7wQPndFlVDvPOsc78nH</loc>
+    <lastmod>2026-10-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1729,8 +1963,26 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/EdUJkcEOO9aLuxiLyDsL</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/EmUOMRouh61nDGxWjkqe</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/EnwnwKV7fEHNQu7x74z6</loc>
     <lastmod>2026-08-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/EvKRQHa7UpRTBYs8hqo1</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1749,6 +2001,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/FGsO3qJKpVjpR3TmvSsv</loc>
     <lastmod>2026-07-19</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/FHPZHPYt7S5dXjfF6KXV</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1807,6 +2065,18 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/GDUIM0A6nYcBLDyTAqe5</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/GEVPDLxjLuR8DpMFXSGr</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/GFf1QmL1DcpqXIe5pNbH</loc>
     <lastmod>2026-07-24</lastmod>
     <changefreq>daily</changefreq>
@@ -1831,8 +2101,14 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/GTp573lJbcHLRjVSPvvZ</loc>
+    <lastmod>2026-10-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/GavPu3uLMnnk5qmopHWO</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1845,6 +2121,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/GbbSUaCA003NHPBbQvCx</loc>
     <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/GjCBG9N4cj0qe4vJzBnc</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1915,6 +2197,18 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/HfHoCFU46IJNPKzCx0x3</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/Hgv86CckjSMzVy7axAN3</loc>
+    <lastmod>2026-09-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/Hhb8ywbs8gOJlJu19MT0</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>daily</changefreq>
@@ -1933,6 +2227,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/HkqheKQxvZukGMpL59gW</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/HsP8CXY8OVMUZHLjcqem</loc>
     <lastmod>2026-07-24</lastmod>
     <changefreq>daily</changefreq>
@@ -1941,12 +2241,6 @@
   <url>
     <loc>https://dealzhub.co.in/product/HyEtmtqv7hb5ujmv3eku</loc>
     <lastmod>2026-08-19</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://dealzhub.co.in/product/I4yvSbP0w8nCl8OoZYaz</loc>
-    <lastmod>2026-09-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1977,6 +2271,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/IPv0y3OCsRlv8bSLJyQD</loc>
     <lastmod>2026-07-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/IS9y6aXNGFfKnpBkMeAJ</loc>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2059,6 +2359,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/JwkzW0ITW31Oo4A0lY7d</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/JyejRobTVWywdltm4GqH</loc>
     <lastmod>2026-08-29</lastmod>
     <changefreq>daily</changefreq>
@@ -2113,6 +2419,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/Kbopi4igVzutF4fhDl5p</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/KdhCfVaxelhEA7xHmsFj</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>daily</changefreq>
@@ -2127,6 +2439,18 @@
   <url>
     <loc>https://dealzhub.co.in/product/KlDrw7LG3oJNXSRy90GX</loc>
     <lastmod>2026-09-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/KlJ12dDV8OdEMz8d2ltT</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/KokEeZ5of7797bNPXOX6</loc>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2149,6 +2473,18 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/L4pJs4V39E8Eyjdyr49V</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/LCaWy77vIeQsb0hVVd9K</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/LGMECdJTwAu2sRyoLbXH</loc>
     <lastmod>2026-07-24</lastmod>
     <changefreq>daily</changefreq>
@@ -2163,6 +2499,18 @@
   <url>
     <loc>https://dealzhub.co.in/product/Le4yirhx2lK8elGVxcMQ</loc>
     <lastmod>2026-07-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/LgpyX63alfLGc1YLdixF</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/LnmR3xRHCI3CInVOptJu</loc>
+    <lastmod>2026-10-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2215,6 +2563,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/MUaq39eqqGCrxofdnJiv</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/Mnvw304hKpniO29SQGA1</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>daily</changefreq>
@@ -2223,6 +2577,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/Msve77DrMr8hw0KKF7do</loc>
     <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/N0cacH7Q8YfRLubLfqRy</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2311,8 +2671,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/Ocb72GgxHXNZ5R27iXRj</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/OdiRkvBZFLKUGoPGkmvW</loc>
     <lastmod>2026-08-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/OiqO151mrvcXIQGhrmgc</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2354,7 +2726,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/PKf1f1RNWLTYSySFnaqi</loc>
-    <lastmod>2026-09-02</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2371,8 +2743,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/PiJFSna9IDF0UlxVJuV2</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/PizBQD8GSW6blOfwMbac</loc>
     <lastmod>2026-08-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/PoKF5aCdQi80laCT1JvH</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2389,6 +2773,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/Q3zzQRf2ixw23Qgzf6Uc</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/Q7S85cQuIDk1YJNwIfjV</loc>
     <lastmod>2026-07-24</lastmod>
     <changefreq>daily</changefreq>
@@ -2396,13 +2786,19 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/Q8DObdPy8LPFomA7H4su</loc>
-    <lastmod>2026-09-05</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/QDb640Ki7x7LAhmG6thQ</loc>
     <lastmod>2026-08-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/QKXXl1ao2pJqfvJz1X4v</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2425,8 +2821,14 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://dealzhub.co.in/product/QSb1n68jOn5IVofGRoP5</loc>
-    <lastmod>2026-08-23</lastmod>
+    <loc>https://dealzhub.co.in/product/QP6E7do84KxBiDdjbuFv</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/QTm8PP4JP48xAsAXrfRR</loc>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2462,7 +2864,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/ROmReR06rJoCpQNQh1QE</loc>
-    <lastmod>2026-09-05</lastmod>
+    <lastmod>2026-10-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2515,14 +2917,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/SBrLtkgkiBpMynHKeR3I</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/SP6UbVDYasCdbpDmRcvP</loc>
     <lastmod>2026-08-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://dealzhub.co.in/product/SgR4JK6eNWu6488UNmmA</loc>
-    <lastmod>2026-08-23</lastmod>
+    <loc>https://dealzhub.co.in/product/SiSOAYFufUGpMdhUO0LW</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2581,14 +2989,32 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/TPwfyOeAbHpdi8cygQM1</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/TRrX46FCpmTPqzUwePIn</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/TafErVkvffDsiPADDa1b</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/TcVdEh3dk27O5Hir7MaT</loc>
     <lastmod>2026-07-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/TrYi9q41GucHXbRF7cWA</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2601,6 +3027,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/U0AIOMbovEiT3sq3PO9p</loc>
     <lastmod>2026-08-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/U0szLT5avWPhsu1kZYHT</loc>
+    <lastmod>2026-10-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2629,8 +3061,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/UUYzLYVqXopXXTs3iEOd</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/UZWDV5olp66TcdtIWGZB</loc>
     <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/UhmaRXCegD2yJmZjvPes</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2671,6 +3115,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/UwqFdZthIRfaUc5Zpi5u</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/V3Ds6vJ7gbOWjauooOt1</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>daily</changefreq>
@@ -2689,6 +3139,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/VJM3uxHSEdV9cFXbBj92</loc>
+    <lastmod>2026-09-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/VJZIMn0BhC1R05ed63dG</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>daily</changefreq>
@@ -2697,6 +3153,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/VLuJoebNL36GEqeTkWk4</loc>
     <lastmod>2026-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/VYlQXisV7D4TkOhfKM3T</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2755,12 +3217,6 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://dealzhub.co.in/product/WcVcKF7fmTROUeMhaG16</loc>
-    <lastmod>2026-08-28</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://dealzhub.co.in/product/Wx78RPJKVqRbn9BJGL27</loc>
     <lastmod>2026-08-09</lastmod>
     <changefreq>daily</changefreq>
@@ -2781,6 +3237,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/X3d9xQDtvgwTpxB4J3ka</loc>
     <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/XAbbjR9yOzYrxoPf2ASy</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2834,7 +3296,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/Xsexv1jA2Jw2dQyaPsUF</loc>
-    <lastmod>2026-09-05</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2863,6 +3325,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/YWdUb4OLRJj09E8a6M8F</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/Ya6GcaBcLXuyxMw69A54</loc>
     <lastmod>2026-07-24</lastmod>
     <changefreq>daily</changefreq>
@@ -2881,6 +3349,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/Yn5NZlXAJsleqNOTwuIp</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/Z7mVjWnYjuZwudsCqUaT</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>daily</changefreq>
@@ -2889,6 +3363,18 @@
   <url>
     <loc>https://dealzhub.co.in/product/ZCh09V3S5MjD0srTCtNe</loc>
     <lastmod>2026-08-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/ZGyiX6XoWWiM8Zj4kmrK</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/ZHBeiySxyYDXwNKAEQfB</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2911,8 +3397,14 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://dealzhub.co.in/product/a7iZqjd7s8unLn2M7Riu</loc>
-    <lastmod>2026-09-04</lastmod>
+    <loc>https://dealzhub.co.in/product/ZzjX8fOxRuLp03iVFXIE</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/a7V5E4ikZAJoo8XMGNQH</loc>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -2971,6 +3463,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/bBVgnghddoZU76ZUFMED</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/bBWQ2Id4WFRe3uY3YJPs</loc>
     <lastmod>2026-09-01</lastmod>
     <changefreq>daily</changefreq>
@@ -3007,14 +3505,44 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/bqQJs9Jdz8vqrmo1LOzN</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/c3vI5yBXicHgqdzxM2Of</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/c4fCPEBvrBkzExOzq6pa</loc>
+    <lastmod>2026-09-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/cCwdQ0v6f2jNNtxBHR1z</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/cETuuxOBt9LJvf9Sxxwi</loc>
     <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/cIAf59fUGsprMTBUuWQe</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/cMXCj6WsCYTRJrubtvKO</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3027,6 +3555,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/cPsiM2HU6KKBnAKCPVlB</loc>
     <lastmod>2026-08-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/cZ8E8GGMCmZ0fjwrn1Tj</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3051,6 +3585,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/dVwvhwhrwxQe0er2jbvv</loc>
     <lastmod>2026-07-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/dWu3FXbtN7cwPj1HQCIM</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3133,6 +3673,18 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/eh0NgFyNO5CtSQCL84nG</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/elyXWApDSZ8wyMK0xApG</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/f8DZd8iLgOQxGWEVFWkD</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>daily</changefreq>
@@ -3152,7 +3704,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/fF6XkACNyeNvUw9V8ncA</loc>
-    <lastmod>2026-09-05</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3331,8 +3883,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/j20edkbLtVr1povvbUa3</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/j4AqVBMQMLVYXCY3YuNO</loc>
     <lastmod>2026-08-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/j5V7RAWgbZAHuretW658</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3535,6 +4099,18 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/m5iSLxnaXpZnwfdLeb6T</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/m8NvTpiNcDwLLBLfYHDV</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/mRaImvbwocsNqIwS0Vb6</loc>
     <lastmod>2026-07-07</lastmod>
     <changefreq>daily</changefreq>
@@ -3571,6 +4147,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/n642zU1L5zoNskH4XodI</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/n6oOmmTrqz1gjoWVVOJ5</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>daily</changefreq>
@@ -3585,6 +4167,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/nBG2dlbuJfyAGnAcsvLa</loc>
     <lastmod>2026-08-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/nBqG0xgaLlJKz8un7QhC</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3625,8 +4213,14 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/ndY1nWTaYVI4mrgUx2Gv</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/ngqmOsfAsUX05oMAlW2U</loc>
-    <lastmod>2026-07-30</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3645,6 +4239,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/nz5q4Qj7djXJF3B3JDG8</loc>
     <lastmod>2026-08-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/o0D0BNXeuLVzYJVUsJlv</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3697,6 +4297,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/op7RvHEP4CXuXb3F0NOX</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/ozJyDXimhM5nENvn2bah</loc>
     <lastmod>2026-08-19</lastmod>
     <changefreq>daily</changefreq>
@@ -3729,6 +4335,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/pNmd8pE9iH0OA4sxI4ZE</loc>
     <lastmod>2026-09-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/pR3EjR1X9aYl3OAaVjFl</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3781,6 +4393,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/q4ZxB2o7RScMqzbZuz1T</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/q6FBm14J7jyK8jaQkkvV</loc>
     <lastmod>2026-07-27</lastmod>
     <changefreq>daily</changefreq>
@@ -3811,6 +4429,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/qLqSxaIIdnWfeaWIhcWA</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/qMBp0BjV6tFgwUzdjnc6</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>daily</changefreq>
@@ -3829,6 +4453,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/qbBEWsl02rNeJHgoyDwb</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/qdr0Xwzy2yyiR5uJ7BbH</loc>
     <lastmod>2026-08-29</lastmod>
     <changefreq>daily</changefreq>
@@ -3843,6 +4473,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/qgmnZwl5OE8zXcUY9WtW</loc>
     <lastmod>2026-09-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/qiTTNBOuSbgT7Eo4LC40</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3867,6 +4503,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/qxbeOpjNcQAgljOWCbMq</loc>
     <lastmod>2026-09-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/qyxpf6DVrDVNZOLEH2Lx</loc>
+    <lastmod>2026-10-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3913,8 +4555,32 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/rTsUNpw1a5EVDjD8a9NL</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/rlQYZjDkQBrRZjicdnb0</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/rli5sHwPhvE6a6Ww6pWt</loc>
     <lastmod>2026-08-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/rq1vd2ieeWBtg1uFhvgz</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/rqYjtLgpArx9Tw2w12j7</loc>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3932,7 +4598,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/sCWwbvvD5erqozZYzq3J</loc>
-    <lastmod>2026-09-02</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3951,6 +4617,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/scROuBRJiTrp4bWm9iU9</loc>
     <lastmod>2026-08-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/sjb7lzbsU0D5IITJ3eTX</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3974,7 +4646,7 @@
   </url>
   <url>
     <loc>https://dealzhub.co.in/product/spjTLukLEerByMUFhGlO</loc>
-    <lastmod>2026-09-05</lastmod>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -3987,6 +4659,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/srbpyvh08okliNXRF5rA</loc>
     <lastmod>2026-09-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/t0qQdBtXVjCf2lhczdh9</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4069,6 +4747,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/uBQgNID5jYoAf7H6Tffp</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/uH8sgSTlb6zSKnqd5jeO</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>daily</changefreq>
@@ -4081,8 +4765,32 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/uPVoTL5EpgFq4mmbEHJD</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/uQMNhbA78Le5FV7qQGhx</loc>
     <lastmod>2026-09-11</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/uTw2IZKIAEpLFuCvUYDs</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/uaw9AjyIRe27HBrozi95</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/udDVRdsb17ZdH2JMQYEh</loc>
+    <lastmod>2026-09-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4099,8 +4807,26 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/ujqYfSwhVlkWIGs8TWcq</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/ulz5Yf7uBAbZcnvpwHE0</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/uqzwzNLY49FQDxzAk7LX</loc>
     <lastmod>2026-08-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/utBeXWn0YJeTFYeVOlSF</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4119,6 +4845,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/v0zJ9NyZv35lejmJgHzU</loc>
     <lastmod>2026-07-19</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/v1pBCeHlYP0700TmqFDk</loc>
+    <lastmod>2026-10-12</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4201,8 +4933,20 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/wA547vVbJXOQ0vrhJK0v</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/wJImZEJ35U6SkJO3cSPz</loc>
     <lastmod>2026-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/wOqyP0ulMbed0pC140S1</loc>
+    <lastmod>2026-09-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4221,6 +4965,24 @@
   <url>
     <loc>https://dealzhub.co.in/product/wdmcvy3SP4sPU2Jxrq4w</loc>
     <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/wtNwBmBZJIMNddkeXX6q</loc>
+    <lastmod>2026-09-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/x2xvd5dc5rCxDIDssRvq</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/xEpBoCLqSHAjf3RoUMb8</loc>
+    <lastmod>2026-09-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4251,6 +5013,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/xW4ev4DjeNqsH570O6SB</loc>
     <lastmod>2026-08-19</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/xaetbnrfGDx2ykPhCEJ7</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4327,6 +5095,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://dealzhub.co.in/product/yYUufwGPmrrVqmK2kaCR</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://dealzhub.co.in/product/yqK6UoZPB4CIlnfLEbaD</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>daily</changefreq>
@@ -4341,6 +5115,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/yxIWk09i2jXLmFokwFEt</loc>
     <lastmod>2026-08-19</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/zA1GuETFMQJL2pZ7VS2c</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -4365,6 +5145,12 @@
   <url>
     <loc>https://dealzhub.co.in/product/zF1P8v3M1MMHdsMAsHVf</loc>
     <lastmod>2026-08-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dealzhub.co.in/product/zKfyDGqMWzYw35Ntx7s2</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
