@@ -41,11 +41,6 @@ const Footer = () => {
                 Favorites
               </Link>
             </li>
-            <li>
-              <Link to="/cart" className="hover:text-white transition-colors duration-200">
-                Cart
-              </Link>
-            </li>
           </ul>
         </div>
 

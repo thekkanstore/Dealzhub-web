@@ -34,6 +34,7 @@ export const getUserData = async (uid, email = null) => {
         return {
           id: userDoc.id,
           cart: data.cart || [],
+          storeCarts: data.storeCarts || {},
           ...data,
         };
       }
@@ -48,6 +49,7 @@ export const getUserData = async (uid, email = null) => {
         return {
           id: docSnap.id,
           cart: data.cart || [],
+          storeCarts: data.storeCarts || {},
           ...data,
         };
       }
@@ -180,6 +182,18 @@ export const updateUserCart = async (userId, cart) => {
     });
   } catch (error) {
     console.error('Error updating user cart:', error);
+    throw error;
+  }
+};
+
+export const updateUserStoreCarts = async (userId, storeCarts) => {
+  try {
+    const userDocRef = doc(db, 'users', userId);
+    await updateDoc(userDocRef, {
+      storeCarts: storeCarts
+    });
+  } catch (error) {
+    console.error('Error updating user store carts in Firestore:', error);
     throw error;
   }
 };

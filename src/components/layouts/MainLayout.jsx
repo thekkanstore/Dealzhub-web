@@ -53,7 +53,6 @@ const MainLayout = () => {
             setSearchQuery={setSearchQuery}
             navigateTo={navigate}
             favoritesCount={favorites ? favorites.length : 0}
-            cartCount={cart ? cart.length : 0}
             logout={logout}
           />
         )}

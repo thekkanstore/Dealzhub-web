@@ -344,22 +344,13 @@ const Header = ({
                 <button
                   className="relative hover:text-blue-600"
                   onClick={() => navigateTo('/favorites')}
+                  title="Favorites"
+                  aria-label="Favorites"
                 >
                   <Heart className="w-6 h-6" />
                   {favoritesCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {favoritesCount}
-                    </span>
-                  )}
-                </button>
-                <button
-                  className="relative hover:text-blue-600"
-                  onClick={() => navigateTo('/cart')}
-                >
-                  <ShoppingCart className="w-6 h-6" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {cartCount}
                     </span>
                   )}
                 </button>
@@ -499,22 +490,6 @@ const Header = ({
                   {favoritesCount > 0 && (
                     <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {favoritesCount}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  className="flex items-center gap-3 w-full px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-                  onClick={() => {
-                    navigateTo('/cart');
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  <span>Cart</span>
-                  {cartCount > 0 && (
-                    <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {cartCount}
                     </span>
                   )}
                 </button>
