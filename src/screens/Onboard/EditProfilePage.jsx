@@ -4,6 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import { getUserData, updateUserProfile } from '../../services/firestore';
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from 'lucide-react';
+import { toast } from '../../utils/toast';
 
 const EditProfilePage = () => {
   const { user } = useAppContext();
@@ -70,11 +71,12 @@ const EditProfilePage = () => {
 
       try {
         await updateUserProfile(currentUserId, updatedData, userEmail);
+        toast.success('Profile updated successfully!');
         navigate("/home");
         window.location.reload();
       } catch (error) {
         console.error('Error updating profile:', error);
-        alert('Failed to update profile.');
+        toast.error('Failed to update profile.');
       }
     }
   };
