@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where, limit } from 'firebase/firestore';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -14,6 +14,23 @@ const BASE_URL = 'https://dealzhub.co.in';
 async function generateSitemap() {
   console.log('🚀 Starting dynamic sitemap generation for DealzHub...');
   
+  const outputPath = path.resolve(__dirname, '../public/sitemap.xml');
+  const isForce = process.argv.includes('--force');
+
+  // Skip query overhead if sitemap was generated within the last 24 hours (unless --force)
+  if (!isForce && fs.existsSync(outputPath)) {
+    try {
+      const stats = fs.statSync(outputPath);
+      const ageHours = (Date.now() - stats.mtimeMs) / (1000 * 60 * 60);
+      if (ageHours < 24) {
+        console.log(`⚡ Sitemap is up to date (${ageHours.toFixed(1)}h old, < 24h threshold). Skipping DB scan. (Use --force to override)`);
+        return;
+      }
+    } catch (e) {
+      // Continue if stat fails
+    }
+  }
+
   const staticPages = [
     { loc: `${BASE_URL}/home`, priority: '1.0', changefreq: 'daily' },
     { loc: `${BASE_URL}/about`, priority: '0.8', changefreq: 'monthly' },
@@ -30,10 +47,20 @@ async function generateSitemap() {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 1. Fetch Approved Stores
+    // 1. Fetch Approved Stores (bounded & filtered)
     console.log('📦 Fetching active stores from Firestore...');
     try {
-      const storesSnapshot = await getDocs(collection(db, 'stores'));
+      let storesSnapshot;
+      try {
+        const qStores = query(
+          collection(db, 'stores'),
+          where('vendorStatus', 'in', ['approved', 'private'])
+        );
+        storesSnapshot = await getDocs(qStores);
+      } catch (storeQueryErr) {
+        storesSnapshot = await getDocs(collection(db, 'stores'));
+      }
+
       storesSnapshot.forEach((docSnap) => {
         const store = docSnap.data();
         const status = (store.vendorStatus || '').toLowerCase();
@@ -53,10 +80,21 @@ async function generateSitemap() {
       console.warn('⚠️ Could not fetch stores for sitemap:', storeErr.message);
     }
 
-    // 2. Fetch Active Products
+    // 2. Fetch Active Products (bounded to 2,500 most relevant items)
     console.log('🛍️ Fetching active products from Firestore...');
     try {
-      const productsSnapshot = await getDocs(collection(db, 'products'));
+      let productsSnapshot;
+      try {
+        const qProducts = query(
+          collection(db, 'products'),
+          where('isActive', '==', true),
+          limit(2500)
+        );
+        productsSnapshot = await getDocs(qProducts);
+      } catch (prodQueryErr) {
+        productsSnapshot = await getDocs(query(collection(db, 'products'), limit(2500)));
+      }
+
       productsSnapshot.forEach((docSnap) => {
         const product = docSnap.data();
         if (product.isActive !== false) {
@@ -96,7 +134,6 @@ ${allUrls.map(u => `  <url>
 </urlset>
 `;
 
-  const outputPath = path.resolve(__dirname, '../public/sitemap.xml');
   fs.writeFileSync(outputPath, xml.trim(), 'utf-8');
   console.log(`🎉 Sitemap successfully generated with ${allUrls.length} URLs at ${outputPath}`);
 }
