@@ -4,6 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import { createNewUser } from '../../services/firestore';
 import { useNavigate } from 'react-router-dom';
 import { Roles } from '../../config/common';
+import { serverTimestamp } from 'firebase/firestore';
 
 const PersonalDetailsPage = () =>  {
   const { user } = useAppContext();
@@ -26,8 +27,8 @@ const PersonalDetailsPage = () =>  {
         cartItems: [],
         isAgreeTermsAndConditions: formData.termsAccepted || false,
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
       try {
         await createNewUser(userData);

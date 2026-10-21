@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, query, where, limit, startAfter } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, query, where, limit, startAfter, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { FireStoreCollections } from "../config/common";
 import { clearStoreCache, generateUniqueStoreSlug } from './storeFirestoreService';
@@ -189,8 +189,12 @@ export const updateUserCart = async (userId, cart) => {
 export const updateUserStoreCarts = async (userId, storeCarts) => {
   try {
     const userDocRef = doc(db, 'users', userId);
+    const flatCartItems = Object.values(storeCarts || {}).flatMap(items =>
+      Array.isArray(items) ? items.map(i => i.productId || i.id).filter(Boolean) : []
+    );
     await updateDoc(userDocRef, {
-      storeCarts: storeCarts
+      storeCarts: storeCarts,
+      cartItems: Array.from(new Set(flatCartItems)),
     });
   } catch (error) {
     console.error('Error updating user store carts in Firestore:', error);
@@ -226,7 +230,7 @@ export const updateUserRole = async (userId, role, userEmail = null) => {
         const updatedRoles = [...currentRoles, role];
         await updateDoc(userDocRef, {
           role: updatedRoles,
-          updatedAt: new Date()
+          updatedAt: serverTimestamp()
         });
       }
     }

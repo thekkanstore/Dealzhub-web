@@ -16,8 +16,7 @@ import { getSubCategories } from '../../services/subcategoryService';
 import { getImageBlobFromStorage } from '../../services/firebaseStorageService';
 import SEO from '../../components/common/SEO';
 import SubscriptionPlanModal from '../../components/vendor/SubscriptionPlanModal';
-import { createCashfreeOrder, initiateCashfreeWebCheckout } from '../../services/cashfreeService';
-import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import StoreCartDrawer from '../../components/cart/StoreCartDrawer';
 
@@ -102,7 +101,7 @@ const StorePage = () => {
           subscriptionPlan: planId,
           subscriptionAmount: amount,
           paymentOrderId: orderId,
-          updatedAt: new Date(),
+          updatedAt: serverTimestamp(),
         }, { merge: true });
       }
 
