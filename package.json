@@ -9,6 +9,10 @@
     "check:slugs": "node scripts/check-store-slugs.mjs",
     "migrate:slugs:dry": "node scripts/migrate-store-slugs.mjs",
     "migrate:slugs": "node scripts/migrate-store-slugs.mjs --apply",
+    "images:audit": "node scripts/migrate-images-to-webp.mjs",
+    "images:test-one": "node scripts/migrate-images-to-webp.mjs --test-one",
+    "images:migrate": "node scripts/migrate-images-to-webp.mjs --apply",
+    "images:rollback": "node scripts/migrate-images-to-webp.mjs --rollback",
     "build": "npm run sitemap && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -37,6 +41,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
+    "sharp": "^0.35.5",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
     "vite": "npm:rolldown-vite@7.1.14"
