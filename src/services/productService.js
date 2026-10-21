@@ -324,27 +324,26 @@ export const fetchProductsByStoreAndCategory = async (
   }
 };
 
-// Generate search tokens for product name
+// Generate search tokens for product name (optimized prefix-based matching capped at 40 tokens - SCALE-03)
 function generateSearchTokens(text) {
+  if (!text) return [];
   const tokens = new Set();
   const normalizedText = text.toLowerCase().trim();
 
   // Split by spaces and create tokens
-  const words = normalizedText.split(/\s+/);
+  const words = normalizedText.split(/\s+/).filter(Boolean);
 
   words.forEach(word => {
     // Add full word
     tokens.add(word);
 
-    // Add n-grams (substrings) for partial matching
-    for (let i = 0; i < word.length; i++) {
-      for (let j = i + 2; j <= word.length; j++) {
-        tokens.add(word.substring(i, j));
-      }
+    // Add prefix n-grams for progressive search matching
+    for (let j = 2; j <= word.length; j++) {
+      tokens.add(word.substring(0, j));
     }
   });
 
-  return Array.from(tokens);
+  return Array.from(tokens).slice(0, 40);
 }
 
 export const createNewProduct = async (productData) => {

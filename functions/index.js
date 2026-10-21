@@ -7,22 +7,20 @@ const Papa = require("papaparse");
 initializeApp();
 const db = getFirestore();
 
-// Helper to generate search tokens
+// Helper to generate search tokens (optimized prefix-based matching capped at 40 tokens - SCALE-03)
 function generateSearchTokens(text) {
   if (!text) return [];
   const tokens = new Set();
   const normalizedText = text.toLowerCase().trim();
-  const words = normalizedText.split(/\s+/);
+  const words = normalizedText.split(/\s+/).filter(Boolean);
 
   words.forEach(word => {
     tokens.add(word);
-    for (let i = 0; i < word.length; i++) {
-      for (let j = i + 2; j <= word.length; j++) {
-        tokens.add(word.substring(i, j));
-      }
+    for (let j = 2; j <= word.length; j++) {
+      tokens.add(word.substring(0, j));
     }
   });
-  return Array.from(tokens);
+  return Array.from(tokens).slice(0, 40);
 }
 
 // Utility to convert to snake_case for image paths if needed
