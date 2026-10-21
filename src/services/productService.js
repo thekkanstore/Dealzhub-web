@@ -10,10 +10,11 @@ import {
   setDoc,
   limit,
   startAfter,
-  deleteDoc
+  deleteDoc,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getStoreById } from './storeFirestoreService';
+import { getStoreById, getStoresByIds } from './storeFirestoreService';
 import { deleteMultipleImages } from './firebaseStorageService';
 
 export const isStoreSubscriptionValid = (store) => {
@@ -38,6 +39,32 @@ export const isStoreSubscriptionValid = (store) => {
   return true;
 };
 
+/**
+ * Attaches store metadata to an array of products efficiently.
+ * Eliminates N+1 queries by leveraging existing embedded store objects, in-memory cache,
+ * and batched queries via getStoresByIds.
+ */
+export const attachStoresToProducts = async (products = []) => {
+  if (!Array.isArray(products) || products.length === 0) return [];
+
+  const missingStoreIds = [];
+  products.forEach((product) => {
+    if (product.storeId && (!product.store || !product.store.vendorStatus)) {
+      missingStoreIds.push(product.storeId);
+    }
+  });
+
+  const storeMap = await getStoresByIds(missingStoreIds);
+
+  return products.map((product) => {
+    const fetchedStore = product.storeId ? storeMap.get(product.storeId) : null;
+    return {
+      ...product,
+      store: fetchedStore || product.store || undefined,
+    };
+  });
+};
+
 export const fetchAllProducts = async (
   category,
   location,
@@ -46,53 +73,76 @@ export const fetchAllProducts = async (
   lastVisibleDoc = null
 ) => {
   try {
-    let q = collection(db, 'products');
+    let validProducts = [];
+    let currentLastDoc = lastVisibleDoc;
+    let hasMore = true;
+    let iterations = 0;
+    const maxIterations = 5; // Guard against infinite iteration loops
 
-    // Apply category filter
-    if (category) {
-      q = query(q, where('categoryId', '==', category));
+    // Loop until we reach target limitVal or exhaust active collection (solves SCALE-05 Ghost Pages)
+    while (validProducts.length < limitVal && hasMore && iterations < maxIterations) {
+      iterations++;
+      let q = collection(db, 'products');
+
+      // Apply category filter
+      if (category) {
+        q = query(q, where('categoryId', '==', category));
+      }
+
+      // Apply location filter directly to database query
+      if (location && location !== 'Select Location') {
+        q = query(q, where('store.city', '==', location));
+      }
+
+      // Standardize default ordering to createdAt DESC when no filters are active (MED-06)
+      if (!category && (!location || location === 'Select Location')) {
+        q = query(q, orderBy('createdAt', 'desc'));
+      }
+
+      if (currentLastDoc) {
+        q = query(q, startAfter(currentLastDoc));
+      }
+
+      const fetchChunkSize = Math.max(limitVal, 15);
+      q = query(q, limit(fetchChunkSize));
+
+      const snapshot = await getDocs(q);
+      if (snapshot.docs.length === 0) {
+        hasMore = false;
+        break;
+      }
+
+      currentLastDoc = snapshot.docs[snapshot.docs.length - 1];
+      hasMore = snapshot.docs.length === fetchChunkSize;
+
+      const rawChunk = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        docSnapshot: doc,
+        ...doc.data()
+      }));
+
+      // Hydrate stores without N+1 cascade reads (SCALE-02)
+      const chunkWithStores = await attachStoresToProducts(rawChunk);
+
+      // Filter products based on active store subscription
+      const filteredChunk = chunkWithStores.filter((p) => {
+        if (!p.store) return true; // fallback if store not found
+        return isStoreSubscriptionValid(p.store);
+      });
+
+      validProducts = [...validProducts, ...filteredChunk];
     }
 
-    // Apply location filter directly to database query
-    if (location && location !== 'Select Location') {
-      q = query(q, where('store.city', '==', location));
-    }
+    const slicedProducts = validProducts.slice(0, limitVal);
+    const lastItem = slicedProducts[slicedProducts.length - 1];
+    const finalLastDoc = lastItem ? lastItem.docSnapshot : currentLastDoc;
 
-    // Only apply name sorting if no category or location is active to avoid index requirements
-    if (!category && (!location || location === 'Select Location')) {
-      q = query(q, orderBy('name'));
-    }
-
-    if (lastVisibleDoc) {
-      q = query(q, startAfter(lastVisibleDoc));
-    }
-    
-    q = query(q, limit(limitVal));
-
-    const snapshot = await getDocs(q);
-    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-    const hasMore = snapshot.docs.length === limitVal;
-
-    const rawProducts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-    // Fetch store info and filter out products whose stores are expired or unpaid
-    const productsWithStore = await Promise.all(
-      rawProducts.map(async (product) => {
-        if (!product.storeId) return product;
-        const store = await getStoreById(product.storeId);
-        return { ...product, store };
-      })
-    );
-
-    const products = productsWithStore.filter((p) => {
-      if (!p.store) return true; // fallback if store not found
-      return isStoreSubscriptionValid(p.store);
-    });
+    const cleanedProducts = slicedProducts.map(({ docSnapshot, ...rest }) => rest);
 
     return {
-      products,
-      lastDoc,
-      hasMore
+      products: cleanedProducts,
+      lastDoc: finalLastDoc,
+      hasMore: hasMore || validProducts.length > limitVal
     };
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -256,13 +306,12 @@ export const fetchProductsByStoreAndCategory = async (
 
     const products = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-    // Fetch store data for each product
-    const productsWithStores = await Promise.all(
-      products.map(async (product) => {
-        const store = await getStoreById(product.storeId);
-        return { ...product, store };
-      })
-    );
+    // Fetch store data once for this store instead of N+1 cascade roundtrips
+    const store = await getStoreById(storeId);
+    const productsWithStores = products.map((product) => ({
+      ...product,
+      store: store || product.store
+    }));
 
     return {
       products: productsWithStores,
@@ -304,13 +353,16 @@ export const createNewProduct = async (productData) => {
     const newProductRef = doc(productsCollectionRef);
     const productId = newProductRef.id;
 
+    const isOutOfStock = Boolean(productData.isOutOfStock);
     const newProductData = {
       ...productData,
       id: productId,
       nameLower: productData.name?.toLowerCase(),
       searchTokens: generateSearchTokens(productData.name.toLowerCase() || ''),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      isOutOfStock: isOutOfStock,
+      status: isOutOfStock ? 'outofstock' : 'instock',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
       isActive: true,
     };
 
@@ -347,8 +399,14 @@ export const updateProductDetails = async (
       ...productData,
       nameLower: productData.name?.toLowerCase(),
       searchTokens: generateSearchTokens(productData.name.toLowerCase() || ''),
-      updatedAt: new Date(),
+      updatedAt: serverTimestamp(),
     };
+
+    if (productData.isOutOfStock !== undefined) {
+      const isOutOfStock = Boolean(productData.isOutOfStock);
+      updatedProductData.isOutOfStock = isOutOfStock;
+      updatedProductData.status = isOutOfStock ? 'outofstock' : 'instock';
+    }
 
     await updateDoc(productRef, updatedProductData);
 

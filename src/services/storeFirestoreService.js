@@ -1,4 +1,4 @@
-import { doc, getDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, updateDoc, limit, documentId } from 'firebase/firestore';
 import { db } from '../firebase';
 import { FireStoreCollections } from '../config/common';
 
@@ -17,6 +17,59 @@ export const clearStoreCache = (storeId) => {
 };
 
 /**
+ * Fetches multiple stores by IDs in batches of up to 30, utilizing storeCache.
+ * Returns a Map of storeId -> storeData.
+ */
+export const getStoresByIds = async (storeIds = []) => {
+  const result = new Map();
+  if (!storeIds || storeIds.length === 0) return result;
+
+  const uniqueIds = Array.from(new Set(storeIds.filter(Boolean)));
+  const missingIds = [];
+
+  for (const id of uniqueIds) {
+    if (storeCache.has(id)) {
+      result.set(id, storeCache.get(id));
+    } else {
+      missingIds.push(id);
+    }
+  }
+
+  if (missingIds.length === 0) {
+    return result;
+  }
+
+  // Firestore where(documentId(), 'in', ...) supports up to 30 items per query
+  const BATCH_SIZE = 30;
+  for (let i = 0; i < missingIds.length; i += BATCH_SIZE) {
+    const chunk = missingIds.slice(i, i + BATCH_SIZE);
+    try {
+      const q = query(
+        collection(db, FireStoreCollections.STORES),
+        where(documentId(), 'in', chunk)
+      );
+      const snap = await getDocs(q);
+      snap.forEach((docSnap) => {
+        const storeData = { id: docSnap.id, ...docSnap.data() };
+        storeCache.set(docSnap.id, storeData);
+        result.set(docSnap.id, storeData);
+      });
+    } catch (err) {
+      console.error('Error batch fetching stores by IDs:', err);
+      // Fallback to individual getStoreById for this chunk
+      await Promise.all(
+        chunk.map(async (id) => {
+          const store = await getStoreById(id);
+          if (store) result.set(id, store);
+        })
+      );
+    }
+  }
+
+  return result;
+};
+
+/**
  * Generates a clean base URL slug from a store name.
  * e.g., "My Super Store" -> "my-super-store"
  */
@@ -31,51 +84,44 @@ export const generateBaseSlug = (storeName) => {
 };
 
 /**
- * Generates a unique store slug. If the base slug is already used by another store,
- * appends a random number (e.g. -4829).
- * If no duplicate exists, it does NOT add any number.
+ * Checks if a slug is already assigned to another store in Firestore
+ */
+export const isStoreSlugTaken = async (slug, currentStoreId = null) => {
+  if (!slug) return false;
+  const storesRef = collection(db, FireStoreCollections.STORES);
+  const q = query(storesRef, where('slug', '==', slug.toLowerCase().trim()), limit(1));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return false;
+  if (currentStoreId && snapshot.docs[0].id === currentStoreId) return false;
+  return true;
+};
+
+/**
+ * Generates a unique store slug using targeted O(1) point queries instead of full O(N) scans.
+ * If the base slug is free, uses it cleanly without numbers.
+ * If collision exists, appends an available 4-digit number.
  */
 export const generateUniqueStoreSlug = async (storeName, currentStoreId = null) => {
   const baseSlug = generateBaseSlug(storeName);
   try {
-    const storesRef = collection(db, FireStoreCollections.STORES);
-    const snapshot = await getDocs(storesRef);
-
-    const usedSlugs = new Set();
-    const storeList = [];
-
-    snapshot.forEach((docSnap) => {
-      if (currentStoreId && docSnap.id === currentStoreId) {
-        return; // Exclude current store
-      }
-      const data = docSnap.data();
-      storeList.push({ id: docSnap.id, ...data });
-      if (data.slug) {
-        usedSlugs.add(data.slug.toLowerCase().trim());
-      }
-    });
-
-    const assignedSlugs = new Set(usedSlugs);
-    for (const s of storeList) {
-      if (!s.slug && s.storeName) {
-        const sBase = generateBaseSlug(s.storeName);
-        assignedSlugs.add(sBase);
-      }
-    }
-
-    // If baseSlug is not taken by any other store, use it cleanly without numbers
-    if (!assignedSlugs.has(baseSlug)) {
+    const isTaken = await isStoreSlugTaken(baseSlug, currentStoreId);
+    if (!isTaken) {
       return baseSlug;
     }
 
-    // If already in use, append a random 4-digit number (e.g., -4829)
-    let candidateSlug = '';
-    do {
+    // Try finding an available suffixed slug with up to 5 attempts
+    let attempts = 0;
+    while (attempts < 5) {
       const randomNum = Math.floor(1000 + Math.random() * 9000);
-      candidateSlug = `${baseSlug}-${randomNum}`;
-    } while (assignedSlugs.has(candidateSlug));
+      const candidateSlug = `${baseSlug}-${randomNum}`;
+      const taken = await isStoreSlugTaken(candidateSlug, currentStoreId);
+      if (!taken) {
+        return candidateSlug;
+      }
+      attempts++;
+    }
 
-    return candidateSlug;
+    return `${baseSlug}-${Date.now().toString().slice(-4)}`;
   } catch (error) {
     console.error('Error generating unique store slug:', error);
     return baseSlug;
@@ -201,30 +247,42 @@ export const getStoreBySlug = async (slug) => {
   try {
     const cleanSlug = slug.toLowerCase().trim();
     // Check if slug is directly the doc id in cache
-    if (storeCache.has(slug)) {
-      return storeCache.get(slug);
+    if (storeCache.has(cleanSlug)) {
+      return storeCache.get(cleanSlug);
     }
     const storesRef = collection(db, FireStoreCollections.STORES);
+
+    // 1. Fast indexed point query by slug field (O(1) read)
+    try {
+      const qSlug = query(storesRef, where('slug', '==', cleanSlug), limit(1));
+      const snapSlug = await getDocs(qSlug);
+      if (!snapSlug.empty) {
+        const docSnap = snapSlug.docs[0];
+        const storeData = { id: docSnap.id, ...docSnap.data() };
+        storeCache.set(docSnap.id, storeData);
+        storeCache.set(cleanSlug, storeData);
+        return storeData;
+      }
+    } catch (queryErr) {
+      console.warn('Direct slug query fallback:', queryErr);
+    }
+
+    // 2. Fast point query by doc ID
+    try {
+      const directRef = doc(db, FireStoreCollections.STORES, cleanSlug);
+      const directSnap = await getDoc(directRef);
+      if (directSnap.exists()) {
+        const storeData = { id: directSnap.id, ...directSnap.data() };
+        storeCache.set(directSnap.id, storeData);
+        storeCache.set(cleanSlug, storeData);
+        return storeData;
+      }
+    } catch (idErr) {
+      // not a doc id
+    }
+
+    // 3. Fallback scan only for unmigrated legacy stores without explicit slug
     const snapshot = await getDocs(storesRef);
-
-    // 1. Check exact doc ID match
-    const idMatch = snapshot.docs.find(d => d.id === slug);
-    if (idMatch) {
-      const storeData = { id: idMatch.id, ...idMatch.data() };
-      storeCache.set(idMatch.id, storeData);
-      return storeData;
-    }
-
-    // 2. Check explicit slug match
-    const explicitMatch = snapshot.docs.find(d => {
-      const data = d.data();
-      return data.slug && data.slug.toLowerCase().trim() === cleanSlug;
-    });
-    if (explicitMatch) {
-      const storeData = { id: explicitMatch.id, ...explicitMatch.data() };
-      storeCache.set(explicitMatch.id, storeData);
-      return storeData;
-    }
 
     // 3. Fallback deterministic computation for legacy stores without explicit slug
     const storeList = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));

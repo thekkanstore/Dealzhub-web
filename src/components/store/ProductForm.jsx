@@ -188,9 +188,10 @@ const ProductForm = ({
       setShowOverride(true);
     }
 
-    setStatus(initialData?.status || 'instock');
+    const initialOutOfStock = Boolean(initialData?.isOutOfStock || initialData?.status === 'outofstock');
+    setIsOutOfStock(initialOutOfStock);
+    setStatus(initialOutOfStock ? 'outofstock' : (initialData?.status || 'instock'));
     setIsSecondHand(initialData?.isSecondHand || false);
-    setIsOutOfStock(initialData?.isOutOfStock || false);
     setIsSoldOut(initialData?.isSoldOut || false);
     setSubcategoryIds(initialData?.subcategoryIds || []);
     
@@ -286,6 +287,9 @@ const ProductForm = ({
       const finalUnit = firstOptParsed?.unit || (unit || 'pcs');
       const finalUnitValue = firstOptParsed ? firstOptParsed.value : (parseFloat(unitValue) || 1);
 
+      const effectiveOutOfStock = Boolean(isOutOfStock || status === 'outofstock');
+      const effectiveStatus = effectiveOutOfStock ? 'outofstock' : (isSoldOut ? 'soldout' : 'instock');
+
       onSubmit({ 
         name, 
         description, 
@@ -300,10 +304,10 @@ const ProductForm = ({
         category: selectedCategory,
         images, // New images (File objects)
         existingImages, // Existing images (URLs)
-        status,
+        status: effectiveStatus,
         isSecondHand,
-        isOutOfStock,
-        isSoldOut,
+        isOutOfStock: effectiveOutOfStock,
+        isSoldOut: Boolean(isSoldOut),
         storeId,
         userId
       });
@@ -631,7 +635,11 @@ const ProductForm = ({
           className="bg-gray-50/80 appearance-none border border-transparent rounded-lg h-12 w-full p-3 text-[#524B6B] leading-tight focus:outline-none focus:shadow-outline"
           id="status"
           value={status}
-          onChange={(e) => setStatus(e.target.value)}
+          onChange={(e) => {
+            const nextStatus = e.target.value;
+            setStatus(nextStatus);
+            setIsOutOfStock(nextStatus === 'outofstock');
+          }}
         >
           <option value="instock">In Stock</option>
           <option value="outofstock">Out of Stock</option>
@@ -653,7 +661,11 @@ const ProductForm = ({
           <input
             type="checkbox"
             checked={isOutOfStock}
-            onChange={(e) => setIsOutOfStock(e.target.checked)}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setIsOutOfStock(checked);
+              setStatus(checked ? 'outofstock' : 'instock');
+            }}
             className="mr-2 w-4 h-4"
           />
           <span className="text-sm text-[#524B6B]">Out of Stock</span>

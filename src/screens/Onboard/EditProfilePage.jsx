@@ -5,6 +5,7 @@ import { getUserData, updateUserProfile } from '../../services/firestore';
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from 'lucide-react';
 import { toast } from '../../utils/toast';
+import { serverTimestamp } from 'firebase/firestore';
 
 const EditProfilePage = () => {
   const { user } = useAppContext();
@@ -61,12 +62,12 @@ const EditProfilePage = () => {
         address: formData.address,
         city: formData.city,
         state: formData.state,
-        updatedAt: new Date(),
+        updatedAt: serverTimestamp(),
         // Keep existing data
         role: userData?.role || [],
         favorites: userData?.favorites || [],
         cart: userData?.cart || [],
-        createdAt: userData?.createdAt || new Date(),
+        ...(userData?.createdAt ? { createdAt: userData.createdAt } : { createdAt: serverTimestamp() }),
       };
 
       try {

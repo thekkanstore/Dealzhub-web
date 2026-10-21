@@ -7,6 +7,7 @@ import { createNewStore, updateUserRole, getStoreByUserId } from '../../services
 import { uploadImageToStorage } from '../../services/firebaseStorageService';
 import { createCashfreeOrder, initiateCashfreeWebCheckout } from '../../services/cashfreeService';
 import { Loader2 } from 'lucide-react';
+import { serverTimestamp } from 'firebase/firestore';
 
 const VendorDetailsPage = () => {
   const { user } = useAppContext();
@@ -84,8 +85,8 @@ const VendorDetailsPage = () => {
         subscriptionAmount: formData.subscriptionAmount || 2999,
         paymentStatus: 'pending',
         vendorStatus: 'pending',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
         isActive: true,
       };
 

@@ -1,5 +1,6 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject, getBlob } from 'firebase/storage';
 import { storage } from '../firebase';
+import { compressImageToWebP, compressMultipleImagesToWebP } from '../utils/imageCompression';
 
 /**
  * Fetch image blob directly via Firebase Storage SDK (bypasses CORS)
@@ -18,10 +19,11 @@ export const getImageBlobFromStorage = async (imageUrl) => {
 
 /**
  * Upload a single image to Firebase Storage with specific path
+ * Automatically converts and compresses images to WebP format (< 1200px)
  */
 export const uploadImageToStorage = async (file, imagePath) => {
   try {
-    if (!file || !(file instanceof File)) {
+    if (!file || !(file instanceof File || file instanceof Blob)) {
       return {
         success: false,
         error: 'Invalid file provided',
@@ -35,13 +37,22 @@ export const uploadImageToStorage = async (file, imagePath) => {
       };
     }
 
-    // Create a unique filename
-    const filename = `${Date.now()}_${Math.random().toString(36).substring(7)}_${file.name}`;
+    // Compress and convert to WebP before network transmission
+    const processedFile = await compressImageToWebP(file);
+
+    // Create a sanitized unique filename
+    const safeName = (processedFile.name || 'image.webp').replace(/[^a-zA-Z0-9._-]/g, '_');
+    const filename = `${Date.now()}_${Math.random().toString(36).substring(7)}_${safeName}`;
     const fullPath = `${imagePath}/${filename}`;
     const storageRef = ref(storage, fullPath);
 
-    // Upload the file
-    const snapshot = await uploadBytes(storageRef, file);
+    // Upload with WebP metadata and caching headers
+    const metadata = {
+      contentType: processedFile.type || 'image/webp',
+      cacheControl: 'public, max-age=31536000',
+    };
+
+    const snapshot = await uploadBytes(storageRef, processedFile, metadata);
 
     // Get the download URL
     const downloadURL = await getDownloadURL(snapshot.ref);

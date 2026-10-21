@@ -9,6 +9,7 @@ import { createCashfreeOrder, initiateCashfreeWebCheckout } from '../../services
 import { ArrowLeft, Sparkles, AlertTriangle, CreditCard, ShieldCheck, Loader2 } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { toast } from '../../utils/toast';
+import { serverTimestamp } from 'firebase/firestore';
 
 const EditStorePage = () => {
   const { user } = useAppContext();
@@ -89,7 +90,7 @@ const EditStorePage = () => {
           logoUrl: finalLogoUrl,
           logo: finalLogoUrl,
           logoBase64: formData.logoBase64 || initialStoreData.logoBase64 || '',
-          updatedAt: new Date(),
+          updatedAt: serverTimestamp(),
         };
 
         await updateStore(currentUserId, updatedStoreData);
@@ -148,7 +149,7 @@ const EditStorePage = () => {
           subscriptionPlan: planId,
           subscriptionAmount: amount,
           paymentOrderId: orderId,
-          updatedAt: new Date(),
+          updatedAt: serverTimestamp(),
         }, { merge: true });
       }
 

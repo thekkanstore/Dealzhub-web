@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { verifyCashfreeOrder } from '../../services/cashfreeService';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { updateUserRole } from '../../services/firestore';
 import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
@@ -65,7 +65,7 @@ const PaymentStatusPage = () => {
               vendorStatus: 'approved',
               subscriptionStartDate: startDate,
               subscriptionEndDate: endDate,
-              updatedAt: new Date(),
+              updatedAt: serverTimestamp(),
             }, { merge: true });
 
             if (storeData.userId || storeData.email) {
