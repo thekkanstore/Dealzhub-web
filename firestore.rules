@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: Check if caller is an administrator
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.admin == true ||
+        request.auth.token.email in ['admin@example.com', 'admin@dealzhub.co.in', 'thekkantech@gmail.com']
+      );
+    }
+
+    // Helper: Check if caller is the store owner
+    function isStoreOwner(storeData) {
+      return request.auth != null && (
+        request.auth.uid == storeData.userId ||
+        request.auth.token.email == storeData.email ||
+        isAdmin()
+      );
+    }
+
+    // 1. Categories & Subcategories: Public read, Admin write
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /sub_categories/{subId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 2. Stores: Public read; Store owner or Admin can create/update/delete
+    match /stores/{storeId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if isStoreOwner(resource.data) || (
+        resource == null && request.auth != null
+      );
+      allow delete: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        isAdmin()
+      );
+    }
+
+    // 3. Products: Public read; Store owner or Admin can create, edit, or delete
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if request.auth != null && (
+        request.resource.data.userId == request.auth.uid ||
+        request.resource.data.store.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update, delete: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.store.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // 4. Users: Customers/Vendors access own document; Admin has full access to all users
+    match /users/{userId} {
+      allow read, write: if request.auth != null && (
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+    }
+
+    // 5. App Banners & Config: Public read, Admin write
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /appConfig/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 6. Default Fallback: Public read, Admin write
+    match /{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
