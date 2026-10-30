@@ -1,11 +1,12 @@
 const isSandbox = (import.meta.env.VITE_CASHFREE_ENV || 'production').toLowerCase() === 'sandbox';
 
+const CASHFREE_SERVICE_URL =
+  import.meta.env.VITE_CASHFREE_SERVICE_URL || 'https://createcashfreeorder-298300377700.us-central1.run.app';
+
 const CASHFREE_CONFIG = {
   APP_ID: import.meta.env.VITE_CASHFREE_APP_ID || '',
-  SECRET_KEY: import.meta.env.VITE_CASHFREE_SECRET_KEY || '',
   ENV: isSandbox ? 'sandbox' : 'production',
-  BASE_URL: '/api/cashfree',
-  API_VERSION: '2023-08-01',
+  SERVICE_URL: CASHFREE_SERVICE_URL,
 };
 
 /**
@@ -34,7 +35,8 @@ export const loadCashfreeSDK = () => {
 };
 
 /**
- * Create a Cashfree Payment Order
+ * Create a Cashfree Payment Order via Serverless Proxy (CRIT-02 Resolved)
+ * Secret keys are protected server-side in Google Secret Manager / Cloud Run.
  */
 export const createCashfreeOrder = async ({
   orderId,
@@ -49,26 +51,17 @@ export const createCashfreeOrder = async ({
     const cleanEmail = customerEmail && customerEmail.includes('@') ? customerEmail : 'vendor@dealzhub.co.in';
 
     const payload = {
-      order_id: orderId,
-      order_amount: parseFloat(orderAmount),
-      order_currency: 'INR',
-      customer_details: {
-        customer_id: `cust_${Date.now()}`,
-        customer_name: customerName || 'Dealzhub Vendor',
-        customer_email: cleanEmail,
-        customer_phone: cleanPhone.length === 10 ? cleanPhone : '9999999999',
-      },
-      order_meta: {
-        return_url: returnUrl || `${window.location.origin}/payment-status?order_id={order_id}`,
-      },
+      orderId: String(orderId),
+      orderAmount: parseFloat(orderAmount),
+      customerName: customerName || 'Dealzhub Vendor',
+      customerEmail: cleanEmail,
+      customerPhone: cleanPhone.length === 10 ? cleanPhone : '9999999999',
+      returnUrl: returnUrl || `${window.location.origin}/payment-status?order_id={order_id}`,
     };
 
-    const response = await fetch(`${CASHFREE_CONFIG.BASE_URL}/orders`, {
+    const response = await fetch(`${CASHFREE_CONFIG.SERVICE_URL}/create-order`, {
       method: 'POST',
       headers: {
-        'x-client-id': CASHFREE_CONFIG.APP_ID,
-        'x-client-secret': CASHFREE_CONFIG.SECRET_KEY,
-        'x-api-version': CASHFREE_CONFIG.API_VERSION,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
@@ -89,18 +82,19 @@ export const createCashfreeOrder = async ({
 };
 
 /**
- * Verify Order Status from Cashfree
+ * Verify Order Status from Cashfree via Serverless Proxy (CRIT-02 Resolved)
  */
 export const verifyCashfreeOrder = async (orderId) => {
   try {
-    const response = await fetch(`${CASHFREE_CONFIG.BASE_URL}/orders/${orderId}`, {
-      method: 'GET',
-      headers: {
-        'x-client-id': CASHFREE_CONFIG.APP_ID,
-        'x-client-secret': CASHFREE_CONFIG.SECRET_KEY,
-        'x-api-version': CASHFREE_CONFIG.API_VERSION,
-      },
-    });
+    const response = await fetch(
+      `${CASHFREE_CONFIG.SERVICE_URL}/verify-order?orderId=${encodeURIComponent(orderId)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     const data = await response.json();
 
